@@ -3,13 +3,13 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Login Ciclistas</title>
+    <title>Login Inventario</title>
     <link rel="stylesheet" href="{{ asset('css/login.css') }}">
 </head>
 
 <body>
 
-<h1>Login Ciclistas</h1>
+<h1>Login Inventario</h1>
 
 <div class="login-container">
 
@@ -29,10 +29,6 @@
         </div>
         <button type="submit">Ingresar</button>
     </form>
-
-    <p class="register-link">
-        <a href="{{ route('register') }}">Registrarse</a>
-    </p>
 
 </div>
 

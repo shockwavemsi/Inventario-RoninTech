@@ -62,7 +62,7 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => App\Models\Ciclista::class, // importante cambie aqui
+            'model' => App\Models\User::class, // importante cambie aqui
         ],
 
         // 'users' => [
