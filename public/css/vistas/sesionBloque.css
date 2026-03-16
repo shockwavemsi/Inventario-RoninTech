@@ -1,0 +1,366 @@
+:root {
+    --rich-black: #030812;
+    --navy-blue: #020764;
+    --dark-cerulean: #043780;
+    --sapphire: #025ec4;
+    --spiro-disco-ball: #0ecced;
+
+    /* Variables semánticas - MODO CLARO (por defecto) */
+    --primary-dark: var(--rich-black);
+    --primary-deep: var(--navy-blue);
+    --primary-medium: var(--dark-cerulean);
+    --primary-bright: var(--sapphire);
+    --accent-color: var(--spiro-disco-ball);
+
+    /* Fondo y texto - MODO CLARO */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8fafc;
+    --text-primary: #1e293b;
+    --text-secondary: #475569;
+    --border-light: #e2e8f0;
+    --background-hover: #f1f5f9;
+    --shadow-color: rgba(2, 7, 100, 0.12);
+    --shadow-hover: rgba(2, 7, 100, 0.18);
+    --table-stripe: #ffffff;
+    --table-stripe-alt: #fafcff;
+}
+
+/* ======== MODO OSCURO ======== */
+@media (prefers-color-scheme: dark) {
+    :root {
+        /* Fondo y texto - MODO OSCURO */
+        --bg-primary: #0a0f1a;
+        --bg-secondary: #111827;
+        --text-primary: #e5e7eb;
+        --text-secondary: #9ca3af;
+        --border-light: #1f2937;
+        --background-hover: #1e293b;
+        --shadow-color: rgba(0, 0, 0, 0.4);
+        --shadow-hover: rgba(0, 0, 0, 0.5);
+        --table-stripe: #0f1520;
+        --table-stripe-alt: #141b26;
+    }
+
+    /* Ajustes adicionales para modo oscuro */
+    body {
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+    }
+
+    /* Hacemos los azules más vibrantes en modo oscuro */
+    :root {
+        --sapphire: #2d7ee9;
+        --spiro-disco-ball: #2fd8f5;
+    }
+}
+
+/* ======== TARJETA DE SESIÓN ======== */
+.sesion-card {
+    background: var(--bg-primary);
+    padding: 24px;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px var(--shadow-color);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-bottom: 24px;
+    border: 1px solid var(--border-light);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Línea decorativa superior */
+.sesion-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(
+        90deg,
+        var(--sapphire),
+        var(--spiro-disco-ball)
+    );
+    opacity: 0.8;
+}
+
+.sesion-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px var(--shadow-hover);
+    border-color: rgba(2, 94, 196, 0.2);
+}
+
+.sesion-titulo {
+    margin: 0 0 8px 0;
+    color: var(--sapphire);
+    font-size: 1.5rem;
+    font-weight: 600;
+    border-bottom: 1px dashed var(--border-light);
+    padding-bottom: 12px;
+}
+
+.sesion-fecha {
+    margin: 0 0 16px 0;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sesion-fecha::before {
+    content: "📅";
+    font-size: 1rem;
+}
+
+/* ======== SUBTÍTULO DE BLOQUES ======== */
+.bloques-subtitulo {
+    margin: 20px 0 12px 0;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.bloques-subtitulo::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border-light), transparent);
+}
+
+/* ======== BLOQUE DENTRO DE SESIÓN ======== */
+.bloque-item {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-light);
+    padding: 16px;
+    border-radius: 12px;
+    margin-top: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+.bloque-item:hover {
+    background: var(--background-hover);
+    border-color: var(--sapphire);
+    transform: translateX(4px);
+}
+
+.bloque-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.bloque-nombre {
+    font-weight: 600;
+    font-size: 1.05rem;
+    color: var(--sapphire);
+}
+
+.bloque-detalles {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.bloque-detalles span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.bloque-detalles span::before {
+    content: "•";
+    color: var(--sapphire);
+    font-weight: bold;
+}
+
+.bloque-detalles span:first-child::before {
+    content: none;
+}
+
+/* ======== BOTÓN ELIMINAR BLOQUE ======== */
+.btn-eliminar-bloque {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 8px;
+    background: #e53935;
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-eliminar-bloque:hover {
+    background: #c62828;
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+}
+
+.btn-eliminar-bloque::before {
+    content: "🗑️";
+    font-size: 0.85rem;
+}
+
+/* ======== BOTÓN ELIMINAR TODA LA SESIÓN ======== */
+.btn-eliminar-sesion {
+    margin-top: 20px;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 10px;
+    background: #c62828;
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
+    width: 100%;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-eliminar-sesion:hover {
+    background: #b71c1c;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(198, 40, 40, 0.3);
+}
+
+.btn-eliminar-sesion::before {
+    content: "⚠️";
+    font-size: 1rem;
+}
+
+/* ======== MENSAJES ======== */
+.sin-bloques {
+    color: var(--text-secondary);
+    font-style: italic;
+    margin-top: 12px;
+    padding: 16px;
+    text-align: center;
+    background: var(--bg-secondary);
+    border-radius: 10px;
+    border: 1px dashed var(--border-light);
+}
+
+.error {
+    color: #e53935;
+    text-align: center;
+    margin-top: 20px;
+    padding: 16px;
+    background: rgba(229, 57, 53, 0.1);
+    border-radius: 10px;
+    border: 1px solid rgba(229, 57, 53, 0.2);
+}
+
+/* ======== CONTENEDOR GENERAL ======== */
+#sesiones {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 columnas como los bloques */
+    gap: 24px;
+    margin: 24px 0;
+}
+
+/* ======== RESPONSIVE ======== */
+@media (max-width: 992px) {
+    #sesiones {
+        grid-template-columns: 1fr; /* En tablets, 1 columna */
+        gap: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .sesion-card {
+        padding: 20px;
+    }
+
+    .sesion-titulo {
+        font-size: 1.3rem;
+    }
+
+    .bloque-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .bloque-detalles {
+        gap: 12px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .bloque-detalles span::before {
+        content: none;
+    }
+
+    .btn-eliminar-bloque {
+        width: 100%;
+        justify-content: center;
+    }
+
+    #sesiones {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .sesion-card {
+        padding: 18px;
+    }
+
+    .sesion-titulo {
+        font-size: 1.2rem;
+    }
+
+    .sesion-fecha {
+        font-size: 0.9rem;
+    }
+
+    .bloque-nombre {
+        font-size: 1rem;
+    }
+}
+
+/* ======== ANIMACIÓN DE ENTRADA ======== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.sesion-card {
+    animation: fadeInUp 0.5s ease forwards;
+}
+
+.sesion-card:nth-child(1) {
+    animation-delay: 0.1s;
+}
+.sesion-card:nth-child(2) {
+    animation-delay: 0.15s;
+}
+.sesion-card:nth-child(3) {
+    animation-delay: 0.2s;
+}
+.sesion-card:nth-child(4) {
+    animation-delay: 0.25s;
+}
+.sesion-card:nth-child(5) {
+    animation-delay: 0.3s;
+}

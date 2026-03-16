@@ -1,0 +1,384 @@
+/* ======== VARIABLES GLOBALES ======== */
+:root {
+    /* Colores de tu paleta */
+    --rich-black: #030812;
+    --navy-blue: #020764;
+    --dark-cerulean: #043780;
+    --sapphire: #025ec4;
+    --spiro-disco-ball: #0ecced;
+
+    /* Variables semánticas */
+    --primary-dark: var(--rich-black);
+    --primary-deep: var(--navy-blue);
+    --primary-medium: var(--dark-cerulean);
+    --primary-bright: var(--sapphire);
+    --accent-color: var(--spiro-disco-ball);
+
+    /* Sombras y efectos */
+    --shadow-sm: 0 4px 12px rgba(3, 8, 18, 0.3);
+    --shadow-md: 0 8px 24px rgba(2, 7, 100, 0.3);
+    --shadow-accent: 0 4px 12px rgba(14, 204, 237, 0.2);
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body {
+    margin: 0;
+    padding-top: 75px;
+}
+
+/* ======== CONTENEDOR PRINCIPAL ======== */
+#menu {
+    list-style: none;
+    margin: 0;
+    padding: 0 2rem;
+    background: linear-gradient(
+        135deg,
+        var(--rich-black) 0%,
+        var(--navy-blue) 100%
+    );
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    height: 75px;
+    font-family:
+        "Inter",
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+    box-shadow: var(--shadow-sm);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(14, 204, 237, 0.15);
+}
+
+/* ======== ITEMS PRINCIPALES ======== */
+#menu > li {
+    position: relative;
+    list-style: none;
+}
+
+#menu > li > a {
+    color: rgba(255, 255, 255, 0.9);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    transition: var(--transition-smooth);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    letter-spacing: 0.3px;
+    position: relative;
+    background: transparent;
+    border: 1px solid transparent;
+}
+
+/* Efecto de fondo en hover con gradiente sutil */
+#menu > li > a:hover {
+    background: linear-gradient(
+        135deg,
+        rgba(2, 7, 100, 0.3) 0%,
+        rgba(4, 55, 128, 0.4) 100%
+    );
+    border-color: rgba(14, 204, 237, 0.3);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(14, 204, 237, 0.15);
+}
+
+/* Indicador de página activa */
+#menu > li.active > a {
+    background: linear-gradient(
+        135deg,
+        var(--sapphire) 0%,
+        var(--dark-cerulean) 100%
+    );
+    color: white;
+    box-shadow: var(--shadow-accent);
+    border-color: var(--spiro-disco-ball);
+}
+
+#menu > li.active > a:hover {
+    background: linear-gradient(
+        135deg,
+        var(--dark-cerulean) 0%,
+        var(--sapphire) 100%
+    );
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(14, 204, 237, 0.3);
+}
+
+/* ======== SUBMENÚ - AHORA LITERALMENTE DEBAJO ======== */
+.submenu {
+    list-style: none;
+    position: absolute;
+    top: 100%; /* Pegado justo debajo */
+    left: 0;
+    min-width: 220px;
+    background: rgba(3, 8, 18, 0.95);
+    backdrop-filter: blur(12px);
+    border-radius: 0 0 4px 4px; /* Solo esquinas inferiores redondeadas */
+    padding: 0.5rem 0;
+    display: none;
+    flex-direction: column;
+    box-shadow: var(--shadow-md);
+    border: 1px solid rgba(14, 204, 237, 0.2);
+    border-top: none; /* Sin borde superior para que se fusione */
+    animation: slideDown 0.15s ease-out;
+    transform-origin: top center;
+}
+
+/* Animación más rápida */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-3px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Estilo de items del submenú */
+.submenu li {
+    width: 100%;
+}
+
+.submenu li a {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 1.2rem;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 400;
+    transition: var(--transition-smooth);
+    position: relative;
+    border-left: 2px solid transparent;
+}
+
+/* Efecto hover en submenú */
+.submenu li a:hover {
+    background: linear-gradient(
+        90deg,
+        rgba(2, 94, 196, 0.2) 0%,
+        rgba(14, 204, 237, 0.1) 100%
+    );
+    color: white;
+    border-left-color: var(--spiro-disco-ball);
+    padding-left: 1.5rem;
+}
+
+/* Separadores en submenú */
+.submenu li:not(:last-child) {
+    border-bottom: 1px solid rgba(14, 204, 237, 0.08);
+}
+
+/* Mostrar submenú */
+.show-submenu {
+    display: flex !important;
+}
+
+/* ======== FLECHA INDICADORA ======== */
+#menu > li.has-children > a::after {
+    content: "▼";
+    margin-left: 0.3rem;
+    font-size: 0.65rem;
+    opacity: 0.7;
+    transition: var(--transition-smooth);
+    display: inline-block;
+    color: var(--spiro-disco-ball);
+}
+
+#menu > li.open > a::after {
+    transform: rotate(180deg) translateY(-1px);
+    opacity: 1;
+}
+
+/* Indicador visual para items con submenú */
+#menu > li.has-children > a {
+    padding-right: 1rem;
+}
+
+/* ======== ELEMENTOS DECORATIVOS ======== */
+/* Línea inferior decorativa en hover */
+#menu > li > a::before {
+    content: "";
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%) scaleX(0);
+    width: 16px;
+    height: 2px;
+    background: linear-gradient(
+        90deg,
+        var(--sapphire),
+        var(--spiro-disco-ball)
+    );
+    border-radius: 1px;
+    transition: transform 0.2s ease;
+}
+
+#menu > li > a:hover::before {
+    transform: translateX(-50%) scaleX(1);
+}
+
+/* ======== ESTADOS ESPECIALES ======== */
+#menu a:focus-visible {
+    outline: 2px solid var(--spiro-disco-ball);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* ======== BARRA DE BÚSQUEDA ======== */
+.search-container {
+    display: flex;
+    align-items: center;
+    margin: 0 1rem;
+    flex: 0 1 400px;
+}
+
+.search-container form {
+    display: flex;
+    width: 100%;
+}
+
+.search-container input[type="text"] {
+    width: 100%;
+    padding: 0.4rem 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px 0 0 4px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 0.95rem;
+    outline: none;
+    transition: var(--transition-smooth);
+}
+
+.search-container input[type="text"]:focus {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: var(--spiro-disco-ball);
+}
+
+.search-container input[type="text"]::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.search-container button {
+    padding: 0.4rem 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-left: none;
+    border-radius: 0 4px 4px 0;
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-container button:hover {
+    background: var(--sapphire);
+    border-color: var(--sapphire);
+}
+
+/* ======== RESPONSIVE ======== */
+@media (max-width: 768px) {
+    body {
+        padding-top: 60px;
+    }
+
+    #menu {
+        padding: 0 1rem;
+        gap: 0.25rem;
+        height: auto;
+        min-height: 60px;
+        flex-wrap: wrap;
+        background: linear-gradient(
+            135deg,
+            var(--rich-black) 0%,
+            var(--navy-blue) 100%
+        );
+    }
+
+    #menu > li {
+        width: 100%;
+    }
+
+    #menu > li > a {
+        padding: 0.6rem 1rem;
+        font-size: 0.95rem;
+        justify-content: space-between;
+        width: 100%;
+        border-radius: 4px;
+    }
+
+    .submenu {
+        position: static;
+        width: 100%;
+        margin-top: 0;
+        background: var(--rich-black);
+        border-radius: 0;
+        box-shadow: none;
+        animation: none;
+        border: 1px solid rgba(14, 204, 237, 0.15);
+        border-top: none;
+    }
+
+    #menu > li.has-children > a::after {
+        margin-left: auto;
+    }
+
+    .submenu li a {
+        padding: 0.6rem 1.2rem;
+    }
+
+    .search-container {
+        order: -1;
+        width: 100%;
+        margin: 0.5rem 0;
+        flex: 1 1 100%;
+    }
+}
+
+/* ======== HOVER EN DESKTOP ======== */
+@media (min-width: 769px) {
+    #menu > li:hover .submenu {
+        display: flex;
+        animation: slideDown 0.15s ease-out;
+    }
+
+    #menu > li.has-children:hover > a::after {
+        transform: rotate(180deg);
+        opacity: 1;
+    }
+
+    #menu > li.has-children:hover > a {
+        background: linear-gradient(
+            135deg,
+            rgba(2, 7, 100, 0.3) 0%,
+            rgba(4, 55, 128, 0.4) 100%
+        );
+        border-color: rgba(14, 204, 237, 0.3);
+    }
+}
+
+/* Ajuste para que el borde del item principal se fusione con el submenú */
+#menu > li.has-children > a {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+#menu > li.has-children:hover > a {
+    border-bottom-color: transparent;
+}

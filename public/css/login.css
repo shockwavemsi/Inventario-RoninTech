@@ -1,0 +1,108 @@
+/* ======== RESET ======== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* ======== BODY ======== */
+body {
+    font-family: "Poppins", Arial, sans-serif;
+    background: linear-gradient(135deg, #0a2342, #185adb);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* ======== TÍTULO ======== */
+h1 {
+    color: #ffffff;
+    margin-bottom: 25px;
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+/* ======== CONTENEDOR ======== */
+.login-container {
+    background: #ffffff;
+    width: 100%;
+    max-width: 380px;
+    padding: 35px 30px;
+    border-radius: 16px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* ======== FORMULARIO ======== */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+/* ======== LABELS ======== */
+label {
+    font-weight: 600;
+    color: #333;
+}
+
+/* ======== INPUTS ======== */
+input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #d0d7e2;
+    border-radius: 8px;
+    font-size: 1rem;
+    background: #f7f9fc;
+    transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+input:focus {
+    outline: none;
+    border-color: #185adb;
+    box-shadow: 0 0 6px rgba(24, 90, 219, 0.4);
+}
+
+/* ======== BOTÓN ======== */
+button {
+    background: #185adb;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s ease, transform 0.1s ease;
+}
+
+button:hover {
+    background: #0a2342;
+    transform: scale(1.02);
+}
+
+/* ======== ENLACE REGISTRO ======== */
+.register-link {
+    text-align: center;
+}
+
+.register-link a {
+    color: #185adb;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.register-link a:hover {
+    text-decoration: underline;
+}
+
+/* ======== ERROR ======== */
+.error-msg {
+    color: red;
+    text-align: center;
+    font-weight: 600;
+}

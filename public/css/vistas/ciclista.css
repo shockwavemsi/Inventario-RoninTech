@@ -1,0 +1,376 @@
+/* ======== VARIABLES DE COLOR ======== */
+:root {
+    --rich-black: #030812;
+    --navy-blue: #020764;
+    --dark-cerulean: #043780;
+    --sapphire: #025ec4;
+    --spiro-disco-ball: #0ecced;
+
+    /* Variables semánticas - MODO CLARO (por defecto) */
+    --primary-dark: var(--rich-black);
+    --primary-deep: var(--navy-blue);
+    --primary-medium: var(--dark-cerulean);
+    --primary-bright: var(--sapphire);
+    --accent-color: var(--spiro-disco-ball);
+
+    /* Fondo y texto - MODO CLARO */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8fafc;
+    --text-primary: #1e293b;
+    --text-secondary: #475569;
+    --border-light: #e2e8f0;
+    --background-hover: #f1f5f9;
+    --shadow-color: rgba(2, 7, 100, 0.12);
+    --shadow-hover: rgba(2, 7, 100, 0.18);
+    --table-stripe: #ffffff;
+    --table-stripe-alt: #fafcff;
+}
+
+/* ======== MODO OSCURO ======== */
+@media (prefers-color-scheme: dark) {
+    :root {
+        /* Fondo y texto - MODO OSCURO */
+        --bg-primary: #0a0f1a;
+        --bg-secondary: #111827;
+        --text-primary: #e5e7eb;
+        --text-secondary: #9ca3af;
+        --border-light: #1f2937;
+        --background-hover: #1e293b;
+        --shadow-color: rgba(0, 0, 0, 0.4);
+        --shadow-hover: rgba(0, 0, 0, 0.5);
+        --table-stripe: #0f1520;
+        --table-stripe-alt: #141b26;
+    }
+
+    /* Ajustes adicionales para modo oscuro */
+    body {
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+    }
+
+    /* Hacemos los azules más vibrantes en modo oscuro */
+    :root {
+        --sapphire: #2d7ee9;
+        --spiro-disco-ball: #2fd8f5;
+    }
+}
+
+/* ======== TÍTULOS ======== */
+h2 {
+    color: var(--sapphire);
+    margin: 30px 0 15px 0;
+    font-size: 1.75rem;
+    font-weight: 600;
+    position: relative;
+    padding-bottom: 8px;
+    border-bottom: 3px solid var(--dark-cerulean);
+    display: inline-block;
+    max-width: 100%;
+}
+
+/* ======== DATOS DEL CICLISTA ======== */
+#datos-ciclista {
+    background: var(--bg-primary);
+    padding: 24px;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px var(--shadow-color);
+    max-width: 600px;
+    margin: 0 0 30px 0;
+    border: 1px solid var(--border-light);
+    transition:
+        box-shadow 0.3s ease,
+        background-color 0.3s ease,
+        border-color 0.3s ease;
+    box-sizing: border-box;
+}
+
+#datos-ciclista:hover {
+    box-shadow: 0 8px 24px var(--shadow-hover);
+}
+
+#datos-ciclista p {
+    margin: 10px 0;
+    font-size: 1rem;
+    color: var(--text-primary);
+    padding: 4px 0;
+    border-bottom: 1px dashed var(--border-light);
+    word-break: break-word;
+    transition:
+        border-color 0.3s ease,
+        color 0.3s ease;
+}
+
+#datos-ciclista p:last-child {
+    border-bottom: none;
+}
+
+#datos-ciclista p strong {
+    color: var(--sapphire);
+    font-weight: 600;
+    min-width: 120px;
+    display: inline-block;
+    transition: color 0.3s ease;
+}
+
+/* ======== TABLA DEL HISTÓRICO ======== */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--bg-primary);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px var(--shadow-color);
+    border: 1px solid var(--border-light);
+    margin: 0 0 30px 0;
+    table-layout: auto;
+    transition:
+        background-color 0.3s ease,
+        border-color 0.3s ease,
+        box-shadow 0.3s ease;
+}
+
+thead {
+    background: linear-gradient(
+        135deg,
+        var(--dark-cerulean) 0%,
+        var(--sapphire) 100%
+    );
+    color: white;
+}
+
+thead th {
+    padding: 14px 12px;
+    font-weight: 600;
+    text-align: left;
+    font-size: 0.95rem;
+    letter-spacing: 0.3px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.15);
+    white-space: nowrap;
+}
+
+tbody td {
+    padding: 12px;
+    border-bottom: 1px solid var(--border-light);
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    transition:
+        background-color 0.2s ease,
+        border-color 0.3s ease,
+        color 0.3s ease;
+    word-break: break-word;
+}
+
+tbody tr {
+    background: var(--table-stripe);
+    transition: background-color 0.3s ease;
+}
+
+tbody tr:nth-child(even) {
+    background: var(--table-stripe-alt);
+}
+
+tbody tr:hover {
+    background: rgba(2, 94, 196, 0.08);
+}
+
+tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Estilo para la primera columna */
+tbody td:first-child {
+    font-weight: 500;
+    color: var(--sapphire);
+}
+
+/* ======== BADGES PARA ESTADOS ======== */
+.status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    background: rgba(2, 94, 196, 0.1);
+    color: var(--sapphire);
+    border: 1px solid rgba(2, 94, 196, 0.3);
+    white-space: nowrap;
+    transition:
+        background-color 0.3s ease,
+        border-color 0.3s ease,
+        color 0.3s ease;
+}
+
+.status-badge.completed {
+    background: rgba(14, 204, 237, 0.1);
+    color: var(--spiro-disco-ball);
+    border-color: rgba(14, 204, 237, 0.3);
+}
+
+.status-badge.pending {
+    background: rgba(4, 55, 128, 0.1);
+    color: var(--dark-cerulean);
+    border-color: rgba(4, 55, 128, 0.3);
+}
+
+/* Modo oscuro - badges más visibles */
+@media (prefers-color-scheme: dark) {
+    .status-badge {
+        background: rgba(2, 94, 196, 0.2);
+        border-color: rgba(2, 94, 196, 0.5);
+    }
+
+    .status-badge.completed {
+        background: rgba(14, 204, 237, 0.15);
+        border-color: rgba(14, 204, 237, 0.4);
+    }
+
+    .status-badge.pending {
+        background: rgba(4, 55, 128, 0.2);
+        border-color: rgba(4, 55, 128, 0.5);
+    }
+}
+
+/* ======== BOTONES DE ACCIÓN ======== */
+.btn-action {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border: 1px solid var(--border-light);
+    background: var(--bg-primary);
+    color: var(--sapphire);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+.btn-action:hover {
+    background: var(--sapphire);
+    color: white;
+    border-color: var(--sapphire);
+}
+
+/* Modo oscuro - botones */
+@media (prefers-color-scheme: dark) {
+    .btn-action {
+        background: var(--bg-secondary);
+        border-color: var(--border-light);
+    }
+
+    .btn-action:hover {
+        background: var(--sapphire);
+        border-color: var(--sapphire);
+    }
+}
+
+/* ======== CONTENEDOR PARA TABLA RESPONSIVE ======== */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    margin: 0 0 30px 0;
+    border-radius: 16px;
+}
+
+/* ======== SELECTOR DE TEMA MANUAL (OPCIONAL) ======== */
+.theme-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-light);
+    border-radius: 40px;
+    padding: 8px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-primary);
+    box-shadow: 0 2px 8px var(--shadow-color);
+    transition: all 0.3s ease;
+    z-index: 999;
+}
+
+.theme-toggle:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px var(--shadow-hover);
+}
+
+.theme-toggle .icon {
+    font-size: 1.2rem;
+}
+
+/* Clase para forzar tema oscuro (si quieres tener un toggle manual) */
+.theme-dark {
+    --bg-primary: #0a0f1a;
+    --bg-secondary: #111827;
+    --text-primary: #e5e7eb;
+    --text-secondary: #9ca3af;
+    --border-light: #1f2937;
+    --background-hover: #1e293b;
+    --shadow-color: rgba(0, 0, 0, 0.4);
+    --shadow-hover: rgba(0, 0, 0, 0.5);
+    --table-stripe: #0f1520;
+    --table-stripe-alt: #141b26;
+    --sapphire: #2d7ee9;
+    --spiro-disco-ball: #2fd8f5;
+}
+
+/* Clase para forzar tema claro */
+.theme-light {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8fafc;
+    --text-primary: #1e293b;
+    --text-secondary: #475569;
+    --border-light: #e2e8f0;
+    --background-hover: #f1f5f9;
+    --shadow-color: rgba(2, 7, 100, 0.12);
+    --shadow-hover: rgba(2, 7, 100, 0.18);
+    --table-stripe: #ffffff;
+    --table-stripe-alt: #fafcff;
+    --sapphire: #025ec4;
+    --spiro-disco-ball: #0ecced;
+}
+
+/* ======== RESPONSIVE ======== */
+@media (max-width: 768px) {
+    h2 {
+        font-size: 1.5rem;
+    }
+
+    #datos-ciclista {
+        padding: 18px;
+    }
+
+    #datos-ciclista p {
+        font-size: 0.95rem;
+    }
+
+    #datos-ciclista p strong {
+        min-width: 100px;
+    }
+
+    thead th,
+    tbody td {
+        padding: 10px 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    #datos-ciclista p {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    #datos-ciclista p strong {
+        min-width: auto;
+    }
+
+    .theme-toggle {
+        bottom: 10px;
+        right: 10px;
+        padding: 6px 12px;
+        font-size: 0.9rem;
+    }
+}

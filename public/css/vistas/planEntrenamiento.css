@@ -1,0 +1,530 @@
+:root {
+    --rich-black: #030812;
+    --navy-blue: #020764;
+    --dark-cerulean: #043780;
+    --sapphire: #025ec4;
+    --spiro-disco-ball: #0ecced;
+
+    /* Variables semánticas - MODO CLARO (por defecto) */
+    --primary-dark: var(--rich-black);
+    --primary-deep: var(--navy-blue);
+    --primary-medium: var(--dark-cerulean);
+    --primary-bright: var(--sapphire);
+    --accent-color: var(--spiro-disco-ball);
+
+    /* Fondo y texto - MODO CLARO */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8fafc;
+    --text-primary: #1e293b;
+    --text-secondary: #475569;
+    --border-light: #e2e8f0;
+    --background-hover: #f1f5f9;
+    --shadow-color: rgba(2, 7, 100, 0.12);
+    --shadow-hover: rgba(2, 7, 100, 0.18);
+    --table-stripe: #ffffff;
+    --table-stripe-alt: #fafcff;
+}
+
+/* ======== MODO OSCURO ======== */
+@media (prefers-color-scheme: dark) {
+    :root {
+        /* Fondo y texto - MODO OSCURO */
+        --bg-primary: #0a0f1a;
+        --bg-secondary: #111827;
+        --text-primary: #e5e7eb;
+        --text-secondary: #9ca3af;
+        --border-light: #1f2937;
+        --background-hover: #1e293b;
+        --shadow-color: rgba(0, 0, 0, 0.4);
+        --shadow-hover: rgba(0, 0, 0, 0.5);
+        --table-stripe: #0f1520;
+        --table-stripe-alt: #141b26;
+    }
+
+    /* Ajustes adicionales para modo oscuro */
+    body {
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+    }
+
+    /* Hacemos los azules más vibrantes en modo oscuro */
+    :root {
+        --sapphire: #2d7ee9;
+        --spiro-disco-ball: #2fd8f5;
+    }
+}
+
+/* ======== ESTILOS GENERALES ======== */
+body {
+    font-family: "Poppins", Arial, sans-serif;
+    background: var(--bg-secondary);
+    margin: 0;
+    padding: 20px;
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+
+/* ======== TARJETAS DE PLANES ======== */
+#planes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 24px;
+    margin: 24px 0;
+}
+
+.plan-card {
+    background: var(--bg-primary);
+    padding: 24px;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px var(--shadow-color);
+    transition:
+        transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        border-color 0.3s ease;
+    border: 1px solid var(--border-light);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Línea decorativa superior */
+.plan-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(
+        90deg,
+        var(--sapphire),
+        var(--spiro-disco-ball)
+    );
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+.plan-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 30px var(--shadow-hover);
+    border-color: var(--sapphire);
+}
+
+.plan-card:hover::before {
+    opacity: 1;
+}
+
+.plan-card h2 {
+    margin: 0 0 16px 0;
+    color: var(--sapphire);
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    border-bottom: 1px dashed var(--border-light);
+    padding-bottom: 12px;
+}
+
+.plan-card p {
+    margin: 8px 0;
+    font-size: 1rem;
+    color: var(--text-primary);
+    padding: 8px 12px;
+    background: var(--bg-secondary);
+    border-radius: 10px;
+    border-left: 3px solid var(--sapphire);
+    word-break: break-word;
+    transition: all 0.2s ease;
+}
+
+.plan-card p:hover {
+    background: var(--background-hover);
+    border-left-color: var(--spiro-disco-ball);
+    transform: translateX(4px);
+}
+
+/* Colores diferentes para cada tipo de párrafo */
+.plan-card p:nth-of-type(1) {
+    border-left-color: var(--sapphire);
+}
+.plan-card p:nth-of-type(2) {
+    border-left-color: var(--dark-cerulean);
+}
+.plan-card p:nth-of-type(3) {
+    border-left-color: var(--primary-bright);
+}
+.plan-card p:nth-of-type(4) {
+    border-left-color: var(--spiro-disco-ball);
+}
+.plan-card p:nth-of-type(5) {
+    border-left-color: var(--primary-medium);
+}
+.plan-card p:nth-of-type(6) {
+    border-left-color: var(--accent-color);
+}
+
+.plan-card p strong {
+    color: var(--sapphire);
+    font-weight: 600;
+    min-width: 120px;
+    display: inline-block;
+}
+
+.plan-card hr {
+    margin: 20px 0 16px;
+    border: none;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        var(--border-light),
+        transparent
+    );
+}
+
+/* ======== BOTONES DE LA TARJETA ======== */
+.plan-card button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-right: 10px;
+    margin-top: 8px;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-width: 100px;
+}
+
+.plan-card button:hover {
+    transform: translateY(-2px);
+}
+
+/* Botón Editar */
+.plan-card button:first-of-type {
+    background: var(--sapphire);
+    color: white;
+    box-shadow: 0 4px 12px rgba(2, 94, 196, 0.25);
+}
+
+.plan-card button:first-of-type:hover {
+    background: var(--dark-cerulean);
+    box-shadow: 0 6px 16px rgba(2, 94, 196, 0.35);
+}
+
+/* Botón Eliminar */
+.plan-card button:last-of-type {
+    background: red;
+    color: white;
+    box-shadow: 0 4px 12px rgba(229, 57, 53, 0.25);
+}
+
+.plan-card button:last-of-type:hover {
+    background: var(--danger-hover);
+    box-shadow: 0 6px 16px rgba(198, 40, 40, 0.35);
+}
+
+/* ======== EDITOR ======== */
+.editor {
+    margin-top: 24px;
+    padding: 24px;
+    background: var(--bg-secondary);
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    border: 1px solid var(--border-light);
+    animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Inputs y Selects */
+.editor input,
+.editor select {
+    padding: 14px 18px;
+    border-radius: 12px;
+    border: 1px solid var(--border-light);
+    font-size: 0.95rem;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    transition: all 0.2s ease;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: "Poppins", Arial, sans-serif;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.editor input:focus,
+.editor select:focus {
+    outline: none;
+    border-color: var(--sapphire);
+    box-shadow: 0 0 0 4px rgba(2, 94, 196, 0.1);
+}
+
+.editor input:hover,
+.editor select:hover {
+    border-color: var(--sapphire);
+    background: var(--bg-primary);
+}
+
+/* Input date */
+.editor input[type="date"] {
+    color-scheme: light;
+    padding: 12px 18px;
+}
+
+/* Select personalizado */
+.editor select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    background-size: 18px;
+    padding-right: 48px;
+}
+
+.editor select:hover {
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23025ec4' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+}
+
+/* Placeholder */
+.editor input::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.6;
+}
+
+/* ======== BOTONES DEL EDITOR ======== */
+.editor button {
+    padding: 14px 24px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    width: 100%;
+    margin: 4px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-family: "Poppins", Arial, sans-serif;
+    letter-spacing: 0.3px;
+}
+
+/* Botón Confirmar */
+.editor button:first-of-type {
+    background: green;
+    color: white;
+    box-shadow: 0 4px 12px rgba(67, 160, 71, 0.25);
+}
+
+.editor button:first-of-type:hover {
+    background: var(--success-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(46, 125, 50, 0.35);
+}
+
+/* Botón Cancelar */
+.editor button:last-of-type {
+    background: rgb(58, 58, 58);
+    color: white;
+    box-shadow: 0 4px 12px rgba(117, 117, 117, 0.25);
+}
+
+.editor button:last-of-type:hover {
+    background: var(--cancel-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(97, 97, 97, 0.35);
+}
+
+/* ======== BOTÓN CREAR ======== */
+#botonCrear {
+    padding: 16px 32px;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin: 24px 0;
+    background: linear-gradient(
+        135deg,
+        var(--sapphire) 0%,
+        var(--dark-cerulean) 100%
+    );
+    color: white;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    box-shadow: 0 8px 20px rgba(2, 94, 196, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#botonCrear:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(2, 94, 196, 0.4);
+    background: linear-gradient(
+        135deg,
+        var(--dark-cerulean) 0%,
+        var(--sapphire) 100%
+    );
+}
+
+#botonCrear:active {
+    transform: translateY(-1px);
+}
+
+/* ======== ANIMACIONES ======== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.plan-card {
+    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.plan-card:nth-child(1) {
+    animation-delay: 0.1s;
+}
+.plan-card:nth-child(2) {
+    animation-delay: 0.15s;
+}
+.plan-card:nth-child(3) {
+    animation-delay: 0.2s;
+}
+.plan-card:nth-child(4) {
+    animation-delay: 0.25s;
+}
+.plan-card:nth-child(5) {
+    animation-delay: 0.3s;
+}
+.plan-card:nth-child(6) {
+    animation-delay: 0.35s;
+}
+.plan-card:nth-child(7) {
+    animation-delay: 0.4s;
+}
+.plan-card:nth-child(8) {
+    animation-delay: 0.45s;
+}
+.plan-card:nth-child(9) {
+    animation-delay: 0.5s;
+}
+.plan-card:nth-child(10) {
+    animation-delay: 0.55s;
+}
+
+/* ======== RESPONSIVE ======== */
+@media (max-width: 768px) {
+    body {
+        padding: 16px;
+    }
+
+    #planes {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .plan-card {
+        padding: 20px;
+    }
+
+    .plan-card h2 {
+        font-size: 1.3rem;
+    }
+
+    .plan-card p {
+        font-size: 0.95rem;
+        padding: 6px 10px;
+    }
+
+    .plan-card p strong {
+        min-width: auto;
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    .plan-card button {
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 8px;
+        min-width: auto;
+    }
+
+    .editor {
+        padding: 20px;
+    }
+
+    .editor input,
+    .editor select {
+        padding: 12px 16px;
+    }
+
+    #botonCrear {
+        width: 100%;
+        padding: 14px 24px;
+    }
+}
+
+@media (max-width: 480px) {
+    .plan-card {
+        padding: 16px;
+    }
+
+    .plan-card h2 {
+        font-size: 1.2rem;
+    }
+
+    .plan-card p {
+        font-size: 0.9rem;
+    }
+
+    .editor {
+        padding: 16px;
+    }
+
+    .editor input,
+    .editor select {
+        padding: 10px 14px;
+        font-size: 0.9rem;
+    }
+
+    .editor button {
+        padding: 12px 20px;
+        font-size: 0.95rem;
+    }
+}
+
+/* ======== UTILIDADES ======== */
+.text-center {
+    text-align: center;
+}
+
+.mt-4 {
+    margin-top: 24px;
+}
+
+.mb-4 {
+    margin-bottom: 24px;
+}
