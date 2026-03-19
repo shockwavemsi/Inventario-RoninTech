@@ -13,11 +13,21 @@ class DatabaseSeeder extends Seeder
     /**
      * Seed the application's database.
      */
-    public function run(): void
+     public function run()
     {
-        // User::factory(10)->create();
-
-        // falta Entrenamiento seeder
-        $this->call(RolesSeeder::class);
+        $this->call([
+            RolesSeeder::class,      // Crea roles y usuarios
+            ProductosSeeder::class,  // Crea productos
+            EntradasStockSeeder::class, // Crea entradas
+            VentasSeeder::class,     // Crea ventas
+            //AlertasSeeder::class, // Opcional
+        ]);
+        
+        $this->command->info('==============================================');
+        $this->command->info('BASE DE DATOS INICIALIZADA CORRECTAMENTE');
+        $this->command->info('==============================================');
+        $this->command->info('Admin: admin@admin.com / admin123');
+        $this->command->info('User: user@user.com / user123');
+        $this->command->info('==============================================');
     }
 }

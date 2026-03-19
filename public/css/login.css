@@ -8,7 +8,7 @@
 /* ======== BODY ======== */
 body {
     font-family: "Poppins", Arial, sans-serif;
-    background: linear-gradient(135deg, #0a2342, #185adb);
+    background: linear-gradient(135deg, #212122, #db1818);
     height: 100vh;
     display: flex;
     flex-direction: column;
