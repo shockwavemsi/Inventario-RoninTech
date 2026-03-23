@@ -1,5 +1,5 @@
 <?php
-// database/migrations/2024_01_01_000004_create_productos_table.php
+// database/migrations/2025_01_01_000002_create_categorias_table.php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -9,12 +9,10 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('productos', function (Blueprint $table) {
+        Schema::create('categorias', function (Blueprint $table) {
             $table->id();
-            $table->string('nombre', 200);
-            $table->string('marca', 100)->nullable();
-            $table->decimal('precio_venta', 10, 2);
-            $table->integer('stock_minimo')->default(3);
+            $table->string('nombre', 100);
+            $table->text('descripcion')->nullable();
             $table->boolean('activo')->default(true);
             $table->timestamps();
         });
@@ -22,6 +20,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('productos');
+        Schema::dropIfExists('categorias');
     }
 };

@@ -17,10 +17,13 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             RolesSeeder::class,      // Crea roles y usuarios
-            ProductosSeeder::class,  // Crea productos
-            EntradasStockSeeder::class, // Crea entradas
-            VentasSeeder::class,     // Crea ventas
-            //AlertasSeeder::class, // Opcional
+            MetodoPagoSeeder::class, // Crear Métodos de pago
+            ConfiguracionSeeder::class, // Crear Configuraciones
+            CategoriaSeeder::class, // Crear categorías
+            ProveedorSeeder::class, // Crear Proveedores
+            ProductoSeeder::class, // Crear Productos
+            CompraSeeder::class, // Crear Compras
+            VentaSeeder::class, // Crear Ventas
         ]);
         
         $this->command->info('==============================================');
