@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Configuracion; 
+
 class AdminController extends Controller
 {
     public function index()
     {
-        return view('admin.index');
+        $config = Configuracion::first();
+        return view('admin.index', compact('config'));
     }
 }
+
 

@@ -1,12 +1,12 @@
 <?php
-// app/Models/Proveedor.php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
 class Proveedor extends Model
 {
+    protected $table = 'proveedores'; // ← ESTA LÍNEA SOLUCIONA EL ERROR IMPORTANTE
+
     protected $fillable = [
         'nombre',
         'ruc',
