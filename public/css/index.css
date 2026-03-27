@@ -1,0 +1,50 @@
+.content {
+    margin-left: 260px;
+    padding: 30px;
+}
+
+.card-box {
+    padding: 20px;
+    border-radius: 10px;
+    color: #fff;
+    transition: 0.2s;
+}
+
+.card-box:hover {
+    transform: scale(1.03);
+    cursor: pointer;
+    opacity: 0.9;
+}
+
+.bg-blue {
+    background: #007bff;
+}
+
+.bg-green {
+    background: #28a745;
+}
+
+.bg-orange {
+    background: #fd7e14;
+}
+
+.bg-red {
+    background: #dc3545;
+}
+
+.bg-purple {
+    background: #6f42c1;
+}
+
+.bg-darkblue {
+    background: #343a40;
+}
+
+.icon-box {
+    font-size: 40px;
+    opacity: 0.7;
+}
+
+a.block-link {
+    text-decoration: none;
+}

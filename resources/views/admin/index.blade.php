@@ -3,51 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <title>SIS-INVENTARIOS - Panel Admin</title>
+    <link rel="stylesheet" href="{{ asset('css/main_menu.css') }}">
 
     <!-- Bootstrap -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
 
     <style>
-        body {
-            background: #f4f6f9;
-            font-family: Arial, sans-serif;
-        }
-
-        /* SIDEBAR */
-        .sidebar {
-            width: 240px;
-            height: 100vh;
-            background: #343a40;
-            color: #fff;
-            position: fixed;
-            left: 0;
-            top: 0;
-            padding-top: 20px;
-        }
-
-        .sidebar h3 {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .sidebar a {
-            display: block;
-            padding: 12px 20px;
-            color: #ddd;
-            text-decoration: none;
-            font-size: 15px;
-        }
-
-        .sidebar a:hover {
-            background: #495057;
-            color: #fff;
-        }
-
-        .sidebar .submenu {
-            padding-left: 30px;
-            font-size: 14px;
-        }
-
         /* CONTENIDO */
         .content {
             margin-left: 260px;
@@ -83,31 +44,17 @@
             text-decoration: none;
         }
     </style>
+    <script src="{{ asset('js/menu.js') }}"></script>
 </head>
 
 <body>
 
-    <!-- SIDEBAR -->
     <div class="sidebar">
-        <h3>{{ $config->nombre_empresa }}</h3>
-
-        <a href="#">Dashboard</a>
-        <a href="#">Compras</a>
-        <a href="#">Recibidos</a>
-        <a href="#">Devoluciones</a>
-        <a href="#">Stocks</a>
-        <a href="#">Ventas</a>
-
-        <a href="#">Mantenimiento</a>
-        <div class="submenu">
-            <a href="#">Proveedores</a>
-            <a href="#">Productos</a>
-            <a href="/usuarios">Usuarios</a>
-            <a href="/configuracion">Configuración</a>
-        </div>
-
-        <a href="{{ route('logout') }}" class="mt-4">Cerrar sesión</a>
-    </div>
+    <h3>{{ $config->nombre_empresa }}</h3>
+    <div id="menu-contenedor"></div>
+    <a href="{{ route('logout') }}" class="mt-4">Cerrar sesión</a>
+</div>
+    
 
     <!-- CONTENIDO -->
     <div class="content">
