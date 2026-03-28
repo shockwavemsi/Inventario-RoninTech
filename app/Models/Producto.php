@@ -8,8 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class Producto extends Model
 {
     protected $fillable = [
-        'codigo_barras',
-        'sku',
         'nombre',
         'descripcion',
         'marca',

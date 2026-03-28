@@ -7,7 +7,7 @@
     
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="{{ asset('css/main_menu.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/menu.css') }}">
     <link rel="stylesheet" href="{{ asset('css/index.css') }}">
     <script src="{{ asset('js/menu.js') }}"></script>
 </head>
@@ -203,13 +203,30 @@
                 }
 
                 if (accion === 'eliminar') {
-                    if (confirm('¿Seguro que deseas eliminar este proveedor?')) {
-                        fetch(`/proveedores/${id}/eliminar`, {
-                            method: 'DELETE',
-                            headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
-                        }).then(() => window.location.reload());
-                    }
-                }
+    console.log('Eliminando producto:', id);
+    if (confirm('¿Seguro que deseas eliminar este producto?')) {
+        fetch(`/productos/${id}/eliminar`, {
+            method: 'DELETE',
+            headers: { 
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(res => {
+            console.log('Response:', res.status);
+            if (res.ok) {
+                console.log('Recargando página...');
+                setTimeout(() => window.location.reload(), 500);  // ← Retraso de 500ms
+            } else {
+                alert('Error al eliminar');
+            }
+        })
+        .catch(err => {
+            console.error('Error:', err);
+            alert('Error en la solicitud');
+        });
+    }
+}
             });
         });
 

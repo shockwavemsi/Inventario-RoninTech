@@ -11,7 +11,7 @@ return new class extends Migration
     {
         Schema::create('alertas', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('producto_id')->constrained('productos');
+            $table->foreignId('producto_id')->constrained('productos')->onDelete('cascade');  // ← AQUÍ
             $table->enum('tipo', ['stock_bajo', 'stock_exceso', 'vencimiento', 'producto_nuevo']);
             $table->text('mensaje');
             $table->boolean('vista')->default(false);

@@ -12,13 +12,11 @@ return new class extends Migration
         Schema::create('compras_detalle', function (Blueprint $table) {
             $table->id();
             $table->foreignId('compra_id')->constrained('compras')->onDelete('cascade');
-            $table->foreignId('producto_id')->constrained('productos');
+            $table->foreignId('producto_id')->constrained('productos')->onDelete('cascade');  // ← AQUÍ
             $table->integer('cantidad');
             $table->decimal('precio_unitario', 10, 2);
             $table->decimal('subtotal', 10, 2);
             $table->timestamps();
-            
-            // Índices para mejorar rendimiento
             $table->index(['compra_id', 'producto_id']);
         });
     }

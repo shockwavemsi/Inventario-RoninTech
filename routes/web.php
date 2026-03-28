@@ -8,6 +8,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ConfiguracionController;
 use App\Http\Controllers\ProveedorController;
+use App\Http\Controllers\ProductosController;
 
 // Página inicial (puedes borrarla si no la usas)
 Route::get('/', function () {
@@ -47,14 +48,35 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::delete('/usuarios/{id}/eliminar', [UserController::class, 'destroy'])->name('usuarios.destroy');
 });
 
+// Proveedores
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/proveedores', [ProveedorController::class, 'index'])->name('proveedores.index');
     Route::get('/proveedores/crear', [ProveedorController::class, 'create'])->name('proveedores.create');
     Route::post('/proveedores/guardar', [ProveedorController::class, 'store'])->name('proveedores.store');
     Route::delete('/proveedores/{id}/eliminar', [ProveedorController::class, 'destroy'])->name('proveedores.destroy');
 });
+
+// Enpoint JSON para proveedores
 Route::get('/proveedores/{id}/json', function($id) {
     return \App\Models\Proveedor::findOrFail($id);
 });
+
+// Productos
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/productos', [ProductosController::class, 'index'])->name('productos.index');
+    Route::get('/productos/crear', [ProductosController::class, 'create'])->name('productos.create');
+    Route::post('/productos/guardar', [ProductosController::class, 'store'])->name('productos.store');
+    Route::delete('/productos/{id}/eliminar', [ProductosController::class, 'destroy'])->name('productos.destroy');
+});
+
+// Endpoint JSON para productos
+Route::get('/productos/{id}/json', function($id) {
+    return \App\Models\Producto::findOrFail($id);
+});
+
+Route::get('/productos/{id}/json', function($id) {
+    return \App\Models\Producto::with('proveedor', 'categoria')->findOrFail($id);  // ← Agregar with()
+});
+
 
 

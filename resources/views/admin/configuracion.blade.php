@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ $config->nombre_empresa }} - Configuración</title>
-    <link rel="stylesheet" href="{{ asset('css/main_menu.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/menu.css') }}">
     <link rel="stylesheet" href="{{ asset('css/index.css') }}">
     <!-- Bootstrap -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
