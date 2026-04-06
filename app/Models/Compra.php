@@ -21,6 +21,11 @@ class Compra extends Model
         'usuario_id'
     ];
 
+    
+    protected $attributes = [
+        'estado' => 'pendiente',  // Estado por defecto
+    ];
+
     protected $casts = [
         'fecha_pedido' => 'date',
         'fecha_entrega_esperada' => 'date',

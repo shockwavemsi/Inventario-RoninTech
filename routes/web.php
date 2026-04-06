@@ -9,6 +9,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ConfiguracionController;
 use App\Http\Controllers\ProveedorController;
 use App\Http\Controllers\ProductosController;
+use App\Http\Controllers\ComprasController;
 
 // Página inicial (puedes borrarla si no la usas)
 Route::get('/', function () {
@@ -76,6 +77,18 @@ Route::get('/productos/{id}/json', function($id) {
 
 Route::get('/productos/{id}/json', function($id) {
     return \App\Models\Producto::with('proveedor', 'categoria')->findOrFail($id);  // ← Agregar with()
+});
+
+
+// Compras
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/compras', [ComprasController::class, 'index'])->name('compras.index');
+    Route::post('/compras/guardar', [ComprasController::class, 'store'])->name('compras.store');
+    Route::delete('/compras/{id}/eliminar', [ComprasController::class, 'destroy'])->name('compras.destroy');
+});
+
+Route::get('/compras/{id}/json', function($id) {
+    return \App\Models\Compra::with('proveedor', 'usuario', 'detalles.producto')->findOrFail($id);
 });
 
 
