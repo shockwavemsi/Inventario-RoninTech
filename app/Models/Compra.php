@@ -21,9 +21,8 @@ class Compra extends Model
         'usuario_id'
     ];
 
-    
     protected $attributes = [
-        'estado' => 'pendiente',  // Estado por defecto
+        'estado' => 'pendiente',
     ];
 
     protected $casts = [
@@ -32,40 +31,73 @@ class Compra extends Model
         'fecha_entrega_real' => 'date',
     ];
 
-    // Relación con proveedor
+    // Generar número de factura automáticamente
+    public static function generarNumeroFactura()
+    {
+        $year = date('Y');
+        
+        // Buscar la última factura del año actual
+        $ultimaFactura = self::whereYear('created_at', $year)
+                            ->orderBy('id', 'desc')
+                            ->first();
+        
+        if ($ultimaFactura && preg_match('/FAC-' . $year . '-(\d+)/', $ultimaFactura->numero_factura, $matches)) {
+            $ultimoNumero = intval($matches[1]);
+            $nuevoNumero = $ultimoNumero + 1;
+        } else {
+            $nuevoNumero = 1;
+        }
+        
+        // Formatear el número con ceros a la izquierda (ej: 001, 010, 100)
+        $numeroFormateado = str_pad($nuevoNumero, 3, '0', STR_PAD_LEFT);
+        
+        return "FAC-{$year}-{$numeroFormateado}";
+    }
+
+    // Evento que se ejecuta antes de crear el registro
+    protected static function booted()
+    {
+        static::creating(function ($compra) {
+            if (!$compra->usuario_id) {
+                $compra->usuario_id = auth()->id();
+            }
+            
+            // Generar número de factura si no viene en la petición
+            if (!$compra->numero_factura) {
+                $compra->numero_factura = self::generarNumeroFactura();
+            }
+        });
+    }
+
+    // Resto de tus relaciones...
     public function proveedor()
     {
         return $this->belongsTo(Proveedor::class);
     }
 
-    // Relación con usuario
     public function usuario()
     {
         return $this->belongsTo(User::class, 'usuario_id');
     }
 
-    // Relación con detalles (usando modelo CompraDetalle)
     public function detalles()
     {
         return $this->hasMany(CompraDetalle::class);
     }
 
-    // Relación con productos a través de detalles (más elegante)
     public function productos()
     {
         return $this->belongsToMany(Producto::class, 'compras_detalle')
-                    ->using(CompraDetalle::class)  // Usa el modelo pivote
+                    ->using(CompraDetalle::class)
                     ->withPivot('cantidad', 'precio_unitario', 'subtotal')
                     ->withTimestamps();
     }
 
-    // Relación con devoluciones
     public function devoluciones()
     {
         return $this->hasMany(DevolucionCompra::class);
     }
 
-    // Método para calcular total automáticamente
     public function calcularTotal()
     {
         $this->subtotal = $this->detalles->sum('subtotal');

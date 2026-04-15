@@ -16,6 +16,7 @@ class Producto extends Model
         'proveedor_id',
         'precio_compra',
         'precio_venta',
+        'stock_actual',
         'stock_minimo',
         'stock_maximo',
         'ubicacion',
@@ -84,17 +85,9 @@ class Producto extends Model
     // ATRIBUTOS CALCULADOS
     // =============================================
     public function getStockActualAttribute()
-    {
-        $entradas = $this->movimientosStock()
-            ->whereIn('tipo', ['entrada_compra', 'devolucion_venta', 'inventario_inicial'])
-            ->sum('cantidad');
-        
-        $salidas = $this->movimientosStock()
-            ->whereIn('tipo', ['salida_venta', 'devolucion_compra', 'ajuste'])
-            ->sum('cantidad');
-        
-        return $entradas - $salidas;
-    }
+{
+    return $this->attributes['stock_actual'] ?? 0;
+}
 
     public function getEstadoStockAttribute()
     {

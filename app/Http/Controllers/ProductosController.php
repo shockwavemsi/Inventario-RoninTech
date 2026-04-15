@@ -10,13 +10,19 @@ use Illuminate\Http\Request;
 
 class ProductosController extends Controller
 {
-    public function index()
+public function index()
 {
     $config = Configuracion::first();
-    $productos = Producto::with('proveedor', 'categoria')->get();
-    $proveedores = Proveedor::all();
+    $productos = Producto::with('categoria', 'proveedor')->get();
     $categorias = Categoria::all();
-    return view('admin.productos', compact('config', 'productos', 'proveedores', 'categorias'));
+    $proveedores = Proveedor::all();
+    
+    // Verifica que stock_actual está llegando
+    foreach ($productos as $p) {
+        \Log::info("Producto: {$p->nombre}, Stock: {$p->stock_actual}");
+    }
+    
+    return view('admin.productos', compact('config', 'productos', 'categorias', 'proveedores'));
 }
 
 public function create()

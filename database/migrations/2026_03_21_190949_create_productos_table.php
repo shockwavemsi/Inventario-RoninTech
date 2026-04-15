@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreignId('proveedor_id')->nullable()->constrained('proveedores')->nullOnDelete();
             $table->decimal('precio_compra', 10, 2)->nullable();
             $table->decimal('precio_venta', 10, 2);
+            $table->integer('stock_actual')->default(0);  // ← Campo agregado
             $table->integer('stock_minimo')->default(3);
             $table->integer('stock_maximo')->default(100);
             $table->string('ubicacion', 100)->nullable();

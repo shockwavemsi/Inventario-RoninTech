@@ -7,33 +7,30 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{ asset('css/menu.css') }}">
     <link rel="stylesheet" href="{{ asset('css/index.css') }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="{{ asset('js/menu.js') }}"></script>
 </head>
 <body>
     <div class="sidebar">
         <h3>{{ $config->nombre_empresa }}</h3>
         <div id="menu-contenedor"></div>
-        <a href="{{ route('logout') }}" class="mt-4">Cerrar sesiÃ³n</a>
+        <a href="{{ route('logout') }}" class="mt-4">Cerrar sesión</a>
     </div>
     
-    <!-- CONTENIDO -->
     <div class="content">
         <h1 class="mb-4">Productos</h1>
         @if(session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
 
-        <!-- BOTÃ“N PARA ABRIR EL MODAL -->
         <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#modalProducto">
             Crear nuevo producto
         </button>
 
-        <!-- BUSCADOR -->
         <div class="d-flex justify-content-end mb-3">
             <input type="text" id="buscador" class="form-control w-25" placeholder="Buscar por nombre...">
         </div>
 
-        <!-- TABLA -->
         <table class="table table-bordered bg-white">
             <thead>
                 <tr>
@@ -42,7 +39,7 @@
                     <th>Nombre</th>
                     <th>Marca</th>
                     <th>Modelo</th>
-                    <th>Categorí­a</th>
+                    <th>Categoría</th>
                     <th>Proveedor</th>
                     <th>Precio Compra</th>
                     <th>Precio Venta</th>
@@ -57,13 +54,15 @@
                         <td>{{ $prod->id }}</td>
                         <td>{{ $prod->created_at->format('d/m/Y') }}</td>
                         <td class="nombre">{{ $prod->nombre }}</td>
-                        <td>{{ $prod->marca ?? 'â€”' }}</td>
-                        <td>{{ $prod->modelo ?? 'â€”' }}</td>
-                        <td>{{ $prod->categoria->nombre ?? 'â€”' }}</td>
-                        <td>{{ $prod->proveedor->nombre ?? 'â€”' }}</td>
-                        <td>${{ $prod->precio_compra ?? 'â€”' }}</td>
-                        <td>${{ $prod->precio_venta ?? 'â€”' }}</td>
-                        <td>{{ $prod->stock_actual ?? '0' }} / {{ $prod->stock_maximo }}</td>
+                        <td>{{ $prod->marca ?? '—' }}</td>
+                        <td>{{ $prod->modelo ?? '—' }}</td>
+                        <td>{{ $prod->categoria->nombre ?? '—' }}</td>
+                        <td>{{ $prod->proveedor->nombre ?? '—' }}</td>
+                        <td>${{ $prod->precio_compra ?? '—' }}</td>
+                        <td>${{ $prod->precio_venta ?? '—' }}</td>
+                        <td>
+                            {{ $prod->stock_actual }} / {{ $prod->stock_maximo }}
+                        </td>
                         <td>{{ $prod->activo ? 'Activo' : 'Inactivo' }}</td>
                         <td>
                             <select class="form-select accion-producto" data-id="{{ $prod->id }}">
@@ -115,7 +114,7 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label>Categorí­a</label>
+                                    <label>Categoría</label>
                                     <select name="categoria_id" class="form-select" required>
                                         <option value="">Selecciona una categoría...</option>
                                         @foreach($categorias as $cat)
@@ -140,7 +139,7 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label>UbicaciÃ³n</label>
+                                    <label>Ubicación</label>
                                     <input type="text" name="ubicacion" class="form-control">
                                 </div>
                             </div>
@@ -152,16 +151,22 @@
                         </div>
 
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="mb-3">
                                     <label>Precio Compra</label>
                                     <input type="number" name="precio_compra" class="form-control" step="0.01">
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="mb-3">
                                     <label>Precio Venta</label>
                                     <input type="number" name="precio_venta" class="form-control" step="0.01" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label>Stock Actual</label>
+                                    <input type="number" name="stock_actual" class="form-control" value="0" step="1">
                                 </div>
                             </div>
                         </div>
@@ -169,7 +174,7 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label>Stock Máximo</label>
+                                    <label>Stock Mínimo</label>
                                     <input type="number" name="stock_minimo" class="form-control" value="3">
                                 </div>
                             </div>
@@ -203,7 +208,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">InformaciÃ³n de Producto</h5>
+                    <h5 class="modal-title">Información de Producto</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
@@ -215,6 +220,9 @@
                     <p><strong>Descripción:</strong><br> <span id="ver_descripcion"></span></p>
                     <p><strong>Precio Compra:</strong><br> $<span id="ver_precio_compra"></span></p>
                     <p><strong>Precio Venta:</strong><br> $<span id="ver_precio_venta"></span></p>
+                    <p><strong>Stock Actual:</strong><br> <span id="ver_stock_actual"></span></p>
+                    <p><strong>Stock Mínimo:</strong><br> <span id="ver_stock_minimo"></span></p>
+                    <p><strong>Stock Máximo:</strong><br> <span id="ver_stock_maximo"></span></p>
                     <p><strong>Ubicación:</strong><br> <span id="ver_ubicacion"></span></p>
                     <p><strong>Estado:</strong><br>
                         <span id="ver_estado" class="badge"></span>
@@ -227,7 +235,8 @@
         </div>
     </div>
 
-    <!-- JS ACCIONES + BUSCADOR + CONTADOR + VER -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
     <script>
         // ACCIONES
         document.querySelectorAll('.accion-producto').forEach(select => {
@@ -241,53 +250,72 @@
                     window.location.href = `/productos/${id}/editar`;
                 }
                 if (accion === 'eliminar') {
-    console.log('ID a eliminar:', id);  // ← Agregar
-    if (confirm('¿Seguro que deseas eliminar este producto?')) {
-        console.log('Eliminando...');  // ← Agregar
-        fetch(`/productos/${id}/eliminar`, {
-            method: 'DELETE',
-            headers: { 
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(res => {
-            console.log('Response:', res.status);  // ← Agregar
-            if (res.ok) {
-                window.location.reload();
-            } else {
-                console.error('Error:', res.status);
-                alert('Error al eliminar');
-            }
-        })
-        .catch(err => {
-            console.error('Error:', err);
-            alert('Error en la solicitud');
-        });
-    }
-}
+                    if (confirm('¿Seguro que deseas eliminar este producto?')) {
+                        fetch(`/productos/${id}/eliminar`, {
+                            method: 'DELETE',
+                            headers: { 
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Content-Type': 'application/json'
+                            }
+                        })
+                        .then(res => {
+                            if (res.ok) {
+                                window.location.reload();
+                            } else {
+                                alert('Error al eliminar');
+                            }
+                        })
+                        .catch(err => {
+                            console.error('Error:', err);
+                            alert('Error en la solicitud');
+                        });
+                    }
+                }
+                this.value = '';
             });
         });
 
-        // FUNCIÃ“N PARA VER PRODUCTO
+        // FUNCIÓN PARA VER PRODUCTO (ARREGLADA CON SOLUCIÓN 1)
         function mostrarProducto(id) {
             fetch(`/productos/${id}/json`)
                 .then(res => res.json())
                 .then(data => {
                     document.getElementById('ver_nombre').textContent = data.nombre;
-                    document.getElementById('ver_marca').textContent = data.marca ?? 'â€”';
-                    document.getElementById('ver_modelo').textContent = data.modelo ?? 'â€”';
-                    document.getElementById('ver_categoria').textContent = data.categoria?.nombre ?? 'â€”';
-                    document.getElementById('ver_proveedor').textContent = data.proveedor?.nombre ?? 'â€”';
+                    document.getElementById('ver_marca').textContent = data.marca ?? '—';
+                    document.getElementById('ver_modelo').textContent = data.modelo ?? '—';
+                    document.getElementById('ver_categoria').textContent = data.categoria?.nombre ?? '—';
+                    document.getElementById('ver_proveedor').textContent = data.proveedor?.nombre ?? '—';
                     document.getElementById('ver_descripcion').textContent = data.descripcion ?? '—';
-                    document.getElementById('ver_precio_compra').textContent = data.precio_compra ?? 'â€”';
-                    document.getElementById('ver_precio_venta').textContent = data.precio_venta ?? 'â€”';
-                    document.getElementById('ver_ubicacion').textContent = data.ubicacion ?? 'â€”';
+                    document.getElementById('ver_precio_compra').textContent = data.precio_compra ?? '—';
+                    document.getElementById('ver_precio_venta').textContent = data.precio_venta ?? '—';
+                    document.getElementById('ver_stock_actual').textContent = data.stock_actual ?? '0';
+                    document.getElementById('ver_stock_minimo').textContent = data.stock_minimo ?? '3';
+                    document.getElementById('ver_stock_maximo').textContent = data.stock_maximo ?? '100';
+                    document.getElementById('ver_ubicacion').textContent = data.ubicacion ?? '—';
+                    
                     const estado = document.getElementById('ver_estado');
                     estado.textContent = data.activo ? 'Activo' : 'Inactivo';
                     estado.className = data.activo ? 'badge bg-success' : 'badge bg-danger';
-                    const modal = new bootstrap.Modal(document.getElementById('modalVerProducto'));
+                    
+                    const modalElement = document.getElementById('modalVerProducto');
+                    const modal = new bootstrap.Modal(modalElement);
                     modal.show();
+                    
+                    // SOLUCIÓN: Forzar limpieza cuando se cierre el modal
+                    modalElement.addEventListener('hidden.bs.modal', function () {
+                        // Eliminar manualmente el backdrop si existe
+                        const backdrops = document.querySelectorAll('.modal-backdrop');
+                        backdrops.forEach(backdrop => backdrop.remove());
+                        
+                        // Restaurar el scroll del body
+                        document.body.classList.remove('modal-open');
+                        document.body.style.overflow = '';
+                        document.body.style.paddingRight = '';
+                    }, { once: true }); // El { once: true } evita que se ejecute múltiples veces
+                })
+                .catch(error => {
+                    console.error('Error al cargar el producto:', error);
+                    alert('Error al cargar los datos del producto');
                 });
         }
 
@@ -297,47 +325,34 @@
         const contador = document.getElementById('contador');
         const total = filas.length;
 
-        buscador.addEventListener('keyup', function () {
-            const filtro = this.value.toLowerCase();
-            let visibles = 0;
-            filas.forEach(fila => {
-                const nombre = fila.querySelector('.nombre').textContent.toLowerCase();
-                if (nombre.includes(filtro)) {
-                    fila.style.display = '';
-                    visibles++;
-                } else {
-                    fila.style.display = 'none';
-                }
+        if (buscador) {
+            buscador.addEventListener('keyup', function () {
+                const filtro = this.value.toLowerCase();
+                let visibles = 0;
+                filas.forEach(fila => {
+                    const nombre = fila.querySelector('.nombre')?.textContent.toLowerCase() || '';
+                    if (nombre.includes(filtro)) {
+                        fila.style.display = '';
+                        visibles++;
+                    } else {
+                        fila.style.display = 'none';
+                    }
+                });
+                contador.innerHTML = `<strong>Mostrando ${visibles} de ${total} productos</strong>`;
             });
-            contador.innerHTML = `<strong>Mostrando ${visibles} de ${total} productos</strong>`;
-        });
-
+        }
+        
+        // También arreglamos el modal de crear producto por si acaso
+        const modalCrearElement = document.getElementById('modalProducto');
+        if (modalCrearElement) {
+            modalCrearElement.addEventListener('hidden.bs.modal', function () {
+                const backdrops = document.querySelectorAll('.modal-backdrop');
+                backdrops.forEach(backdrop => backdrop.remove());
+                document.body.classList.remove('modal-open');
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
+            });
+        }
     </script>
-
-    <!-- BOOTSTRAP JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
 </body>
 </html>
-
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ asset('css/menu.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/index.css') }}">
-    <title>{{ $config->nombre_empresa }} - Productos</title>
-    <script src="{{ asset('js/menu.js') }}"></script> 
-</head>
-<body>
-    <div class="sidebar">
-        <h3>{{ $config->nombre_empresa }}</h3>
-        <div id="menu-contenedor"></div>
-        <a href="{{ route('logout') }}" class="mt-4">Cerrar sesión</a>
-    </div>
-    <div class="content">
-        <p>Vista de productos</p>
-    </div>
-</body>
-</html> -->

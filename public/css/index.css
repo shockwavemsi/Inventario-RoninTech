@@ -48,3 +48,22 @@
 a.block-link {
     text-decoration: none;
 }
+
+/* Para mejorar la apariencia de la tabla en el modal */
+.modal-xl {
+    max-width: 1200px;
+}
+
+#tabla-detalles tfoot td {
+    background-color: #f8f9fa;
+    font-weight: 500;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f5f5f5;
+    cursor: pointer;
+}
+
+.bg-primary.text-white .btn-close {
+    filter: brightness(0) invert(1);
+}
