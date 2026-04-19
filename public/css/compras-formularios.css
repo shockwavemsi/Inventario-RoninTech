@@ -1,0 +1,460 @@
+/* ========================================
+   COMPRAS FORMULARIO - CYBERPUNK GLASSMORPHISM
+   (Réplica exacta del estilo de compras.css)
+   ======================================== */
+
+:root {
+    --bg-dark: #0d0d0e;
+    --bg-darker: #030303;
+    --card-bg: rgba(20, 20, 25, 0.65);
+    --neon-red: #e63946;
+    --neon-red-light: #ff4d4d;
+    --glass-border: rgba(230, 57, 70, 0.25);
+    --text-main: #f0f0f0;
+    --text-muted: #a0a0a0;
+}
+
+/* =========== FONDO GENERAL =========== */
+body {
+    background: linear-gradient(135deg, var(--bg-dark) 0%, #0b0b0b 50%, var(--bg-darker) 100%);
+    color: var(--text-main);
+    font-family: 'Segoe UI', 'Roboto', sans-serif;
+    overflow-x: hidden;
+    position: relative;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 400%;
+    height: 400%;
+    background: 
+        radial-gradient(circle at 20% 50%, rgba(230, 57, 70, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(230, 57, 70, 0.02) 0%, transparent 50%),
+        radial-gradient(circle at 40% 20%, rgba(230, 57, 70, 0.02) 0%, transparent 50%);
+    animation: gradientShift 20s ease infinite;
+    pointer-events: none;
+    z-index: -1;
+}
+
+@keyframes gradientShift {
+    0% { transform: translate(0, 0); }
+    25% { transform: translate(-50px, -50px); }
+    50% { transform: translate(-100px, 0); }
+    75% { transform: translate(-50px, 50px); }
+    100% { transform: translate(0, 0); }
+}
+
+/* =========== ANIMACIONES =========== */
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+}
+
+@keyframes pulse-subtle {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* =========== CONTENEDOR PRINCIPAL =========== */
+.content {
+    margin-left: 280px;
+    padding: 30px;
+    min-height: 100vh;
+}
+
+.content h1 {
+    font-size: 2.5rem;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: var(--neon-red);
+    margin-bottom: 30px;
+    animation: slideInDown 0.6s ease-out;
+    text-shadow: 0 0 10px rgba(230, 57, 70, 0.3);
+}
+
+/* =========== ALERTAS =========== */
+.alert {
+    background: rgba(40, 167, 69, 0.15) !important;
+    border: 1px solid rgba(40, 167, 69, 0.4) !important;
+    border-radius: 8px;
+    color: #90ee90 !important;
+    animation: slideInDown 0.5s ease-out;
+    backdrop-filter: blur(10px);
+}
+
+/* =========== HEADER CON BOTÓN =========== */
+.d-flex.justify-content-between {
+    animation: slideInUp 0.6s ease-out 0.2s both;
+    margin-bottom: 25px;
+    gap: 15px;
+}
+
+/* =========== TARJETAS CON GLASSMORPHISM =========== */
+.card {
+    background: var(--card-bg) !important;
+    backdrop-filter: blur(20px) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: slideInUp 0.6s ease-out forwards;
+    position: relative;
+    overflow: hidden;
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(230, 57, 70, 0.1), transparent);
+    animation: shimmer 3s infinite;
+    pointer-events: none;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    border: 1px solid rgba(230, 57, 70, 0.6) !important;
+    box-shadow: 0 8px 32px rgba(230, 57, 70, 0.2) !important;
+}
+
+.card:nth-of-type(1) { animation-delay: 0.1s; }
+.card:nth-of-type(2) { animation-delay: 0.2s; }
+.card:nth-of-type(3) { animation-delay: 0.3s; }
+.card:nth-of-type(4) { animation-delay: 0.4s; }
+.card:nth-of-type(5) { animation-delay: 0.5s; }
+
+.card-header {
+    background: rgba(230, 57, 70, 0.15) !important;
+    border-bottom: 1px solid rgba(230, 57, 70, 0.2) !important;
+    color: var(--neon-red) !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+    padding: 15px !important;
+    border-radius: 12px 12px 0 0 !important;
+}
+
+.card-body {
+    padding: 20px !important;
+    color: var(--text-main) !important;
+}
+
+/* =========== FORMULARIO INPUTS =========== */
+.form-control,
+.form-select {
+    background: rgba(20, 20, 25, 0.5) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(230, 57, 70, 0.2) !important;
+    border-radius: 8px !important;
+    color: var(--text-main) !important;
+    transition: all 0.3s ease;
+    font-family: 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.form-control::placeholder {
+    color: var(--text-muted);
+}
+
+.form-control:focus,
+.form-select:focus {
+    background: rgba(20, 20, 25, 0.7) !important;
+    border: 1px solid var(--neon-red) !important;
+    box-shadow: 0 0 15px rgba(230, 57, 70, 0.3) !important;
+    color: var(--text-main) !important;
+}
+
+.form-control:required:invalid {
+    border: 1px solid var(--neon-red) !important;
+    box-shadow: 0 0 10px rgba(230, 57, 70, 0.2) !important;
+}
+
+.form-control:required:valid {
+    border: 1px solid rgba(40, 167, 69, 0.4) !important;
+}
+
+/* =========== LABELS =========== */
+.form-label {
+    color: var(--text-main);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.form-label .text-danger {
+    color: var(--neon-red) !important;
+}
+
+/* =========== TEXTOS PEQUEÑOS =========== */
+small.text-muted {
+    color: var(--text-muted) !important;
+    font-size: 0.8rem;
+    display: block;
+    margin-top: 5px;
+}
+
+/* =========== BOTONES =========== */
+.btn {
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    overflow: hidden;
+    border: none !important;
+}
+
+.btn-primary {
+    background: var(--neon-red) !important;
+    box-shadow: 0 0 15px rgba(230, 57, 70, 0.4);
+}
+
+.btn-primary:hover {
+    box-shadow: 0 0 30px rgba(230, 57, 70, 0.8);
+    transform: scale(1.05);
+}
+
+.btn-success {
+    background: #28a745 !important;
+    box-shadow: 0 0 10px rgba(40, 167, 69, 0.3);
+}
+
+.btn-success:hover {
+    box-shadow: 0 0 20px rgba(40, 167, 69, 0.6);
+    transform: scale(1.05);
+}
+
+.btn-secondary {
+    background: rgba(160, 160, 160, 0.3) !important;
+    border: 1px solid rgba(160, 160, 160, 0.5) !important;
+    backdrop-filter: blur(10px);
+}
+
+.btn-secondary:hover {
+    background: rgba(160, 160, 160, 0.5) !important;
+    border: 1px solid rgba(160, 160, 160, 0.8) !important;
+}
+
+.btn-danger {
+    background: #dc3545 !important;
+    box-shadow: 0 0 10px rgba(220, 53, 69, 0.3);
+}
+
+.btn-danger:hover {
+    box-shadow: 0 0 20px rgba(220, 53, 69, 0.6);
+    transform: scale(1.05);
+}
+
+/* =========== TABLA CON GLASSMORPHISM =========== */
+.table-responsive {
+    animation: slideInUp 0.6s ease-out 0.3s both;
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.table {
+    margin-bottom: 0;
+    color: var(--text-main) !important;
+}
+
+.table thead {
+    background: rgba(15, 15, 20, 0.9);
+    border-bottom: 2px solid var(--neon-red);
+}
+
+.table thead th {
+    color: var(--neon-red);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+    padding: 15px 12px;
+    border: none;
+    font-size: 0.9rem;
+}
+
+.table tbody tr {
+    border-color: rgba(230, 57, 70, 0.1);
+    transition: all 0.3s ease;
+    animation: slideInUp 0.4s ease-out forwards;
+}
+
+.table tbody tr:hover {
+    background: rgba(230, 57, 70, 0.08) !important;
+    box-shadow: inset 0 0 10px rgba(230, 57, 70, 0.1);
+    transform: scale(1.01);
+}
+
+.table tbody tr:nth-child(1) { animation-delay: 0.1s; }
+.table tbody tr:nth-child(2) { animation-delay: 0.15s; }
+.table tbody tr:nth-child(3) { animation-delay: 0.2s; }
+.table tbody tr:nth-child(4) { animation-delay: 0.25s; }
+.table tbody tr:nth-child(5) { animation-delay: 0.3s; }
+.table tbody tr:nth-child(6) { animation-delay: 0.35s; }
+.table tbody tr:nth-child(7) { animation-delay: 0.4s; }
+.table tbody tr:nth-child(8) { animation-delay: 0.45s; }
+
+.table tbody td {
+    padding: 12px;
+    border: none;
+    vertical-align: middle;
+    color: var(--text-main);
+}
+
+.table tbody td strong {
+    color: var(--neon-red);
+}
+
+.table tfoot td {
+    border-color: rgba(230, 57, 70, 0.2);
+    font-weight: 600;
+    padding: 12px;
+    color: var(--text-main);
+}
+
+.table tfoot tr {
+    background: rgba(230, 57, 70, 0.05);
+}
+
+/* =========== TEXTAREA =========== */
+textarea.form-control {
+    background: rgba(20, 20, 25, 0.5) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(230, 57, 70, 0.2) !important;
+    resize: vertical;
+}
+
+textarea.form-control:focus {
+    background: rgba(20, 20, 25, 0.7) !important;
+    border: 1px solid var(--neon-red) !important;
+    box-shadow: 0 0 15px rgba(230, 57, 70, 0.3) !important;
+}
+
+/* =========== TABLE BORDERLESS =========== */
+.table-borderless {
+    color: var(--text-main);
+}
+
+.table-borderless td {
+    border: none;
+    padding: 10px;
+    color: var(--text-main);
+}
+
+.table-borderless .form-control,
+.table-borderless .form-select {
+    background: rgba(20, 20, 25, 0.5) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(230, 57, 70, 0.2) !important;
+    color: var(--text-main) !important;
+}
+
+.table-borderless .form-control:focus,
+.table-borderless .form-select:focus {
+    background: rgba(20, 20, 25, 0.7) !important;
+    border: 1px solid var(--neon-red) !important;
+    box-shadow: 0 0 15px rgba(230, 57, 70, 0.3) !important;
+}
+
+/* =========== ELEMENTOS READONLY =========== */
+.form-control[readonly] {
+    background: rgba(20, 20, 25, 0.3) !important;
+    color: var(--text-muted) !important;
+    border: 1px solid rgba(230, 57, 70, 0.1) !important;
+}
+
+/* =========== SCROLLBAR PERSONALIZADO =========== */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(20, 20, 25, 0.5);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--neon-red);
+    border-radius: 4px;
+    box-shadow: 0 0 10px rgba(230, 57, 70, 0.4);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--neon-red-light);
+    box-shadow: 0 0 15px rgba(230, 57, 70, 0.6);
+}
+
+/* =========== RESPONSIVE =========== */
+@media (max-width: 1024px) {
+    .content {
+        margin-left: 0;
+        padding: 15px;
+    }
+
+    .content h1 {
+        font-size: 1.8rem;
+    }
+
+    .table thead th {
+        font-size: 0.8rem;
+        padding: 10px 8px;
+    }
+}
+
+@media (max-width: 768px) {
+    .card {
+        margin-bottom: 15px !important;
+    }
+
+    .table-responsive {
+        font-size: 0.85rem;
+    }
+
+    .btn {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+}

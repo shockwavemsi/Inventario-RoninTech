@@ -8,7 +8,7 @@
     --primary-darker: #660000;
 
     /* Backgrounds */
-    --bg-primary: #0a0a0a;
+    --bg-primary: #0b0b0b;
     --bg-secondary: #121212;
     --bg-tertiary: #1a1a1a;
     --bg-surface: rgba(18, 18, 18, 0.8);
@@ -49,7 +49,7 @@ body {
     font-weight: 500;
     line-height: 1.5;
     letter-spacing: 0.25px;
-    background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-tertiary) 100%);
+    background: linear-gradient(135deg, var(--bg-dark) 0%, #0b0b0b 50%, var(--bg-darker) 100%);
     color: var(--text-primary);
     min-height: 100vh;
 }
@@ -62,7 +62,7 @@ body {
     position: fixed;
     left: 0;
     top: 0;
-    background: var(--bg-surface);
+    background: linear-gradient(135deg, var(--bg-dark) 0%, #0b0b0b 50%, var(--bg-darker) 100%);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border-right: 1px solid rgba(204, 0, 0, 0.25);

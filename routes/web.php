@@ -82,29 +82,33 @@ Route::get('/productos/{id}/json', function($id) {
 
 // Compras
 Route::middleware(['auth', 'role:admin'])->group(function () {
+
+    // ✅ RUTAS SIN PARÁMETROS (primero)
     Route::get('/compras', [ComprasController::class, 'index'])->name('compras.index');
-    Route::post('/compras/store', [ComprasController::class, 'store'])->name('compras.store');
-    Route::delete('/compras/{id}/eliminar', [ComprasController::class, 'destroy'])->name('compras.destroy');
     Route::get('/compras/create', [ComprasController::class, 'create'])->name('compras.create');
+    Route::post('/compras/store', [ComprasController::class, 'store'])->name('compras.store');
+    Route::get('/compras/ultimo-numero', function() {
+        return response()->json([
+            'numero_factura' => \App\Models\Compra::generarNumeroFactura()
+        ]);
+    });
+
+    // ✅ RUTAS CON PARÁMETROS ESPECÍFICOS (después)
+    Route::get('/compras/{id}/json', function($id) {
+        return \App\Models\Compra::with('proveedor', 'usuario', 'detalles.producto')->findOrFail($id);
+    });
+    Route::delete('/compras/{id}/eliminar', [ComprasController::class, 'destroy'])->name('compras.destroy');
     Route::post('/compras/{id}/estado', [ComprasController::class, 'cambiarEstado'])->name('compras.cambiarEstado');
+
 });
 
-Route::get('/compras/{id}/json', function($id) {
-    return \App\Models\Compra::with('proveedor', 'usuario', 'detalles.producto')->findOrFail($id);
-});
-// Obtener el último número de factura (para preview)
-Route::get('/compras/ultimo-numero', function() {
-    return response()->json([
-        'numero_factura' => \App\Models\Compra::generarNumeroFactura()
-    ]);
-})->middleware(['auth', 'role:admin']);
-
-// Obtener productos por proveedor
+// ✅ RUTAS FUERA DEL MIDDLEWARE (rutas públicas o especiales)
 Route::get('/api/productos-por-proveedor/{proveedorId}', function($proveedorId) {
     return \App\Models\Producto::where('proveedor_id', $proveedorId)
                                 ->where('activo', true)
                                 ->get(['id', 'nombre', 'marca', 'modelo', 'precio_compra']);
 })->middleware(['auth', 'role:admin']);
+
 
 
 

@@ -9,10 +9,6 @@
             "url": "/compras"
         },
         {
-            "nombre": "Recibidos",
-            "url": "/recibidos"
-        },
-        {
             "nombre": "Devoluciones",
             "url": "/devoluciones"
         },

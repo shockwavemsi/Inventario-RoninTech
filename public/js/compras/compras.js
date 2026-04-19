@@ -1,3 +1,4 @@
+// public/js/compras/compras.js
 // Variables globales
 let productosTemp = [];
 let productoIndex = 0;
@@ -7,11 +8,11 @@ function mostrarAlerta(tipo, mensaje) {
     const alertDiv = document.createElement('div');
     alertDiv.className = `alert alert-${tipo} alert-dismissible fade show`;
     alertDiv.innerHTML = `${mensaje}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
-    
+
     const content = document.querySelector('.content');
     const titulo = content.querySelector('h1');
     content.insertBefore(alertDiv, titulo.nextSibling);
-    
+
     setTimeout(() => {
         if (alertDiv) alertDiv.remove();
     }, 3000);
@@ -30,10 +31,27 @@ function cargarSiguienteNumeroFactura() {
         .catch(error => console.error('Error:', error));
 }
 
-// Inicializar cuando el DOM está listo
+// ✅ Inicializar cuando el DOM está listo
 document.addEventListener('DOMContentLoaded', function() {
-    // Inicializar módulos
-    if (typeof initBuscador === 'function') initBuscador();
-    if (typeof initAccionesCompra === 'function') initAccionesCompra();
-    if (typeof initModalCreacion === 'function') initModalCreacion();
+    console.log('⚡ compras.js inicializado');
+
+    // Inicializar módulos en orden correcto
+    if (typeof cargarSiguienteNumeroFactura === 'function') {
+        cargarSiguienteNumeroFactura();
+    }
+
+    if (typeof initBuscador === 'function') {
+        console.log('✅ Inicializando buscador...');
+        initBuscador();
+    }
+
+    if (typeof initAccionesCompra === 'function') {
+        console.log('✅ Inicializando acciones compra...');
+        initAccionesCompra();
+    }
+
+    if (typeof initEliminarCompra === 'function') {
+        console.log('✅ Inicializando eliminar compra...');
+        initEliminarCompra();
+    }
 });
