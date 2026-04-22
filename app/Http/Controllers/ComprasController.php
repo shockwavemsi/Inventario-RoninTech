@@ -35,12 +35,12 @@ public function index()
         return view('admin.compras.create', compact('config', 'proveedores', 'productos'));
     }
 
-    public function store(Request $request)
+public function store(Request $request)
 {
     try {
         \Log::info('=== INICIO GUARDAR COMPRA ===');
         \Log::info('Datos recibidos:', $request->all());
-        
+
         $request->validate([
             'proveedor_id' => 'required|exists:proveedores,id',
             'fecha_pedido' => 'required|date',
@@ -51,24 +51,24 @@ public function index()
             'observaciones' => 'nullable|string',
             'productos_json' => 'required|string',
         ]);
-        
+
         \Log::info('Validación pasada');
-        
+
         // Crear la compra
         $datos = $request->all();
         $datos['usuario_id'] = auth()->id();
-        
+
         \Log::info('Datos a guardar:', $datos);
-        
+
         $compra = Compra::create($datos);
-        
+
         \Log::info('Compra creada ID: ' . $compra->id);
-        
+
         // Guardar los productos
         $productos = json_decode($request->productos_json, true);
-        
+
         \Log::info('Productos a guardar:', $productos);
-        
+
         foreach ($productos as $producto) {
             CompraDetalle::create([
                 'compra_id' => $compra->id,
@@ -78,21 +78,57 @@ public function index()
                 'descuento' => $producto['descuento'] ?? 0,
                 'subtotal' => $producto['subtotal']
             ]);
+
+            // ✅ NUEVO: Registrar movimiento de stock
+            $this->registrarMovimientoStock(
+                $producto['producto_id'],
+                'entrada_compra',
+                $producto['cantidad'],
+                'compra',
+                $compra->id
+            );
         }
-        
+
         \Log::info('Compra guardada exitosamente');
         \Log::info('=== FIN GUARDAR COMPRA ===');
-        
+
         return redirect()->route('compras.index')
                         ->with('success', "¡Compra creada correctamente! Número: {$compra->numero_factura}");
-                        
+
     } catch (\Exception $e) {
         \Log::error('ERROR AL GUARDAR COMPRA: ' . $e->getMessage());
         \Log::error($e->getTraceAsString());
-        
+
         return back()->with('error', 'Error: ' . $e->getMessage())->withInput();
     }
 }
+
+// ✅ NUEVO MÉTODO: Registrar movimiento de stock
+private function registrarMovimientoStock($productoId, $tipo, $cantidad, $referenciaTipo, $referenciaId)
+{
+    // Calcular stock actual
+    $stockActual = \DB::table('movimientos_stock')
+        ->where('producto_id', $productoId)
+        ->sum(\DB::raw("CASE WHEN tipo IN ('entrada_compra', 'devolucion_venta', 'inventario_inicial') THEN cantidad ELSE -cantidad END"));
+
+    $stockNuevo = $stockActual + $cantidad;
+
+    \DB::table('movimientos_stock')->insert([
+        'producto_id' => $productoId,
+        'tipo' => $tipo,
+        'cantidad' => $cantidad,
+        'stock_anterior' => $stockActual,
+        'stock_nuevo' => $stockNuevo,
+        'referencia_tipo' => $referenciaTipo,
+        'referencia_id' => $referenciaId,
+        'usuario_id' => auth()->id(),
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    \Log::info("Movimiento stock registrado: Producto {$productoId}, Tipo {$tipo}, Cantidad {$cantidad}");
+}
+
     public function destroy($id)
     {
         try {

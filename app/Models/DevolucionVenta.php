@@ -1,5 +1,4 @@
 <?php
-// app/Models/DevolucionVenta.php
 
 namespace App\Models;
 
@@ -7,16 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class DevolucionVenta extends Model
 {
-    protected $table = 'devoluciones_ventas';
+    protected $table = 'devolucion_ventas';
+    protected $fillable = ['venta_id', 'fecha', 'motivo', 'total_devuelto', 'usuario_id', 'estado'];
 
-    protected $fillable = [
-        'venta_id',
-        'fecha',
-        'motivo',
-        'total_devuelto',
-        'usuario_id'
-    ];
-
+    // ✅ AGREGAR ESTO:
     protected $casts = [
         'fecha' => 'datetime',
     ];
@@ -28,11 +21,11 @@ class DevolucionVenta extends Model
 
     public function usuario()
     {
-        return $this->belongsTo(User::class, 'usuario_id');
+        return $this->belongsTo(User::class);
     }
 
     public function detalles()
     {
-        return $this->hasMany(DevolucionDetalle::class, 'devolucion_venta_id');
+        return $this->hasMany(DevolucionDetalle::class);
     }
 }

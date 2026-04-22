@@ -6,7 +6,7 @@
     
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{ asset('css/menu.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/index.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/stock.css') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="{{ asset('js/menu.js') }}"></script>
 </head>
@@ -23,7 +23,7 @@
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
 
-        <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#modalProducto">
+        <button class="btn btn-danger mb-3" data-bs-toggle="modal" data-bs-target="#modalProducto">
             Crear nuevo producto
         </button>
 
@@ -32,50 +32,45 @@
         </div>
 
         <table class="table table-bordered bg-white">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Fecha</th>
-                    <th>Nombre</th>
-                    <th>Marca</th>
-                    <th>Modelo</th>
-                    <th>Categoría</th>
-                    <th>Proveedor</th>
-                    <th>Precio Compra</th>
-                    <th>Precio Venta</th>
-                    <th>Stock</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="tabla-productos">
-                @foreach($productos as $prod)
-                    <tr>
-                        <td>{{ $prod->id }}</td>
-                        <td>{{ $prod->created_at->format('d/m/Y') }}</td>
-                        <td class="nombre">{{ $prod->nombre }}</td>
-                        <td>{{ $prod->marca ?? '—' }}</td>
-                        <td>{{ $prod->modelo ?? '—' }}</td>
-                        <td>{{ $prod->categoria->nombre ?? '—' }}</td>
-                        <td>{{ $prod->proveedor->nombre ?? '—' }}</td>
-                        <td>${{ $prod->precio_compra ?? '—' }}</td>
-                        <td>${{ $prod->precio_venta ?? '—' }}</td>
-                        <td>
-                            {{ $prod->stock_actual }} / {{ $prod->stock_maximo }}
-                        </td>
-                        <td>{{ $prod->activo ? 'Activo' : 'Inactivo' }}</td>
-                        <td>
-                            <select class="form-select accion-producto" data-id="{{ $prod->id }}">
-                                <option value="">Acciones</option>
-                                <option value="ver">Ver</option>
-                                <option value="editar">Editar</option>
-                                <option value="eliminar">Eliminar</option>
-                            </select>
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
+    <thead>
+        <tr>
+            
+            <th>Fecha de Creación</th>
+            <th>Nombre</th>
+            <th>Marca</th>
+            <th>Modelo</th>
+            <th>Categoría</th>
+            <th>Proveedor</th>
+            <th>Precio Compra</th>
+            <th>Precio Venta</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody id="tabla-productos">
+        @foreach($productos as $prod)
+            <tr>
+                <td>{{ $prod->created_at->format('d/m/Y') }}</td>
+                <td class="nombre">{{ $prod->nombre }}</td>
+                <td>{{ $prod->marca ?? '—' }}</td>
+                <td>{{ $prod->modelo ?? '—' }}</td>
+                <td>{{ $prod->categoria->nombre ?? '—' }}</td>
+                <td>{{ $prod->proveedor->nombre ?? '—' }}</td>
+                <td>${{ $prod->precio_compra ?? '—' }}</td>
+                <td>${{ $prod->precio_venta ?? '—' }}</td>
+                <td>{{ $prod->activo ? 'Activo' : 'Inactivo' }}</td>
+                <td>
+                    <select class="form-select accion-producto" data-id="{{ $prod->id }}">
+                        <option value="">Acciones</option>
+                        <option value="ver">Ver</option>
+                        <option value="editar">Editar</option>
+                        <option value="eliminar">Eliminar</option>
+                    </select>
+                </td>
+            </tr>
+        @endforeach
+    </tbody>
+</table>
         <p id="contador"><strong>Mostrando {{ count($productos) }} productos</strong></p>
     </div>
 

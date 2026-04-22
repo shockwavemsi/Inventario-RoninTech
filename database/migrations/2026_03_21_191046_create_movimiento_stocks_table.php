@@ -12,7 +12,7 @@ return new class extends Migration
         Schema::create('movimientos_stock', function (Blueprint $table) {
             $table->id();
             $table->foreignId('producto_id')->constrained('productos')->onDelete('cascade');  // ← AQUÍ
-            $table->enum('tipo', ['entrada_compra', 'salida_venta', 'devolucion_compra', 'devolucion_venta', 'ajuste', 'inventario_inicial']);
+            $table->enum('tipo', ['entrada_compra', 'salida_venta', 'devolucion_venta', 'ajuste', 'inventario_inicial']);
             $table->integer('cantidad');
             $table->integer('stock_anterior')->nullable();
             $table->integer('stock_nuevo')->nullable();
