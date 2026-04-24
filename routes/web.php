@@ -111,7 +111,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     });
     Route::delete('/compras/{id}/eliminar', [ComprasController::class, 'destroy'])->name('compras.destroy');
     Route::post('/compras/{id}/estado', [ComprasController::class, 'cambiarEstado'])->name('compras.cambiarEstado');
-
+    Route::patch('/compras/{id}', [ComprasController::class, 'update'])->name('compras.update');
 });
 
 // ✅ RUTAS FUERA DEL MIDDLEWARE (rutas públicas o especiales)

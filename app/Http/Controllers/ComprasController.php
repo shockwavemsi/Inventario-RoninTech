@@ -185,4 +185,30 @@ public function cambiarEstado(Request $request, $id)
         ], 500);
     }
 }
+
+public function update(Request $request, $id)
+{
+    try {
+        $compra = Compra::findOrFail($id);
+
+        $request->validate([
+            'fecha_pedido' => 'required|date',
+            'fecha_entrega_esperada' => 'nullable|date',
+            'observaciones' => 'nullable|string',
+        ]);
+
+        $compra->update($request->only('fecha_pedido', 'fecha_entrega_esperada', 'observaciones'));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Compra actualizada correctamente'
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => $e->getMessage()
+        ], 500);
+    }
+}
 }

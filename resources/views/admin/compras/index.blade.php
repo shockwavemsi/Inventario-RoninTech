@@ -9,12 +9,10 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="{{ asset('css/menu.css') }}">
     <link rel="stylesheet" href="{{ asset('css/compras.css') }}">
-
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="{{ asset('js/menu.js') }}"></script>
 </head>
 <body>
-
     <div class="sidebar">
         <h3>{{ $config->nombre_empresa }}</h3>
         <div id="menu-contenedor"></div>
@@ -24,7 +22,6 @@
     </div>
 
     <div class="content">
-
         <h1>
             <i class="bi bi-cart3"></i> Órdenes de Compra
         </h1>
@@ -110,7 +107,7 @@
                         <th><i class="bi bi-cash-coin"></i> Total</th>
                         <th><i class="bi bi-info-circle"></i> Estado</th>
                         <th><i class="bi bi-person"></i> Usuario</th>
-                        <th style="width: 150px"><i class="bi bi-gear"></i> Acciones</th>
+                        <th style="width: 200px"><i class="bi bi-gear"></i> Acciones</th>
                     </tr>
                 </thead>
                 <tbody id="tabla-compras">
@@ -143,6 +140,11 @@
                                         <i class="bi bi-eye"></i>
                                     </button>
 
+                                    <button type="button" class="btn btn-warning editar-compra" 
+                                                data-id="{{ $c->id }}" title="Editar compra">
+                                            <i class="bi bi-pencil"></i>
+                                    </button>
+
                                     @if($c->estado === 'pendiente')
                                         <button type="button" class="btn btn-success cambiar-estado" 
                                                 data-id="{{ $c->id }}" data-estado="recibido" 
@@ -166,13 +168,12 @@
         <p id="contador">
             <i class="bi bi-info-circle"></i> <strong>Mostrando {{ count($compras) }} compras</strong>
         </p>
-
     </div>
 
+    <!-- MODAL VER COMPRA -->
     <div class="modal fade" id="modalVerCompra" tabindex="-1">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
-
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title">
                         <i class="bi bi-receipt"></i> Detalles de la Orden de Compra
@@ -181,7 +182,6 @@
                 </div>
 
                 <div class="modal-body">
-
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <div class="card">
@@ -235,6 +235,7 @@
                     <h6 class="mb-3">
                         <i class="bi bi-box-seam"></i> Productos Comprados
                     </h6>
+
                     <div class="table-responsive">
                         <table class="table table-bordered table-hover">
                             <thead class="table-light">
@@ -280,7 +281,6 @@
                         <strong><i class="bi bi-chat-left-text"></i> Observaciones:</strong><br>
                         <span id="ver_observaciones"></span>
                     </div>
-
                 </div>
 
                 <div class="modal-footer">
@@ -291,7 +291,92 @@
                         <i class="bi bi-printer"></i> Imprimir
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
 
+    <!-- MODAL EDITAR COMPRA -->
+    <div class="modal fade" id="modalEditarCompra" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title">
+                        <i class="bi bi-pencil"></i> Editar Orden de Compra
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <form id="formEditarCompra">
+                    <div class="modal-body">
+                        <input type="hidden" id="editar_id">
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label"><strong>Código</strong></label>
+                                <input type="text" id="editar_codigo" class="form-control" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><strong>Proveedor</strong></label>
+                                <input type="text" id="editar_proveedor" class="form-control" readonly>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label"><strong>Fecha Pedido</strong></label>
+                                <input type="date" id="editar_fecha_pedido" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><strong>Fecha Entrega Esperada</strong></label>
+                                <input type="date" id="editar_fecha_entrega" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+    <div class="col-md-6">
+        <label class="form-label"><strong>Estado</strong></label>
+        <select id="editar_estado" class="form-select" required>
+            <option value="pendiente">Pendiente</option>
+            <option value="recibido">Recibido</option>
+        </select>
+    </div>
+</div>
+
+                        <label class="form-label"><strong>Observaciones</strong></label>
+                        <textarea id="editar_observaciones" class="form-control mb-4" rows="3"></textarea>
+
+                        <h6 class="mb-3"><i class="bi bi-box-seam"></i> Productos</h6>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th class="text-center">Cantidad</th>
+                                        <th class="text-end">Precio Unit.</th>
+                                        <th class="text-end">Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="editar_detalles">
+                                </tbody>
+                                <tfoot class="table-light">
+                                    <tr>
+                                        <td colspan="3" class="text-end fw-bold">TOTAL:</td>
+                                        <td class="text-end fw-bold" id="editar_total">$0.00</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-warning">
+                            <i class="bi bi-save"></i> Guardar Cambios
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -319,7 +404,6 @@
                 const estado = fila.dataset.estado;
                 const codigo = fila.dataset.codigo.toLowerCase();
                 const proveedor = fila.dataset.proveedor.toLowerCase();
-
                 const cumpleFiltroEstado = filtroActual === 'todos' || estado === filtroActual;
                 const cumpleBuscador = codigo.includes(buscador) || proveedor.includes(buscador);
 
@@ -343,6 +427,89 @@
         });
 
         document.getElementById('buscador').addEventListener('input', aplicarFiltros);
+
+        // ✅ EDITAR COMPRA
+        document.querySelectorAll('.editar-compra').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = this.dataset.id;
+                
+                fetch(`/compras/${id}/json`)
+                    .then(res => res.json())
+                    .then(data => {
+                        document.getElementById('editar_id').value = data.id;
+                        document.getElementById('editar_codigo').value = data.numero_factura;
+                        document.getElementById('editar_proveedor').value = data.proveedor?.nombre || '—';
+                        document.getElementById('editar_fecha_pedido').value = data.fecha_pedido.split(' ')[0];
+                        document.getElementById('editar_fecha_entrega').value = data.fecha_entrega_esperada ? data.fecha_entrega_esperada.split(' ')[0] : '';
+                        document.getElementById('editar_observaciones').value = data.observaciones || '';
+                        document.getElementById('editar_estado').value = data.estado;
+
+                        // Llenar detalles
+                        const tbody = document.getElementById('editar_detalles');
+                        tbody.innerHTML = '';
+                        let total = 0;
+
+                        data.detalles.forEach(det => {
+                            const subtotal = det.cantidad * det.precio_unitario;
+                            total += subtotal;
+
+                            const row = `
+                                <tr>
+                                    <td>${det.producto?.nombre || '—'}</td>
+                                    <td class="text-center">${det.cantidad}</td>
+                                    <td class="text-end">$${parseFloat(det.precio_unitario).toFixed(2)}</td>
+                                    <td class="text-end">$${subtotal.toFixed(2)}</td>
+                                </tr>
+                            `;
+                            tbody.innerHTML += row;
+                        });
+
+                        document.getElementById('editar_total').textContent = '$' + total.toFixed(2);
+
+                        const modal = new bootstrap.Modal(document.getElementById('modalEditarCompra'));
+                        modal.show();
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        alert('Error al cargar compra');
+                    });
+            });
+        });
+
+        // ✅ GUARDAR CAMBIOS
+        document.getElementById('formEditarCompra').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('editar_id').value;
+            const datos = {
+                fecha_pedido: document.getElementById('editar_fecha_pedido').value,
+                fecha_entrega_esperada: document.getElementById('editar_fecha_entrega').value,
+                estado: document.getElementById('editar_estado').value, 
+                observaciones: document.getElementById('editar_observaciones').value,
+            };
+
+            fetch(`/compras/${id}`, {
+                method: 'PATCH',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(datos)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert('✅ Compra actualizada');
+                    window.location.reload();
+                } else {
+                    alert('❌ ' + data.message);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Error al guardar');
+            });
+        });
     </script>
 
 </body>
