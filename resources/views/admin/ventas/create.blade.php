@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="{{ asset('css/menu.css') }}">
     <link rel="stylesheet" href="{{ asset('css/index.css') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="stylesheet" href="{{ asset('css/compras.css') }}">
     <script src="{{ asset('js/menu.js') }}"></script>
 </head>
 <body>

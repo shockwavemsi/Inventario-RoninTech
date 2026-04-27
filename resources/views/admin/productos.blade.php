@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="{{ asset('css/stock.css') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="{{ asset('js/menu.js') }}"></script>
+    <link rel="stylesheet" href="{{ asset('css/compras.css') }}">
 </head>
 <body>
     <div class="sidebar">
