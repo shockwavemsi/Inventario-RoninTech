@@ -13,6 +13,7 @@ use App\Http\Controllers\ComprasController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\VentasController;
 use App\Http\Controllers\DevolucionesController;
+use App\Models\Configuracion;
 
 
 // Página inicial (puedes borrarla si no la usas)
@@ -36,7 +37,8 @@ Route::middleware(['auth', 'role:admin'])->get('/admin', [AdminController::class
 
 // Panel usuario normal (si lo usas)
 Route::middleware(['auth', 'role:user'])->get('/usuario', function () {
-    return "Panel de usuario normal";
+    $config = Configuracion::first(); // o como tengas definido tu modelo
+    return view('admin.index', compact('config'));
 });
 
 // CONFIGURACIÓN

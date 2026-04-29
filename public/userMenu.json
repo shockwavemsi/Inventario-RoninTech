@@ -1,0 +1,24 @@
+{
+    "menu": [
+        {
+            "nombre": "Dashboard",
+            "url": "/dashboard"
+        },
+        {
+            "nombre": "Compras",
+            "url": "/compras"
+        },
+        {
+            "nombre": "Devoluciones",
+            "url": "/devoluciones"
+        },
+        {
+            "nombre": "Stocks",
+            "url": "/stocks"
+        },
+        {
+            "nombre": "Ventas",
+            "url": "/ventas"
+        }
+    ]
+}
