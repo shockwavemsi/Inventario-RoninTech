@@ -2,28 +2,50 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $config->nombre_empresa }} - Nueva Devolución</title>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="{{ asset('css/menu.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/index.css') }}">
     <link rel="stylesheet" href="{{ asset('css/compras.css') }}">
+
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="{{ asset('js/menu.js') }}"></script>
+
 </head>
+
 <body>
+
+    <!-- BOTÓN HAMBURGUESA -->
+    <button id="menu-toggle" class="menu-toggle" aria-label="Abrir menú">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
+    <!-- OVERLAY -->
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <!-- SIDEBAR -->
     <div class="sidebar">
         <h3>{{ $config->nombre_empresa }}</h3>
         <div id="menu-contenedor"></div>
-        <a href="{{ route('logout') }}" class="mt-4">Cerrar sesión</a>
+        <a href="{{ route('logout') }}" class="mt-4">
+            <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+        </a>
     </div>
 
+    <!-- CONTENIDO PRINCIPAL -->
     <div class="content">
-        <h1 class="mb-4">Nueva Devolución de Venta</h1>
+
+        <h1>
+            <i class="bi bi-plus-circle"></i> Nueva Devolución de Venta
+        </h1>
 
         @if($errors->any())
             <div class="alert alert-danger alert-dismissible fade show">
-                <strong>❌ Errores:</strong>
+                <strong><i class="bi bi-exclamation-circle-fill"></i> Errores:</strong>
                 @foreach($errors->all() as $error)
                     <div>{{ $error }}</div>
                 @endforeach
@@ -37,12 +59,12 @@
             <!-- SELECCIONAR VENTA -->
             <div class="card mb-4">
                 <div class="card-header bg-danger text-white">
-                    <h5 class="mb-0">Seleccionar Venta</h5>
+                    <h5 class="mb-0"><i class="bi bi-receipt"></i> Seleccionar Venta</h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-8">
-                            <label class="form-label">Venta <span class="text-danger">*</span></label>
+                            <label class="form-label"><strong>Venta <span class="text-danger">*</span></strong></label>
                             <select name="venta_id" id="venta_select" class="form-select bg-dark text-light border-secondary" required>
                                 <option value="">Selecciona una venta...</option>
                                 @foreach($ventas as $venta)
@@ -53,7 +75,7 @@
                             </select>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Cliente</label>
+                            <label class="form-label"><strong>Cliente</strong></label>
                             <input type="text" id="cliente_venta" class="form-control bg-dark text-light border-secondary" readonly>
                         </div>
                     </div>
@@ -63,48 +85,50 @@
             <!-- PRODUCTOS DE LA VENTA -->
             <div class="card mb-4">
                 <div class="card-header bg-danger text-white">
-                    <h5 class="mb-0">Productos Vendidos</h5>
+                    <h5 class="mb-0"><i class="bi bi-box-seam"></i> Productos Vendidos</h5>
                 </div>
                 <div class="card-body">
-                    <table class="table table-dark table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Devolver</th>
-                                <th>Producto</th>
-                                <th class="text-center">Cant. Original</th>
-                                <th class="text-center">Cant. Devolver</th>
-                                <th class="text-center">Precio Unit</th>
-                                <th class="text-center">Subtotal</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabla-productos-venta">
-                            <tr>
-                                <td colspan="6" class="text-muted text-center">Selecciona una venta para ver sus productos</td>
-                            </tr>
-                        </tbody>
-                        <tfoot>
-                            <tr class="table-success">
-                                <td colspan="5" class="text-end"><strong>TOTAL DEVOLUCIÓN:</strong></td>
-                                <td class="text-center"><strong id="total_devolucion">$0.00</strong></td>
-                            </tr>
-                        </tfoot>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="table table-dark table-bordered">
+                            <thead>
+                                <tr>
+                                    <th class="text-center"><i class="bi bi-checkbox"></i> Devolver</th>
+                                    <th><i class="bi bi-box"></i> Producto</th>
+                                    <th class="text-center">Cant. Original</th>
+                                    <th class="text-center">Cant. Devolver</th>
+                                    <th class="text-center">Precio Unit</th>
+                                    <th class="text-center">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-productos-venta">
+                                <tr>
+                                    <td colspan="6" class="text-muted text-center py-4">Selecciona una venta para ver sus productos</td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-success">
+                                    <td colspan="5" class="text-end"><strong>TOTAL DEVOLUCIÓN:</strong></td>
+                                    <td class="text-center"><strong id="total_devolucion">$0.00</strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
                 </div>
             </div>
 
             <!-- INFORMACIÓN ADICIONAL -->
             <div class="card mb-4">
                 <div class="card-header bg-danger text-white">
-                    <h5 class="mb-0">Detalles de Devolución</h5>
+                    <h5 class="mb-0"><i class="bi bi-file-text"></i> Detalles de Devolución</h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <label class="form-label">Motivo <span class="text-danger">*</span></label>
+                            <label class="form-label"><strong>Motivo <span class="text-danger">*</span></strong></label>
                             <textarea name="motivo" id="motivo" class="form-control bg-dark text-light border-secondary" rows="3" required placeholder="Describe el motivo...">{{ old('motivo') }}</textarea>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Estado <span class="text-danger">*</span></label>
+                            <label class="form-label"><strong>Estado <span class="text-danger">*</span></strong></label>
                             <select name="estado" class="form-select bg-dark text-light border-secondary" required>
                                 <option value="pendiente" selected>Pendiente</option>
                                 <option value="completada">Completada</option>
@@ -120,14 +144,44 @@
 
             <!-- BOTONES -->
             <div class="text-center">
-                <button type="submit" class="btn btn-success btn-lg">Guardar Devolución</button>
-                <a href="{{ route('devoluciones.index') }}" class="btn btn-secondary btn-lg">Cancelar</a>
+                <button type="submit" class="btn btn-success btn-lg">
+                    <i class="bi bi-check-circle"></i> Guardar Devolución
+                </button>
+                <a href="{{ route('devoluciones.index') }}" class="btn btn-secondary btn-lg">
+                    <i class="bi bi-x-circle"></i> Cancelar
+                </a>
             </div>
+
         </form>
+
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+
+        // BOTÓN HAMBURGUESA
+        const menuToggle = document.getElementById('menu-toggle');
+        const sidebar = document.querySelector('.sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+
+        menuToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('activo');
+            overlay.classList.toggle('activo');
+        });
+
+        overlay.addEventListener('click', function() {
+            sidebar.classList.remove('activo');
+            overlay.classList.remove('activo');
+        });
+
+        // Cerrar sidebar al hacer click en un link
+        document.querySelectorAll('.sidebar a').forEach(link => {
+            link.addEventListener('click', function() {
+                sidebar.classList.remove('activo');
+                overlay.classList.remove('activo');
+            });
+        });
+
         let productosSeleccionados = [];
 
         // Cuando selecciona una venta
@@ -141,7 +195,7 @@
 
             if (!ventaId) {
                 document.getElementById('tabla-productos-venta').innerHTML = 
-                    '<tr><td colspan="6" class="text-muted text-center">Selecciona una venta para ver sus productos</td></tr>';
+                    '<tr><td colspan="6" class="text-muted text-center py-4">Selecciona una venta para ver sus productos</td></tr>';
                 return;
             }
 
@@ -162,7 +216,7 @@
             tbody.innerHTML = '';
 
             if (detalles.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-muted text-center">No hay productos en esta venta</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="text-muted text-center py-4">No hay productos en esta venta</td></tr>';
                 calcularTotal();
                 return;
             }
@@ -176,7 +230,7 @@
                         <td>${detalle.producto.nombre}</td>
                         <td class="text-center">${detalle.cantidad}</td>
                         <td class="text-center">
-                            <input type="number" class="form-control form-control-sm cantidad-devolver" data-idx="${idx}" min="0" max="${detalle.cantidad}" value="0" style="width: 80px;">
+                            <input type="number" class="form-control form-control-sm cantidad-devolver" data-idx="${idx}" min="0" max="${detalle.cantidad}" value="0" style="width: 80px; margin: auto;">
                         </td>
                         <td class="text-center">$${parseFloat(detalle.precio_unitario).toFixed(2)}</td>
                         <td class="text-center subtotal-${idx}">$0.00</td>
@@ -190,13 +244,11 @@
                 checkbox.addEventListener('change', function() {
                     const idx = this.dataset.idx;
                     const cantidadInput = document.querySelector(`.cantidad-devolver[data-idx="${idx}"]`);
-
                     if (this.checked) {
                         cantidadInput.value = detalles[idx].cantidad;
                     } else {
                         cantidadInput.value = 0;
                     }
-
                     calcularTotal();
                 });
             });
@@ -222,7 +274,6 @@
                 if (cantidad > 0) {
                     const subtotal = cantidad * precio;
                     totalDevolucion += subtotal;
-
                     document.querySelector(`.subtotal-${idx}`).textContent = '$' + subtotal.toFixed(2);
 
                     productosSeleccionados.push({
@@ -248,6 +299,7 @@
                 alert('❌ Debes seleccionar al menos un producto para devolver');
             }
         });
+
     </script>
 
 </body>

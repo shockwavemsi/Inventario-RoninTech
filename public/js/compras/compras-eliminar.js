@@ -3,7 +3,7 @@ function initEliminarCompra() {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
             const id = this.dataset.id;
-            if (!confirm('¿Eliminar esta compra?')) return;
+            // if (!confirm('¿Eliminar esta compra?')) return;
 
             const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
             const fila = btn.closest('tr');
@@ -22,20 +22,11 @@ function initEliminarCompra() {
             })
             .then(data => {
                 console.log('Data:', data);
-
-                // ✅ Elimina la fila visualmente
                 if (fila) fila.remove();
-
-                // ✅ Actualiza el contador de filas
                 const restantes = document.querySelectorAll('#tabla-compras tr').length;
                 const contador = document.getElementById('contador');
                 if (contador) {
                     contador.innerHTML = `<i class="bi bi-info-circle"></i> <strong>Mostrando ${restantes} compras</strong>`;
-                }
-
-                // ✅ FALTABA: Actualizar estadísticas globales (valor total, pendientes, etc.)
-                if (typeof actualizarEstadisticas === 'function') {
-                    actualizarEstadisticas();
                 }
             })
             .catch(error => {
@@ -46,5 +37,4 @@ function initEliminarCompra() {
     });
 }
 
-// Inicializar al cargar
 document.addEventListener('DOMContentLoaded', initEliminarCompra);

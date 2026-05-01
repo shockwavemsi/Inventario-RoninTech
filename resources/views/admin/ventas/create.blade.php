@@ -2,29 +2,50 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $config->nombre_empresa }} - Crear Venta</title>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="{{ asset('css/menu.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/index.css') }}">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" href="{{ asset('css/compras.css') }}">
+
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="{{ asset('js/menu.js') }}"></script>
+
 </head>
+
 <body>
+
+    <!-- BOTÓN HAMBURGUESA -->
+    <button id="menu-toggle" class="menu-toggle" aria-label="Abrir menú">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
+    <!-- OVERLAY -->
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <!-- SIDEBAR -->
     <div class="sidebar">
         <h3>{{ $config->nombre_empresa }}</h3>
         <div id="menu-contenedor"></div>
-        <a href="{{ route('logout') }}" class="mt-4">Cerrar sesión</a>
+        <a href="{{ route('logout') }}" class="mt-4">
+            <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+        </a>
     </div>
 
+    <!-- CONTENIDO PRINCIPAL -->
     <div class="content">
-        <h1 class="mb-4">Crear Venta</h1>
 
-        <!-- ✅ MOSTRAR ERRORES SIN PERDER DATOS -->
+        <h1 class="mb-4">
+            <i class="bi bi-plus-circle"></i> Crear Venta
+        </h1>
+
         @if($errors->any())
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <strong>❌ Errores:</strong>
+                <strong><i class="bi bi-exclamation-circle-fill"></i> Errores:</strong>
                 @foreach($errors->all() as $error)
                     <div>{{ $error }}</div>
                 @endforeach
@@ -34,7 +55,7 @@
 
         @if(session('error'))
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <strong>❌ Error:</strong> {{ session('error') }}
+                <strong><i class="bi bi-exclamation-circle-fill"></i> Error:</strong> {{ session('error') }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         @endif
@@ -45,26 +66,27 @@
             <!-- DATOS PRINCIPALES -->
             <div class="card mb-4">
                 <div class="card-header bg-danger text-white">
-                    <h5 class="mb-0">Información de Venta</h5>
+                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> Información de Venta</h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-4">
-                            <label class="form-label">Número de Venta</label>
+                            <label class="form-label"><strong>Número de Venta</strong></label>
                             <input type="text" id="numero_factura_input" name="numero_factura" class="form-control bg-dark text-light border-secondary" readonly>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Cliente <span class="text-danger">*</span></label>
+                            <label class="form-label"><strong>Cliente <span class="text-danger">*</span></strong></label>
                             <input type="text" name="cliente" id="cliente" class="form-control bg-dark text-light border-secondary" value="{{ old('cliente') }}" required>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Documento Cliente</label>
+                            <label class="form-label"><strong>Documento Cliente</strong></label>
                             <input type="text" name="cliente_documento" class="form-control bg-dark text-light border-secondary" value="{{ old('cliente_documento') }}">
                         </div>
                     </div>
+
                     <div class="row mt-3">
                         <div class="col-md-6">
-                            <label class="form-label">Método de Pago <span class="text-danger">*</span></label>
+                            <label class="form-label"><strong>Método de Pago <span class="text-danger">*</span></strong></label>
                             <select name="metodo_pago" class="form-select bg-dark text-light border-secondary" required>
                                 <option value="">Selecciona...</option>
                                 <option value="efectivo" {{ old('metodo_pago') == 'efectivo' ? 'selected' : '' }}>Efectivo</option>
@@ -73,16 +95,17 @@
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Estado <span class="text-danger">*</span></label>
+                            <label class="form-label"><strong>Estado <span class="text-danger">*</span></strong></label>
                             <select name="estado" class="form-select bg-dark text-light border-secondary" required>
                                 <option value="pendiente" {{ old('estado') == 'pendiente' ? 'selected' : '' }}>Pendiente</option>
                                 <option value="completada" {{ old('estado') == 'completada' ? 'selected' : '' }}>Completada</option>
                             </select>
                         </div>
                     </div>
+
                     <div class="row mt-3">
                         <div class="col-md-12">
-                            <label class="form-label">Observaciones</label>
+                            <label class="form-label"><strong>Observaciones</strong></label>
                             <textarea name="observaciones" class="form-control bg-dark text-light border-secondary" rows="2">{{ old('observaciones') }}</textarea>
                         </div>
                     </div>
@@ -92,12 +115,12 @@
             <!-- AGREGAR PRODUCTOS -->
             <div class="card mb-4">
                 <div class="card-header bg-danger text-white">
-                    <h5 class="mb-0">Productos</h5>
+                    <h5 class="mb-0"><i class="bi bi-box-seam"></i> Productos</h5>
                 </div>
                 <div class="card-body">
                     <div class="row mb-3">
                         <div class="col-md-5">
-                            <label class="form-label">Producto</label>
+                            <label class="form-label"><strong>Producto</strong></label>
                             <select id="producto_select" class="form-select bg-dark text-light border-secondary">
                                 <option value="">Selecciona un producto...</option>
                                 @foreach($productos as $prod)
@@ -108,48 +131,50 @@
                             </select>
                         </div>
                         <div class="col-md-2">
-                            <label class="form-label">Cantidad</label>
+                            <label class="form-label"><strong>Cantidad</strong></label>
                             <input type="number" id="cantidad" class="form-control bg-dark text-light border-secondary" min="1" value="1">
                         </div>
                         <div class="col-md-3 d-flex align-items-end">
                             <button type="button" class="btn btn-primary w-100" id="agregar_producto">
-                                Agregar
+                                <i class="bi bi-plus-circle"></i> Agregar
                             </button>
                         </div>
                     </div>
 
                     <!-- TABLA DE PRODUCTOS -->
-                    <table class="table table-dark table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Producto</th>
-                                <th class="text-center" style="width: 80px;">Cant</th>
-                                <th class="text-center" style="width: 100px;">Precio Unit</th>
-                                <th class="text-center" style="width: 100px;">Subtotal</th>
-                                <th class="text-center" style="width: 50px;">Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabla-productos">
-                            <!-- Se agrega dinámicamente -->
-                        </tbody>
-                        <tfoot>
-                            <tr class="table-light">
-                                <td colspan="3" class="text-end"><strong>Subtotal:</strong></td>
-                                <td class="text-center"><strong id="subtotal_venta">$0.00</strong></td>
-                                <td></td>
-                            </tr>
-                            <tr class="table-light">
-                                <td colspan="3" class="text-end"><strong>Impuesto (21%):</strong></td>
-                                <td class="text-center"><strong id="impuesto_venta">$0.00</strong></td>
-                                <td></td>
-                            </tr>
-                            <tr class="table-success">
-                                <td colspan="3" class="text-end"><strong>TOTAL:</strong></td>
-                                <td class="text-center"><strong id="total_venta">$0.00</strong></td>
-                                <td></td>
-                            </tr>
-                        </tfoot>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="table table-dark table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th class="text-center" style="width: 80px;">Cant</th>
+                                    <th class="text-center" style="width: 100px;">Precio Unit</th>
+                                    <th class="text-center" style="width: 100px;">Subtotal</th>
+                                    <th class="text-center" style="width: 50px;">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-productos">
+                                <!-- Se agrega dinámicamente -->
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-light">
+                                    <td colspan="3" class="text-end"><strong>Subtotal:</strong></td>
+                                    <td class="text-center"><strong id="subtotal_venta">$0.00</strong></td>
+                                    <td></td>
+                                </tr>
+                                <tr class="table-light">
+                                    <td colspan="3" class="text-end"><strong>Impuesto (21%):</strong></td>
+                                    <td class="text-center"><strong id="impuesto_venta">$0.00</strong></td>
+                                    <td></td>
+                                </tr>
+                                <tr class="table-success">
+                                    <td colspan="3" class="text-end"><strong>TOTAL:</strong></td>
+                                    <td class="text-center"><strong id="total_venta">$0.00</strong></td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
 
                     <input type="hidden" name="productos_json" id="productos_json">
                     <input type="hidden" name="subtotal" id="subtotal">
@@ -160,14 +185,44 @@
 
             <!-- BOTONES -->
             <div class="text-center">
-                <button type="submit" class="btn btn-success btn-lg">Guardar Venta</button>
-                <a href="{{ route('ventas.index') }}" class="btn btn-secondary btn-lg">Cancelar</a>
+                <button type="submit" class="btn btn-success btn-lg">
+                    <i class="bi bi-check-circle"></i> Guardar Venta
+                </button>
+                <a href="{{ route('ventas.index') }}" class="btn btn-secondary btn-lg">
+                    <i class="bi bi-x-circle"></i> Cancelar
+                </a>
             </div>
+
         </form>
+
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+
+        // BOTÓN HAMBURGUESA
+        const menuToggle = document.getElementById('menu-toggle');
+        const sidebar = document.querySelector('.sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+
+        menuToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('activo');
+            overlay.classList.toggle('activo');
+        });
+
+        overlay.addEventListener('click', function() {
+            sidebar.classList.remove('activo');
+            overlay.classList.remove('activo');
+        });
+
+        // Cerrar sidebar al hacer click en un link
+        document.querySelectorAll('.sidebar a').forEach(link => {
+            link.addEventListener('click', function() {
+                sidebar.classList.remove('activo');
+                overlay.classList.remove('activo');
+            });
+        });
+
         let productos_en_venta = [];
 
         function obtenerProximoNumero() {
@@ -191,12 +246,10 @@
 
             document.getElementById('formVenta').addEventListener('submit', function(e) {
                 e.preventDefault();
-
                 if (productos_en_venta.length === 0) {
                     alert('❌ Debes agregar al menos un producto');
                     return;
                 }
-
                 document.getElementById('productos_json').value = JSON.stringify(productos_en_venta);
                 this.submit();
             });
@@ -216,13 +269,11 @@
                 return;
             }
 
-            // ✅ VALIDACIÓN: No sobrepasar stock
             if (cantidad > stock_disponible) {
                 alert(`⚠️ No hay suficiente stock.\nDisponible: ${stock_disponible}\nSolicitado: ${cantidad}`);
                 return;
             }
 
-            // ✅ VALIDACIÓN: Stock agotado
             if (stock_disponible <= 0) {
                 alert(`❌ El producto está agotado`);
                 return;
@@ -251,7 +302,6 @@
         function eliminarProducto(e) {
             const fila = e.target.closest('tr');
             const index = Array.from(document.querySelectorAll('#tabla-productos tr')).indexOf(fila);
-
             productos_en_venta.splice(index, 1);
             renderizarProductos();
         }
@@ -281,6 +331,7 @@
                         </td>
                     </tr>
                 `;
+
                 tbody.innerHTML += fila;
             });
 
@@ -304,6 +355,7 @@
             document.getElementById('impuesto').value = impuesto.toFixed(2);
             document.getElementById('total_input').value = total.toFixed(2);
         }
+
     </script>
 
 </body>

@@ -1,5 +1,5 @@
 /* ========================================
-   STOCK - CYBERPUNK GLASSMORPHISM
+   STOCK - CYBERPUNK GLASSMORPHISM (MEJORADO)
    ======================================== */
 
 :root {
@@ -36,6 +36,8 @@ body::before {
     pointer-events: none;
     z-index: -1;
 }
+
+/* ===================== ANIMACIONES ===================== */
 
 @keyframes gradientShift {
     0% { transform: translate(0, 0); }
@@ -88,12 +90,13 @@ body::before {
     50% { opacity: 0.7; }
 }
 
-/* =========== CONTENEDOR PRINCIPAL =========== */
+/* ===================== CONTENEDOR PRINCIPAL ===================== */
 
 .content {
     margin-left: 280px;
     padding: 30px;
     min-height: 100vh;
+    background: transparent;
 }
 
 .content h1 {
@@ -104,9 +107,55 @@ body::before {
     margin-bottom: 30px;
     animation: slideInDown 0.6s ease-out;
     text-shadow: 0 0 10px rgba(230, 57, 70, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 15px;
 }
 
-/* =========== TARJETAS DE ESTADÍSTICAS =========== */
+.content h1 i {
+    font-size: 2.2rem;
+}
+
+/* ===================== TARJETAS DE ESTADÍSTICAS ===================== */
+
+.row#estadisticas-container {
+    animation: slideInUp 0.6s ease-out 0.1s both;
+}
+
+.estadistica-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: fadeInScale 0.6s ease-out forwards;
+    position: relative;
+    overflow: hidden;
+}
+
+.estadistica-card:hover {
+    transform: translateY(-5px);
+    border: 1px solid rgba(230, 57, 70, 0.6);
+    box-shadow: 0 8px 32px rgba(230, 57, 70, 0.2);
+}
+
+.estadistica-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(230, 57, 70, 0.1), transparent);
+    animation: shimmer 3s infinite;
+    pointer-events: none;
+}
+
+.col-md-3:nth-child(1) .estadistica-card { animation-delay: 0.1s; }
+.col-md-3:nth-child(2) .estadistica-card { animation-delay: 0.2s; }
+.col-md-3:nth-child(3) .estadistica-card { animation-delay: 0.3s; }
+.col-md-3:nth-child(4) .estadistica-card { animation-delay: 0.4s; }
 
 .stat-card {
     background: var(--card-bg);
@@ -138,11 +187,6 @@ body::before {
     pointer-events: none;
 }
 
-.stat-card:nth-child(1) { animation-delay: 0.1s; }
-.stat-card:nth-child(2) { animation-delay: 0.2s; }
-.stat-card:nth-child(3) { animation-delay: 0.3s; }
-.stat-card:nth-child(4) { animation-delay: 0.4s; }
-
 .stat-value {
     font-size: 2rem;
     font-weight: bold;
@@ -157,18 +201,15 @@ body::before {
     letter-spacing: 1px;
 }
 
-/* =========== CONTROLES =========== */
+/* ===================== CONTROLES - FILTRO Y BUSCADOR ===================== */
 
-.d-flex.justify-content-between {
+.d-flex.gap-2 {
     animation: slideInUp 0.6s ease-out 0.2s both;
     margin-bottom: 25px;
-    gap: 15px;
 }
 
-/* =========== FILTRO SELECT =========== */
-
-#filtro-stock,
-select#filtro-stock.form-select.filtro-select {
+/* FILTRO SELECT */
+#filtro-stock.form-select.filtro-select {
     background-color: rgba(20, 20, 25, 0.6) !important;
     backdrop-filter: blur(10px) !important;
     border: 1px solid rgba(230, 57, 70, 0.3) !important;
@@ -180,19 +221,16 @@ select#filtro-stock.form-select.filtro-select {
     letter-spacing: 1px !important;
     padding: 10px 16px !important;
     box-shadow: 0 0 15px rgba(230, 57, 70, 0.2) !important;
-    min-width: 180px !important;
 }
 
-#filtro-stock:hover,
-select#filtro-stock.form-select.filtro-select:hover {
+#filtro-stock.form-select.filtro-select:hover {
     background-color: rgba(20, 20, 25, 0.8) !important;
     border: 1px solid rgba(230, 57, 70, 0.6) !important;
     box-shadow: 0 0 25px rgba(230, 57, 70, 0.4) !important;
     transform: translateY(-3px) !important;
 }
 
-#filtro-stock:focus,
-select#filtro-stock.form-select.filtro-select:focus {
+#filtro-stock.form-select.filtro-select:focus {
     background-color: rgba(20, 20, 25, 0.9) !important;
     border: 2px solid var(--neon-red) !important;
     box-shadow: 0 0 40px rgba(230, 57, 70, 0.6) !important;
@@ -201,50 +239,49 @@ select#filtro-stock.form-select.filtro-select:focus {
     color: var(--text-main) !important;
 }
 
-#filtro-stock option,
-select#filtro-stock option {
+#filtro-stock.form-select.filtro-select option {
     background: #0f0f0f;
     color: #f0f0f0;
     border: none;
     padding: 10px;
 }
 
-#filtro-stock option:checked,
-select#filtro-stock option:checked {
+#filtro-stock.form-select.filtro-select option:checked {
     background: linear-gradient(135deg, #e63946 0%, #ff4d4d 100%);
     color: white;
 }
 
-/* =========== BUSCADOR =========== */
-
-#buscador {
+/* BUSCADOR */
+#buscador.form-control {
     background: rgba(20, 20, 25, 0.5) !important;
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px) !important;
     border: 1px solid rgba(230, 57, 70, 0.2) !important;
     border-radius: 8px !important;
     color: var(--text-main) !important;
     transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    max-width: 280px !important;
 }
 
-#buscador::placeholder {
+#buscador.form-control::placeholder {
     color: var(--text-muted);
     opacity: 0.7;
 }
 
-#buscador:hover {
+#buscador.form-control:hover {
     background: rgba(20, 20, 25, 0.7) !important;
     border: 1px solid rgba(230, 57, 70, 0.4) !important;
-    box-shadow: 0 0 20px rgba(230, 57, 70, 0.2);
+    box-shadow: 0 0 20px rgba(230, 57, 70, 0.2) !important;
 }
 
-#buscador:focus {
+#buscador.form-control:focus {
     background: rgba(20, 20, 25, 0.8) !important;
     border: 1px solid var(--neon-red) !important;
     box-shadow: 0 0 30px rgba(230, 57, 70, 0.4) !important;
     outline: none !important;
+    color: var(--text-main) !important;
 }
 
-/* =========== TABLA CON GLASSMORPHISM =========== */
+/* ===================== TABLA ===================== */
 
 .table-responsive {
     animation: slideInUp 0.6s ease-out 0.3s both;
@@ -274,12 +311,12 @@ select#filtro-stock option:checked {
     padding: 15px 12px;
     border: none;
     font-size: 0.9rem;
+    white-space: nowrap;
 }
 
 .table tbody tr {
     border-color: rgba(230, 57, 70, 0.1);
     transition: all 0.3s ease;
-    animation: slideInUp 0.4s ease-out forwards;
 }
 
 .table tbody tr:hover {
@@ -288,15 +325,6 @@ select#filtro-stock option:checked {
     transform: scale(1.01);
     transform-origin: center;
 }
-
-.table tbody tr:nth-child(1) { animation-delay: 0.1s; }
-.table tbody tr:nth-child(2) { animation-delay: 0.15s; }
-.table tbody tr:nth-child(3) { animation-delay: 0.2s; }
-.table tbody tr:nth-child(4) { animation-delay: 0.25s; }
-.table tbody tr:nth-child(5) { animation-delay: 0.3s; }
-.table tbody tr:nth-child(6) { animation-delay: 0.35s; }
-.table tbody tr:nth-child(7) { animation-delay: 0.4s; }
-.table tbody tr:nth-child(8) { animation-delay: 0.45s; }
 
 .table tbody td {
     padding: 12px;
@@ -309,27 +337,64 @@ select#filtro-stock option:checked {
     color: var(--neon-red);
 }
 
-.nombre {
-    color: var(--text-main);
-    font-weight: 500;
-}
-
+.nombre,
 .proveedor {
     color: var(--text-main);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-/* =========== BADGES =========== */
+/* ===================== BADGES - ESTADOS ===================== */
 
 .badge {
     padding: 8px 12px !important;
-    border-radius: 6px;
+    border-radius: 6px !important;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     font-weight: 600;
     font-size: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     animation: pulse-subtle 2s ease-in-out infinite;
+    border: 1px solid;
 }
 
+/* Badge Danger */
+.badge-danger {
+    background: rgba(220, 53, 69, 0.8) !important;
+    color: #ff6b7a !important;
+    box-shadow: 0 0 10px rgba(220, 53, 69, 0.4) !important;
+    border-color: rgba(220, 53, 69, 0.6) !important;
+}
+
+/* Badge Warning */
+.badge-warning {
+    background: rgba(255, 193, 7, 0.8) !important;
+    color: #ffd740 !important;
+    box-shadow: 0 0 10px rgba(255, 193, 7, 0.4) !important;
+    border-color: rgba(255, 193, 7, 0.6) !important;
+}
+
+/* Badge Success */
+.badge-success {
+    background: rgba(40, 167, 69, 0.8) !important;
+    color: #66bb6a !important;
+    box-shadow: 0 0 10px rgba(40, 167, 69, 0.4) !important;
+    border-color: rgba(40, 167, 69, 0.6) !important;
+}
+
+/* Badge Info */
+.badge-info {
+    background: rgba(23, 162, 184, 0.8) !important;
+    color: #80deea !important;
+    box-shadow: 0 0 10px rgba(23, 162, 184, 0.4) !important;
+    border-color: rgba(23, 162, 184, 0.6) !important;
+}
+
+/* Bootstrap standard badges (compatibility) */
 .bg-danger {
     background: rgba(220, 53, 69, 0.8) !important;
     box-shadow: 0 0 10px rgba(220, 53, 69, 0.4);
@@ -351,16 +416,27 @@ select#filtro-stock option:checked {
     box-shadow: 0 0 10px rgba(23, 162, 184, 0.4);
 }
 
-/* =========== CONTADOR =========== */
+/* ===================== CONTADOR ===================== */
 
 #contador {
     color: var(--text-muted);
     font-size: 0.95rem;
     margin-top: 20px;
     animation: slideInUp 0.6s ease-out 0.5s both;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-/* =========== SCROLLBAR PERSONALIZADO =========== */
+#contador i {
+    color: var(--neon-red);
+}
+
+#contador strong {
+    color: var(--neon-red-light);
+}
+
+/* ===================== SCROLLBAR PERSONALIZADO ===================== */
 
 ::-webkit-scrollbar {
     width: 8px;
@@ -382,9 +458,37 @@ select#filtro-stock option:checked {
     box-shadow: 0 0 15px rgba(230, 57, 70, 0.6);
 }
 
-/* =========== RESPONSIVE =========== */
+/* ===================== RESPONSIVE ===================== */
+
+@media (max-width: 1280px) {
+    .content {
+        margin-left: 256px;
+        padding: 25px;
+    }
+}
 
 @media (max-width: 1024px) {
+    .content {
+        margin-left: 240px;
+        padding: 20px;
+    }
+
+    .content h1 {
+        font-size: 2rem;
+    }
+
+    .table thead th {
+        font-size: 0.8rem;
+        padding: 10px 8px;
+    }
+
+    .table tbody td {
+        padding: 10px 8px;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 768px) {
     .content {
         margin-left: 0;
         padding: 15px;
@@ -394,14 +498,8 @@ select#filtro-stock option:checked {
         font-size: 1.8rem;
     }
 
-    .table thead th {
-        font-size: 0.8rem;
-        padding: 10px 8px;
-    }
-}
-
-@media (max-width: 768px) {
-    .stat-card {
+    .stat-card,
+    .estadistica-card {
         padding: 15px;
     }
 
@@ -411,5 +509,51 @@ select#filtro-stock option:checked {
 
     .table-responsive {
         font-size: 0.85rem;
+    }
+
+    .d-flex.gap-2 {
+        flex-direction: column;
+    }
+
+    #buscador.form-control {
+        max-width: 100% !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .content {
+        padding: 10px;
+    }
+
+    .content h1 {
+        font-size: 1.3rem;
+        letter-spacing: 2px;
+    }
+
+    .table {
+        font-size: 0.75rem;
+    }
+
+    .table thead th {
+        font-size: 0.7rem;
+        padding: 8px 4px;
+    }
+
+    .table tbody td {
+        padding: 6px 4px;
+    }
+
+    .badge {
+        padding: 4px 8px !important;
+        font-size: 0.65rem !important;
+    }
+}
+
+/* ===================== ACCESIBILIDAD ===================== */
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation: none !important;
+        transition: none !important;
     }
 }

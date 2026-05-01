@@ -122,7 +122,7 @@ Route::get('/api/productos-por-proveedor/{proveedorId}', function($proveedorId) 
 })->middleware(['auth', 'role:admin']);
 
 
-// Ventas
+
 // Ventas
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/ventas', [VentasController::class, 'index'])->name('ventas.index');
@@ -131,9 +131,12 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::delete('/ventas/{id}/eliminar', [VentasController::class, 'destroy'])->name('ventas.destroy');
 });
 
-// Endpoint JSON para ventas
+// // Endpoint JSON para ventas
+// Route::get('/ventas/{id}/json', function($id) {
+//     return \App\Models\Venta::with('detalles.producto')->findOrFail($id);
+// });
 Route::get('/ventas/{id}/json', function($id) {
-    return \App\Models\Venta::with('detalles.producto')->findOrFail($id);
+    return \App\Models\Venta::with('usuario', 'detalles.producto')->findOrFail($id);
 });
 
 // Cálcula el último número de venta

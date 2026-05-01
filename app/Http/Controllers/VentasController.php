@@ -74,7 +74,7 @@ class VentasController extends Controller
 
             \Log::info('Venta creada ID: ' . $venta->id . ' Código: ' . $numero_factura);
 
-            // Guardar los productos
+            // ✅ GUARDAR PRODUCTOS y RESTAR STOCK SIEMPRE (sin importar estado)
             foreach ($productos as $producto) {
                 VentaDetalle::create([
                     'venta_id' => $venta->id,
@@ -84,11 +84,9 @@ class VentasController extends Controller
                     'subtotal' => $producto['subtotal']
                 ]);
 
-                // ✅ SOLO RESTAR SI ESTÁ COMPLETADA
-                if ($venta->estado === 'completada') {
-                    $prod = Producto::findOrFail($producto['producto_id']);
-                    $prod->decrement('stock_actual', $producto['cantidad']);
-                }
+                // ✅ RESTAR STOCK SIEMPRE (creada la venta, el producto se reserva)
+                $prod = Producto::findOrFail($producto['producto_id']);
+                $prod->decrement('stock_actual', $producto['cantidad']);
 
                 // Registrar movimiento de stock
                 $this->registrarMovimientoStock(
@@ -111,23 +109,44 @@ class VentasController extends Controller
         }
     }
 
+    // ✅ DESTROY: DEVOLVER STOCK
     public function destroy($id)
     {
         try {
-            $venta = Venta::findOrFail($id);
+            $venta = Venta::with('detalles.producto')->findOrFail($id);
+
+            // ✅ DEVOLVER STOCK DE TODOS LOS PRODUCTOS
+            foreach ($venta->detalles as $detalle) {
+                $producto = $detalle->producto;
+                $producto->increment('stock_actual', $detalle->cantidad);
+
+                // Registrar movimiento de devolución
+                $this->registrarMovimientoStock(
+                    $detalle->producto_id,
+                    'devolucion_venta',  // Tipo devolución
+                    $detalle->cantidad,
+                    'venta',
+                    $venta->id
+                );
+
+                \Log::info("Stock devuelto: Producto {$producto->nombre}, +{$detalle->cantidad}");
+            }
+
             $venta->delete();
 
             if (request()->ajax() || request()->wantsJson()) {
                 return response()->json([
                     'success' => true,
-                    'message' => '¡Venta eliminada correctamente!'
+                    'message' => '✅ ¡Venta eliminada correctamente y stock devuelto!'
                 ]);
             }
 
             return redirect()->route('ventas.index')
-                           ->with('success', '¡Venta eliminada correctamente!');
+                           ->with('success', '✅ ¡Venta eliminada correctamente y stock devuelto!');
 
         } catch (\Exception $e) {
+            \Log::error('ERROR AL ELIMINAR VENTA: ' . $e->getMessage());
+
             if (request()->ajax() || request()->wantsJson()) {
                 return response()->json([
                     'success' => false,
@@ -139,30 +158,14 @@ class VentasController extends Controller
         }
     }
 
-    // ✅ CAMBIAR ESTADO DE VENTA
+    // ✅ CAMBIAR ESTADO (SOLO CAMBIA ESTADO, NO AFECTA STOCK)
     public function cambiarEstado(Request $request, $id)
     {
         try {
             $venta = Venta::with('detalles.producto')->findOrFail($id);
             $nuevoEstado = $request->input('estado');
 
-            // Si cambia a completada desde pendiente, RESTAR STOCK
-            if ($nuevoEstado === 'completada' && $venta->estado === 'pendiente') {
-                foreach ($venta->detalles as $detalle) {
-                    $producto = $detalle->producto;
-
-                    // Validar que todavía hay stock
-                    if ($producto->stock_actual < $detalle->cantidad) {
-                        return response()->json([
-                            'success' => false,
-                            'message' => "⚠️ Stock insuficiente para '{$producto->nombre}'. Disponible: {$producto->stock_actual}, necesario: {$detalle->cantidad}"
-                        ], 400);
-                    }
-
-                    $producto->decrement('stock_actual', $detalle->cantidad);
-                }
-            }
-
+            // ✅ SOLO CAMBIAR ESTADO (el stock ya se restó al crear)
             $venta->estado = $nuevoEstado;
             $venta->save();
 
@@ -186,7 +189,10 @@ class VentasController extends Controller
             ->where('producto_id', $productoId)
             ->sum(DB::raw("CASE WHEN tipo IN ('entrada_compra', 'devolucion_venta', 'inventario_inicial') THEN cantidad ELSE -cantidad END"));
 
-        $stockNuevo = $stockActual - $cantidad;
+        // Si es salida, resta; si es devolución, suma
+        $stockNuevo = ($tipo === 'devolucion_venta') 
+            ? $stockActual + $cantidad 
+            : $stockActual - $cantidad;
 
         DB::table('movimientos_stock')->insert([
             'producto_id' => $productoId,

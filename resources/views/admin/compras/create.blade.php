@@ -11,8 +11,9 @@
     <link rel="stylesheet" href="{{ asset('css/compras.css') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
-<body>
 
+
+<body>
     <div class="sidebar">
         <h3>{{ $config->nombre_empresa }}</h3>
         <div id="menu-contenedor"></div>
@@ -22,7 +23,6 @@
     </div>
 
     <div class="content">
-
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1>
                 <i class="bi bi-cart-plus text-danger"></i> Nueva Orden de Compra
@@ -35,26 +35,26 @@
         <form id="formCrearCompra" action="{{ route('compras.store') }}" method="POST">
             @csrf
 
+            <!-- INFORMACIÓN GENERAL Y FECHAS -->
             <div class="row">
                 <div class="col-md-6">
-                    <div class="card mb-4">
-                        <div class="card-header">
+                    <div class="card mb-4 bg-dark border-danger">
+                        <div class="card-header bg-light text-dark">
                             <i class="bi bi-info-circle"></i> Información General
                         </div>
-                        <div class="card-body">
+                        <div class="card-body bg-dark text-light">
                             <div class="mb-3">
                                 <label class="form-label">
                                     <i class="bi bi-barcode"></i> Código
                                 </label>
-                                <input type="text" class="form-control" id="preview_numero_factura" readonly>
+                                <input type="text" class="form-control bg-secondary text-light border-danger" id="preview_numero_factura" readonly>
                                 <input type="hidden" name="numero_factura" id="numero_factura_hidden">
                             </div>
-
                             <div class="mb-3">
                                 <label class="form-label">
                                     <i class="bi bi-shop"></i> Proveedor <span class="text-danger">*</span>
                                 </label>
-                                <select name="proveedor_id" id="proveedor_id" class="form-select" required>
+                                <select name="proveedor_id" id="proveedor_id" class="form-select bg-secondary text-light border-danger" required>
                                     <option value="">-- Seleccione un proveedor --</option>
                                     @foreach($proveedores as $prov)
                                         <option value="{{ $prov->id }}">{{ $prov->nombre }}</option>
@@ -67,71 +67,71 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="col-md-6">
-                    <div class="card mb-4">
-                        <div class="card-header">
+                    <div class="card mb-4 bg-dark border-danger">
+                        <div class="card-header bg-light text-dark">
                             <i class="bi bi-calendar"></i> Fechas
                         </div>
-                        <div class="card-body">
+                        <div class="card-body bg-dark text-light">
                             <div class="mb-3">
                                 <label class="form-label">
                                     <i class="bi bi-calendar-event"></i> Fecha Pedido <span class="text-danger">*</span>
                                 </label>
-                                <input type="date" name="fecha_pedido" class="form-control" value="{{ date('Y-m-d') }}" required>
+                                <input type="date" name="fecha_pedido" id="fecha_pedido" class="form-control bg-secondary text-light border-danger" value="{{ date('Y-m-d') }}" min="{{ date('Y-m-d') }}" required>
+                                <small class="text-muted">
+                                    <i class="bi bi-info-circle"></i> Solo se permite hoy o fechas futuras
+                                </small>
                             </div>
-
                             <div class="mb-3">
                                 <label class="form-label">
                                     <i class="bi bi-calendar-check"></i> Fecha Entrega Esperada
                                 </label>
-                                <input type="date" name="fecha_entrega_esperada" class="form-control">
+                                <input type="date" name="fecha_entrega_esperada" id="fecha_entrega_esperada" class="form-control bg-secondary text-light border-danger">
+                                <small class="text-muted">
+                                    <i class="bi bi-info-circle"></i> Debe ser igual o posterior a la fecha de pedido
+                                </small>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="card mb-4">
-                <div class="card-header">
+            <!-- PRODUCTOS -->
+            <div class="card mb-4 bg-dark border-danger">
+                <div class="card-header bg-light text-dark">
                     <i class="bi bi-box-seam"></i> Productos
                 </div>
-                <div class="card-body">
-
+                <div class="card-body bg-dark text-light">
                     <div class="row mb-4">
                         <div class="col-md-5">
                             <label class="form-label form-label-sm">Producto</label>
-                            <select id="selector_producto" class="form-select" disabled>
+                            <select id="selector_producto" class="form-select bg-secondary text-light border-danger" disabled>
                                 <option value="">-- Primero seleccione un proveedor --</option>
                             </select>
                         </div>
-
                         <div class="col-md-2">
-                            <label class="form-label form-label-sm">Cantidad</label>
-                            <input type="number" id="cantidad_producto" class="form-control" placeholder="1" value="1" min="0.01" step="0.01">
+                            <label class="form-label form-label-sm">Cantidad <span class="text-danger">*</span></label>
+                            <input type="number" id="cantidad_producto" class="form-control bg-secondary text-light border-danger" placeholder="1" value="1" min="1" step="1">
                         </div>
-
                         <div class="col-md-3">
-                            <label class="form-label form-label-sm">Precio</label>
-                            <input type="number" id="precio_producto" class="form-control" placeholder="0.00" step="0.01">
+                            <label class="form-label form-label-sm">Precio (Previsualización)</label>
+                            <input type="number" id="precio_producto" class="form-control bg-secondary text-light border-danger" placeholder="0.00" step="0.01" readonly disabled>
                         </div>
-
                         <div class="col-md-2">
                             <label class="form-label form-label-sm">&nbsp;</label>
-                            <button type="button" class="btn btn-primary w-100" id="btn_agregar_producto" disabled>
+                            <button type="button" class="btn btn-danger w-100" id="btn_agregar_producto" disabled>
                                 <i class="bi bi-plus-circle"></i> Agregar
                             </button>
                         </div>
                     </div>
-
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-hover">
-                            <thead>
+                    <div class="table-responsive ">
+                        <table class="table table-dark table-hover">
+                            <thead class="">
                                 <tr>
                                     <th width="40%"><i class="bi bi-box"></i> Producto</th>
                                     <th width="15%" class="text-center"><i class="bi bi-hash"></i> Cantidad</th>
-                                    <th width="15%" class="text-end"><i class="bi bi-cash-coin"></i> Precio</th>
-                                    <th width="20%" class="text-end"><i class="bi bi-calculator"></i> Total</th>
+                                    <th width="15%" class="text-end"><i class="bi bi-cash-coin"></i> Precio Unit.</th>
+                                    <th width="20%" class="text-end"><i class="bi bi-calculator"></i> Subtotal</th>
                                     <th width="10%" class="text-center"><i class="bi bi-trash"></i></th>
                                 </tr>
                             </thead>
@@ -153,51 +153,50 @@
                             </tfoot>
                         </table>
                     </div>
-
                 </div>
             </div>
 
+            <!-- OBSERVACIONES Y CÁLCULOS -->
             <div class="row">
                 <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
+                    <div class="card bg-dark border-danger">
+                        <div class="card-header bg-light text-dark">
                             <i class="bi bi-chat-left-text"></i> Observaciones
                         </div>
-                        <div class="card-body">
-                            <textarea name="observaciones" class="form-control" rows="4" placeholder="Notas adicionales sobre la orden..."></textarea>
+                        <div class="card-body bg-dark text-light">
+                            <textarea name="observaciones" class="form-control bg-secondary text-light border-danger" rows="4" placeholder="Notas adicionales sobre la orden..."></textarea>
                         </div>
                     </div>
                 </div>
-
                 <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
+                    <div class="card bg-dark border-danger">
+                        <div class="card-header bg-light text-dark">
                             <i class="bi bi-graph-up"></i> Cálculos Finales
                         </div>
-                        <div class="card-body">
-                            <table class="table table-borderless mb-0 small">
+                        <div class="card-body bg-dark text-light">
+                            <table class="table table-dark table-borderless mb-0 small">
                                 <tr>
                                     <td class="fw-bold"><i class="bi bi-calculator"></i> SUB TOTAL:</td>
                                     <td class="text-end">
-                                        <input type="number" name="subtotal" id="subtotal_final" class="form-control form-control-sm" readonly>
+                                        <input type="number" name="subtotal" id="subtotal_final" class="form-control form-control-sm bg-secondary text-light border-danger" readonly>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td class="fw-bold"><i class="bi bi-percent"></i> DESCUENTO (%):</td>
                                     <td class="text-end">
-                                        <input type="number" id="descuento_porcentaje" class="form-control form-control-sm" value="0" step="0.01" min="0">
+                                        <input type="number" id="descuento_porcentaje" class="form-control form-control-sm bg-secondary text-light border-danger" value="0" step="0.01" min="0">
                                     </td>
                                 </tr>
                                 <tr>
                                     <td class="fw-bold"><i class="bi bi-percent"></i> IMPUESTO (%):</td>
                                     <td class="text-end">
-                                        <input type="number" id="impuesto_porcentaje" class="form-control form-control-sm" value="18" step="0.01" min="0">
+                                        <input type="number" id="impuesto_porcentaje" class="form-control form-control-sm bg-secondary text-light border-danger" value="18" step="0.01" min="0">
                                     </td>
                                 </tr>
-                                <tr class="border-top-2 pt-2">
-                                    <td class="fw-bold fs-6"><i class="bi bi-money"></i> TOTAL:</td>
+                                <tr class="border-top border-danger">
+                                    <td class="fw-bold fs-6 text-danger"><i class="bi bi-money"></i> TOTAL:</td>
                                     <td class="text-end">
-                                        <input type="number" name="total" id="total_final" class="form-control form-control-sm fw-bold" style="background: var(--color-neon-red); color: white; border: 1px solid var(--color-neon-red);" readonly>
+                                        <input type="number" name="total" id="total_final" class="form-control form-control-sm fw-bold bg-danger text-light border-danger" readonly>
                                     </td>
                                 </tr>
                             </table>
@@ -207,9 +206,13 @@
                 </div>
             </div>
 
+            <!-- BOTONES -->
             <div class="mt-4 d-flex gap-2">
                 <button type="submit" class="btn btn-success">
                     <i class="bi bi-save"></i> Guardar Orden
+                </button>
+                <button type="button" class="btn btn-warning" id="btn_limpiar_productos">
+                    <i class="bi bi-arrow-clockwise"></i> Limpiar Productos
                 </button>
                 <a href="{{ route('compras.index') }}" class="btn btn-secondary">
                     <i class="bi bi-x-circle"></i> Cancelar
@@ -217,7 +220,6 @@
             </div>
 
         </form>
-
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
@@ -227,6 +229,36 @@
         let productosTemp = [];
         let productoIndex = 0;
 
+        // ════════════════════════════════════════════════════════════════
+        // VALIDACIÓN DE FECHAS
+        // ════════════════════════════════════════════════════════════════
+        const hoy = new Date().toISOString().split('T')[0];
+        document.getElementById('fecha_pedido').min = hoy;
+
+        document.getElementById('fecha_pedido').addEventListener('change', function() {
+            const fechaPedido = this.value;
+            const fechaEntrega = document.getElementById('fecha_entrega_esperada');
+            
+            fechaEntrega.min = fechaPedido;
+            
+            if (fechaEntrega.value && fechaEntrega.value < fechaPedido) {
+                fechaEntrega.value = '';
+            }
+        });
+
+        document.getElementById('fecha_entrega_esperada').addEventListener('change', function() {
+            const fechaPedido = document.getElementById('fecha_pedido').value;
+            const fechaEntrega = this.value;
+
+            if (fechaEntrega && fechaEntrega < fechaPedido) {
+                alert('❌ La fecha de entrega no puede ser anterior a la fecha de pedido');
+                this.value = '';
+            }
+        });
+
+        // ════════════════════════════════════════════════════════════════
+        // CARGAR NÚMERO DE FACTURA
+        // ════════════════════════════════════════════════════════════════
         function cargarNumeroFactura() {
             fetch('/compras/ultimo-numero')
                 .then(res => res.json())
@@ -237,6 +269,9 @@
                 .catch(err => console.error('Error:', err));
         }
 
+        // ════════════════════════════════════════════════════════════════
+        // CARGAR PRODUCTOS POR PROVEEDOR
+        // ════════════════════════════════════════════════════════════════
         function cargarProductosPorProveedor(proveedorId) {
             if (!proveedorId) {
                 document.getElementById('selector_producto').innerHTML = '<option value="">-- Primero seleccione un proveedor --</option>';
@@ -274,40 +309,49 @@
                 });
         }
 
+        // ════════════════════════════════════════════════════════════════
+        // RECALCULAR TOTALES
+        // ════════════════════════════════════════════════════════════════
         function recalcularTotales() {
             let subtotal = 0;
             productosTemp.forEach(p => { subtotal += p.subtotal; });
+
             const descuentoPorcentaje = parseFloat(document.getElementById('descuento_porcentaje').value) || 0;
             const descuentoMonto = subtotal * descuentoPorcentaje / 100;
+
             const impuestoPorcentaje = parseFloat(document.getElementById('impuesto_porcentaje').value) || 0;
             const baseImponible = subtotal - descuentoMonto;
             const impuestoMonto = baseImponible * impuestoPorcentaje / 100;
             const total = baseImponible + impuestoMonto;
+
             document.getElementById('subtotal_final').value = subtotal.toFixed(2);
             document.getElementById('subtotal_temp').textContent = '$' + subtotal.toFixed(2);
             document.getElementById('total_final').value = total.toFixed(2);
             document.getElementById('impuesto_valor').value = impuestoMonto.toFixed(2);
         }
 
+        // ════════════════════════════════════════════════════════════════
+        // VALIDAR CAMPOS DE PRODUCTO
+        // ════════════════════════════════════════════════════════════════
         function validarCamposProducto() {
             const selectProducto = document.getElementById('selector_producto').value;
             const cantidadInput = document.getElementById('cantidad_producto');
-            const precioInput = document.getElementById('precio_producto');
 
             if (selectProducto) {
                 cantidadInput.setAttribute('required', '');
-                precioInput.setAttribute('required', '');
             } else {
                 cantidadInput.removeAttribute('required');
-                precioInput.removeAttribute('required');
                 cantidadInput.value = 1;
-                precioInput.value = '';
             }
         }
 
+        // ════════════════════════════════════════════════════════════════
+        // RENDERIZAR PRODUCTOS EN TABLA
+        // ════════════════════════════════════════════════════════════════
         function renderizarProductos() {
             const tbody = document.getElementById('productos_temp');
             tbody.innerHTML = '';
+
             if (productosTemp.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="5" class="text-muted text-center">No hay productos agregados</td></tr>';
                 recalcularTotales();
@@ -322,10 +366,10 @@
                             <small class="text-muted">${p.marca || '—'} ${p.modelo || '—'}</small>
                         </td>
                         <td class="text-center">
-                            <input type="number" class="form-control form-control-sm cantidad-producto" data-idx="${idx}" value="${p.cantidad}" step="0.01" min="0.01" style="width: 100px;">
+                            <input type="number" class="form-control form-control-sm cantidad-producto bg-secondary text-light border-danger" data-idx="${idx}" value="${p.cantidad}" step="1" min="1" style="width: 100px;">
                         </td>
                         <td class="text-end">
-                            <input type="number" class="form-control form-control-sm precio-producto" data-idx="${idx}" value="${p.precio_unitario.toFixed(2)}" step="0.01" min="0" style="width: 120px;">
+                            $${p.precio_unitario.toFixed(2)}
                         </td>
                         <td class="text-end fw-bold">$${p.subtotal.toFixed(2)}</td>
                         <td class="text-center">
@@ -341,16 +385,7 @@
             document.querySelectorAll('.cantidad-producto').forEach(input => {
                 input.addEventListener('change', function(e) {
                     const idx = parseInt(e.target.dataset.idx);
-                    productosTemp[idx].cantidad = parseFloat(e.target.value) || 0;
-                    productosTemp[idx].subtotal = productosTemp[idx].cantidad * productosTemp[idx].precio_unitario;
-                    renderizarProductos();
-                });
-            });
-
-            document.querySelectorAll('.precio-producto').forEach(input => {
-                input.addEventListener('change', function(e) {
-                    const idx = parseInt(e.target.dataset.idx);
-                    productosTemp[idx].precio_unitario = parseFloat(e.target.value) || 0;
+                    productosTemp[idx].cantidad = parseInt(e.target.value) || 1;
                     productosTemp[idx].subtotal = productosTemp[idx].cantidad * productosTemp[idx].precio_unitario;
                     renderizarProductos();
                 });
@@ -367,6 +402,9 @@
             recalcularTotales();
         }
 
+        // ════════════════════════════════════════════════════════════════
+        // EVENT LISTENERS
+        // ════════════════════════════════════════════════════════════════
         document.getElementById('proveedor_id').addEventListener('change', function() {
             cargarProductosPorProveedor(this.value);
         });
@@ -385,20 +423,20 @@
             const productoId = select.value;
 
             if (!productoId) {
-                alert('Seleccione un producto');
+                alert('❌ Seleccione un producto');
                 return;
             }
 
-            const cantidad = parseFloat(document.getElementById('cantidad_producto').value) || 0;
+            const cantidad = parseInt(document.getElementById('cantidad_producto').value) || 1;
             const precioUnitario = parseFloat(document.getElementById('precio_producto').value) || 0;
 
             if (cantidad <= 0) {
-                alert('Cantidad debe ser mayor a 0');
+                alert('❌ Cantidad debe ser mayor a 0');
                 return;
             }
 
             if (precioUnitario <= 0) {
-                alert('Precio debe ser mayor a 0');
+                alert('❌ Precio debe ser mayor a 0');
                 return;
             }
 
@@ -420,13 +458,25 @@
             renderizarProductos();
         });
 
+        // BOTÓN LIMPIAR PRODUCTOS (Solo elimina temporales)
+        document.getElementById('btn_limpiar_productos').addEventListener('click', function() {
+            if (productosTemp.length === 0) {
+                alert('No hay productos para limpiar');
+                return;
+            }
+            if (confirm('¿Está seguro de que desea eliminar todos los productos temporales?')) {
+                productosTemp = [];
+                renderizarProductos();
+            }
+        });
+
         document.getElementById('descuento_porcentaje').addEventListener('input', recalcularTotales);
         document.getElementById('impuesto_porcentaje').addEventListener('input', recalcularTotales);
 
         document.getElementById('formCrearCompra').addEventListener('submit', function(e) {
             if (productosTemp.length === 0) {
                 e.preventDefault();
-                alert('Debe agregar al menos un producto');
+                alert('❌ Debe agregar al menos un producto');
                 return;
             }
 
@@ -438,8 +488,6 @@
         });
 
         cargarNumeroFactura();
-
     </script>
-
 </body>
 </html>

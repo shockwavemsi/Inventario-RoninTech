@@ -17,10 +17,10 @@ function getEstadoInfo(stock, minimo, maximo) {
     const estado = determinarEstado(stock, minimo, maximo);
 
     const info = {
-        agotado: { clase: 'bg-danger', icono: 'bi-x-circle-fill', label: 'Agotado' },
-        bajo: { clase: 'bg-warning text-dark', icono: 'bi-exclamation-triangle-fill', label: 'Bajo' },
-        exceso: { clase: 'bg-info', icono: 'bi-arrow-up-circle-fill', label: 'Exceso' },
-        normal: { clase: 'bg-success', icono: 'bi-check-circle-fill', label: 'Normal' }
+agotado: { clase: 'badge-danger', icono: 'bi-x-circle-fill', label: 'Agotado' },
+bajo: { clase: 'badge-warning', icono: 'bi-exclamation-triangle-fill', label: 'Bajo' },
+exceso: { clase: 'badge-info', icono: 'bi-arrow-up-circle-fill', label: 'Exceso' },
+normal: { clase: 'badge-success', icono: 'bi-check-circle-fill', label: 'Normal' }
     };
 
     return { estado, ...info[estado] };

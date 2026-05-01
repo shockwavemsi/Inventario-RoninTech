@@ -1,4 +1,5 @@
 // public/js/compras/compras.js
+
 // Variables globales
 let productosTemp = [];
 let productoIndex = 0;
@@ -8,11 +9,9 @@ function mostrarAlerta(tipo, mensaje) {
     const alertDiv = document.createElement('div');
     alertDiv.className = `alert alert-${tipo} alert-dismissible fade show`;
     alertDiv.innerHTML = `${mensaje}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
-
     const content = document.querySelector('.content');
     const titulo = content.querySelector('h1');
     content.insertBefore(alertDiv, titulo.nextSibling);
-
     setTimeout(() => {
         if (alertDiv) alertDiv.remove();
     }, 3000);

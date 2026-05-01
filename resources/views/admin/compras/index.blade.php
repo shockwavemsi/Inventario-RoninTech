@@ -1,10 +1,13 @@
+<!-- ========================================
+     ARCHIVO 1: compras/index.blade.php
+     ======================================== -->
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $config->nombre_empresa }} - Órdenes de Compra</title>
-
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="{{ asset('css/menu.css') }}">
@@ -13,6 +16,17 @@
     <script src="{{ asset('js/menu.js') }}"></script>
 </head>
 <body>
+    <!-- BOTÓN HAMBURGUESA -->
+    <button id="menu-toggle" class="menu-toggle" aria-label="Abrir menú">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
+    <!-- OVERLAY -->
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <!-- SIDEBAR -->
     <div class="sidebar">
         <h3>{{ $config->nombre_empresa }}</h3>
         <div id="menu-contenedor"></div>
@@ -21,6 +35,7 @@
         </a>
     </div>
 
+    <!-- CONTENIDO PRINCIPAL -->
     <div class="content">
         <h1>
             <i class="bi bi-cart3"></i> Órdenes de Compra
@@ -32,6 +47,7 @@
             </div>
         @endif
 
+        <!-- TARJETAS DE ESTADÍSTICAS -->
         <div class="row mb-4">
             <div class="col-md-3 col-sm-6 mb-3">
                 <div class="stat-card">
@@ -44,7 +60,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="col-md-3 col-sm-6 mb-3">
                 <div class="stat-card">
                     <div class="d-flex align-items-center gap-3">
@@ -56,7 +71,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="col-md-3 col-sm-6 mb-3">
                 <div class="stat-card">
                     <div class="d-flex align-items-center gap-3">
@@ -68,7 +82,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="col-md-3 col-sm-6 mb-3">
                 <div class="stat-card">
                     <div class="d-flex align-items-center gap-3">
@@ -82,11 +95,11 @@
             </div>
         </div>
 
+        <!-- FILTROS Y BUSCADOR -->
         <div class="d-flex justify-content-between align-items-center mb-4 gap-3">
             <a href="{{ route('compras.create') }}" class="btn btn-primary">
                 <i class="bi bi-plus-circle"></i> Nueva Orden
             </a>
-
             <div class="d-flex gap-2" style="flex: 1; max-width: 600px;">
                 <select id="filtro-estado" class="form-select filtro-select">
                     <option value="todos">Todos</option>
@@ -97,8 +110,9 @@
             </div>
         </div>
 
+        <!-- TABLA PRINCIPAL -->
         <div class="table-responsive">
-            <table class="table table-bordered">
+            <table class="table table-dark table-hover">
                 <thead>
                     <tr>
                         <th><i class="bi bi-barcode"></i> Código</th>
@@ -135,26 +149,15 @@
                             <td>{{ $c->usuario->name ?? '—' }}</td>
                             <td>
                                 <div class="btn-group btn-group-sm" role="group">
-                                    <button type="button" class="btn btn-info ver-compra" 
-                                            data-id="{{ $c->id }}" title="Ver detalles">
+                                    <button type="button" class="btn btn-info ver-compra" data-id="{{ $c->id }}" title="Ver detalles">
                                         <i class="bi bi-eye"></i>
                                     </button>
-
-                                    <button type="button" class="btn btn-warning editar-compra" 
-                                                data-id="{{ $c->id }}" title="Editar compra">
-                                            <i class="bi bi-pencil"></i>
-                                    </button>
-
                                     @if($c->estado === 'pendiente')
-                                        <button type="button" class="btn btn-success cambiar-estado" 
-                                                data-id="{{ $c->id }}" data-estado="recibido" 
-                                                title="Recibir compra">
+                                        <button type="button" class="btn btn-success cambiar-estado" data-id="{{ $c->id }}" data-estado="recibido" title="Recibir compra">
                                             <i class="bi bi-check-circle"></i>
                                         </button>
                                     @endif
-
-                                    <button type="button" class="btn btn-danger eliminar-compra" 
-                                            data-id="{{ $c->id }}" title="Eliminar compra">
+                                    <button type="button" class="btn btn-danger eliminar-compra" data-id="{{ $c->id }}" title="Eliminar compra">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </div>
@@ -165,6 +168,7 @@
             </table>
         </div>
 
+        <br>
         <p id="contador">
             <i class="bi bi-info-circle"></i> <strong>Mostrando {{ count($compras) }} compras</strong>
         </p>
@@ -180,7 +184,6 @@
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-
                 <div class="modal-body">
                     <div class="row mb-4">
                         <div class="col-md-6">
@@ -208,7 +211,6 @@
                                 </div>
                             </div>
                         </div>
-
                         <div class="col-md-6">
                             <div class="card">
                                 <div class="card-body">
@@ -231,14 +233,12 @@
                             </div>
                         </div>
                     </div>
-
                     <h6 class="mb-3">
                         <i class="bi bi-box-seam"></i> Productos Comprados
                     </h6>
-
                     <div class="table-responsive">
-                        <table class="table table-bordered table-hover">
-                            <thead class="table-light">
+                        <table class="table table-dark table-hover">
+                            <thead>
                                 <tr>
                                     <th width="5%">#</th>
                                     <th>Producto</th>
@@ -256,7 +256,7 @@
                                     </td>
                                 </tr>
                             </tbody>
-                            <tfoot class="table-light">
+                            <tfoot>
                                 <tr>
                                     <td colspan="6" class="text-end fw-bold">SUBTOTAL:</td>
                                     <td class="text-end fw-bold" id="ver_subtotal">$0.00</td>
@@ -269,20 +269,18 @@
                                     <td colspan="6" class="text-end fw-bold">IMPUESTO (21%):</td>
                                     <td class="text-end fw-bold" id="ver_impuesto">$0.00</td>
                                 </tr>
-                                <tr class="table-active">
+                                <tr>
                                     <td colspan="6" class="text-end fw-bold fs-5">TOTAL:</td>
                                     <td class="text-end fw-bold fs-5 text-primary" id="ver_total">$0.00</td>
                                 </tr>
                             </tfoot>
                         </table>
                     </div>
-
                     <div class="alert alert-secondary mt-3">
                         <strong><i class="bi bi-chat-left-text"></i> Observaciones:</strong><br>
                         <span id="ver_observaciones"></span>
                     </div>
                 </div>
-
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                         <i class="bi bi-x-circle"></i> Cerrar
@@ -305,11 +303,9 @@
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-
                 <form id="formEditarCompra">
                     <div class="modal-body">
                         <input type="hidden" id="editar_id">
-                        
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label"><strong>Código</strong></label>
@@ -320,7 +316,6 @@
                                 <input type="text" id="editar_proveedor" class="form-control" readonly>
                             </div>
                         </div>
-
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label"><strong>Fecha Pedido</strong></label>
@@ -331,24 +326,21 @@
                                 <input type="date" id="editar_fecha_entrega" class="form-control">
                             </div>
                         </div>
-
                         <div class="row mb-3">
-    <div class="col-md-6">
-        <label class="form-label"><strong>Estado</strong></label>
-        <select id="editar_estado" class="form-select" required>
-            <option value="pendiente">Pendiente</option>
-            <option value="recibido">Recibido</option>
-        </select>
-    </div>
-</div>
-
+                            <div class="col-md-6">
+                                <label class="form-label"><strong>Estado</strong></label>
+                                <select id="editar_estado" class="form-select" required>
+                                    <option value="pendiente">Pendiente</option>
+                                    <option value="recibido">Recibido</option>
+                                </select>
+                            </div>
+                        </div>
                         <label class="form-label"><strong>Observaciones</strong></label>
                         <textarea id="editar_observaciones" class="form-control mb-4" rows="3"></textarea>
-
                         <h6 class="mb-3"><i class="bi bi-box-seam"></i> Productos</h6>
                         <div class="table-responsive">
-                            <table class="table table-bordered table-sm">
-                                <thead class="table-light">
+                            <table class="table table-dark table-hover table-sm">
+                                <thead>
                                     <tr>
                                         <th>Producto</th>
                                         <th class="text-center">Cantidad</th>
@@ -358,7 +350,7 @@
                                 </thead>
                                 <tbody id="editar_detalles">
                                 </tbody>
-                                <tfoot class="table-light">
+                                <tfoot>
                                     <tr>
                                         <td colspan="3" class="text-end fw-bold">TOTAL:</td>
                                         <td class="text-end fw-bold" id="editar_total">$0.00</td>
@@ -367,7 +359,6 @@
                             </table>
                         </div>
                     </div>
-
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                             Cancelar
@@ -391,22 +382,18 @@
     <script src="{{ asset('js/compras/compras-actualizar.js') }}"></script>
     <script src="{{ asset('js/compras/compras-stats.js') }}"></script>
     <script src="{{ asset('js/compras/model-fix.js') }}"></script>
-
     <script>
         let filtroActual = 'todos';
-
         function aplicarFiltros() {
             const filas = document.querySelectorAll('#tabla-compras tr');
             const buscador = document.getElementById('buscador').value.toLowerCase();
             let contadorVisible = 0;
-
             filas.forEach(fila => {
                 const estado = fila.dataset.estado;
                 const codigo = fila.dataset.codigo.toLowerCase();
                 const proveedor = fila.dataset.proveedor.toLowerCase();
                 const cumpleFiltroEstado = filtroActual === 'todos' || estado === filtroActual;
                 const cumpleBuscador = codigo.includes(buscador) || proveedor.includes(buscador);
-
                 if (cumpleFiltroEstado && cumpleBuscador) {
                     fila.style.display = '';
                     contadorVisible++;
@@ -414,25 +401,19 @@
                     fila.style.display = 'none';
                 }
             });
-
             const contador = document.getElementById('contador');
             if (contador) {
                 contador.innerHTML = `<i class="bi bi-info-circle"></i> <strong>Mostrando ${contadorVisible} compras</strong>`;
             }
         }
-
         document.getElementById('filtro-estado').addEventListener('change', function() {
             filtroActual = this.value;
             aplicarFiltros();
         });
-
         document.getElementById('buscador').addEventListener('input', aplicarFiltros);
-
-        // ✅ EDITAR COMPRA
         document.querySelectorAll('.editar-compra').forEach(btn => {
             btn.addEventListener('click', function() {
                 const id = this.dataset.id;
-                
                 fetch(`/compras/${id}/json`)
                     .then(res => res.json())
                     .then(data => {
@@ -443,16 +424,12 @@
                         document.getElementById('editar_fecha_entrega').value = data.fecha_entrega_esperada ? data.fecha_entrega_esperada.split(' ')[0] : '';
                         document.getElementById('editar_observaciones').value = data.observaciones || '';
                         document.getElementById('editar_estado').value = data.estado;
-
-                        // Llenar detalles
                         const tbody = document.getElementById('editar_detalles');
                         tbody.innerHTML = '';
                         let total = 0;
-
                         data.detalles.forEach(det => {
                             const subtotal = det.cantidad * det.precio_unitario;
                             total += subtotal;
-
                             const row = `
                                 <tr>
                                     <td>${det.producto?.nombre || '—'}</td>
@@ -463,9 +440,7 @@
                             `;
                             tbody.innerHTML += row;
                         });
-
                         document.getElementById('editar_total').textContent = '$' + total.toFixed(2);
-
                         const modal = new bootstrap.Modal(document.getElementById('modalEditarCompra'));
                         modal.show();
                     })
@@ -475,19 +450,15 @@
                     });
             });
         });
-
-        // ✅ GUARDAR CAMBIOS
         document.getElementById('formEditarCompra').addEventListener('submit', function(e) {
             e.preventDefault();
-
             const id = document.getElementById('editar_id').value;
             const datos = {
                 fecha_pedido: document.getElementById('editar_fecha_pedido').value,
                 fecha_entrega_esperada: document.getElementById('editar_fecha_entrega').value,
-                estado: document.getElementById('editar_estado').value, 
+                estado: document.getElementById('editar_estado').value,
                 observaciones: document.getElementById('editar_observaciones').value,
             };
-
             fetch(`/compras/${id}`, {
                 method: 'PATCH',
                 headers: {
@@ -511,6 +482,5 @@
             });
         });
     </script>
-
 </body>
 </html>
