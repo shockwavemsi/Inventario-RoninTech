@@ -40,8 +40,11 @@ public function create()
     }
 
     public function destroy($id)
-    {
-        Producto::findOrFail($id)->delete();
-        return redirect()->route('productos.index')->with('success', '!Producto eliminado correctamente!');
-    }
+{
+    Producto::findOrFail($id)->delete();
+
+    return response()->json([
+        'success' => true
+    ]);
+}
 }

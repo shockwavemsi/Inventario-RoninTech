@@ -60,7 +60,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/proveedores', [ProveedorController::class, 'index'])->name('proveedores.index');
     Route::get('/proveedores/crear', [ProveedorController::class, 'create'])->name('proveedores.create');
     Route::post('/proveedores/guardar', [ProveedorController::class, 'store'])->name('proveedores.store');
-    Route::delete('/proveedores/{id}/eliminar', [ProveedorController::class, 'destroy'])->name('proveedores.destroy');
+    Route::delete('/proveedores/{id}', [ProveedorController::class, 'destroy']);
 });
 
 // Enpoint JSON para proveedores

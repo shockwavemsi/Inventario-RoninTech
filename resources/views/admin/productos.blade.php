@@ -12,11 +12,24 @@
     <link rel="stylesheet" href="{{ asset('css/compras.css') }}">
 </head>
 <body>
+    <button id="menu-toggle" class="menu-toggle" aria-label="Abrir menú">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
+    <!-- OVERLAY -->
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <!-- SIDEBAR -->
     <div class="sidebar">
         <h3>{{ $config->nombre_empresa }}</h3>
         <div id="menu-contenedor"></div>
-        <a href="{{ route('logout') }}" class="mt-4">Cerrar sesión</a>
+        <a href="{{ route('logout') }}" class="mt-4">
+            <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+        </a>
     </div>
+    
     
     <div class="content">
         <h1 class="mb-4">Productos</h1>
@@ -32,46 +45,69 @@
             <input type="text" id="buscador" class="form-control w-25" placeholder="Buscar por nombre...">
         </div>
 
-        <table class="table table-bordered bg-white">
-    <thead>
-        <tr>
-            
-            <th>Fecha de Creación</th>
-            <th>Nombre</th>
-            <th>Marca</th>
-            <th>Modelo</th>
-            <th>Categoría</th>
-            <th>Proveedor</th>
-            <th>Precio Compra</th>
-            <th>Precio Venta</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody id="tabla-productos">
-        @foreach($productos as $prod)
+        <div class="table-responsive">
+    <table class="table table-dark table-hover">
+        <thead>
             <tr>
-                <td>{{ $prod->created_at->format('d/m/Y') }}</td>
-                <td class="nombre">{{ $prod->nombre }}</td>
-                <td>{{ $prod->marca ?? '—' }}</td>
-                <td>{{ $prod->modelo ?? '—' }}</td>
-                <td>{{ $prod->categoria->nombre ?? '—' }}</td>
-                <td>{{ $prod->proveedor->nombre ?? '—' }}</td>
-                <td>${{ $prod->precio_compra ?? '—' }}</td>
-                <td>${{ $prod->precio_venta ?? '—' }}</td>
-                <td>{{ $prod->activo ? 'Activo' : 'Inactivo' }}</td>
-                <td>
-                    <select class="form-select accion-producto" data-id="{{ $prod->id }}">
-                        <option value="">Acciones</option>
-                        <option value="ver">Ver</option>
-                        <option value="editar">Editar</option>
-                        <option value="eliminar">Eliminar</option>
-                    </select>
-                </td>
+                <th><i class="bi bi-calendar"></i> Fecha</th>
+                <th><i class="bi bi-box"></i> Nombre</th>
+                <th><i class="bi bi-tags"></i> Marca</th>
+                <th><i class="bi bi-cpu"></i> Modelo</th>
+                <th><i class="bi bi-folder"></i> Categoría</th>
+                <th><i class="bi bi-shop"></i> Proveedor</th>
+                <th><i class="bi bi-cash"></i> Compra</th>
+                <th><i class="bi bi-cash-coin"></i> Venta</th>
+                <th><i class="bi bi-info-circle"></i> Estado</th>
+                <th style="width: 200px"><i class="bi bi-gear"></i> Acciones</th>
             </tr>
-        @endforeach
-    </tbody>
-</table>
+        </thead>
+        <tbody id="tabla-productos">
+            @foreach($productos as $prod)
+                <tr data-estado="{{ $prod->activo ? 'activo' : 'inactivo' }}" 
+                    data-nombre="{{ $prod->nombre }}" 
+                    data-marca="{{ $prod->marca ?? '' }}">
+                    
+                    <td>{{ $prod->created_at->format('d/m/Y') }}</td>
+
+                    <td class="nombre">
+                        <i class="bi bi-box-seam"></i> {{ $prod->nombre }}
+                    </td>
+
+                    <td>{{ $prod->marca ?? '—' }}</td>
+                    <td>{{ $prod->modelo ?? '—' }}</td>
+                    <td>{{ $prod->categoria->nombre ?? '—' }}</td>
+                    <td class="proveedor">{{ $prod->proveedor->nombre ?? '—' }}</td>
+
+                    <td><strong>${{ number_format($prod->precio_compra ?? 0, 2) }}</strong></td>
+                    <td><strong>${{ number_format($prod->precio_venta ?? 0, 2) }}</strong></td>
+
+                    <td>
+                        <span class="badge estado-badge px-3 py-2
+                            @if($prod->activo) bg-success
+                            @else bg-secondary @endif">
+                            
+                            <i class="bi 
+                                @if($prod->activo) bi-check-circle-fill
+                                @else bi-x-circle @endif
+                                me-1"></i>
+
+                            {{ $prod->activo ? 'Activo' : 'Inactivo' }}
+                        </span>
+                    </td>
+
+                    <td>
+                        <select class="form-select form-select-sm accion-producto bg-dark text-white border-secondary" data-id="{{ $prod->id }}">
+                            <option value="">⚙️ Acciones</option>
+                            <option value="ver">👁️ Ver</option>
+                            <option value="editar">✏️ Editar</option>
+                            <option value="eliminar">🗑️ Eliminar</option>
+                        </select>
+                    </td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+</div>
         <p id="contador"><strong>Mostrando {{ count($productos) }} productos</strong></p>
     </div>
 

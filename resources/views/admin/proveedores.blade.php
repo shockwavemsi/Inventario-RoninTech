@@ -14,13 +14,23 @@
 </head>
 
 <body>
+    <button id="menu-toggle" class="menu-toggle" aria-label="Abrir menú">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
 
+    <!-- OVERLAY -->
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <!-- SIDEBAR -->
     <div class="sidebar">
         <h3>{{ $config->nombre_empresa }}</h3>
         <div id="menu-contenedor"></div>
-        <a href="{{ route('logout') }}" class="mt-4">Cerrar sesión</a>
+        <a href="{{ route('logout') }}" class="mt-4">
+            <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+        </a>
     </div>
-    
 
     <!-- CONTENIDO -->
     <div class="content">
@@ -42,44 +52,67 @@
         </div>
 
         <!-- TABLA -->
-        <table class="table table-bordered bg-white">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Fecha</th>
-                    <th>Nombre</th>
-                    <th>Contacto</th>
-                    <th>Teléfono</th>
-                    <th>Email</th>
-                    <th>Dirección</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
+        <div class="table-responsive">
+    <table class="table table-dark table-hover">
+        <thead>
+            <tr>
+                <th><i class="bi bi-hash"></i> ID</th>
+                <th><i class="bi bi-calendar"></i> Fecha</th>
+                <th><i class="bi bi-shop"></i> Nombre</th>
+                <th><i class="bi bi-person"></i> Contacto</th>
+                <th><i class="bi bi-telephone"></i> Teléfono</th>
+                <th><i class="bi bi-envelope"></i> Email</th>
+                <th><i class="bi bi-geo-alt"></i> Dirección</th>
+                <th><i class="bi bi-info-circle"></i> Estado</th>
+                <th style="width: 200px"><i class="bi bi-gear"></i> Acciones</th>
+            </tr>
+        </thead>
 
-            <tbody id="tabla-proveedores">
-                @foreach($proveedores as $p)
-                    <tr>
-                        <td>{{ $p->id }}</td>
-                        <td>{{ $p->created_at->format('d/m/Y') }}</td>
-                        <td class="nombre">{{ $p->nombre }}</td>
-                        <td>{{ $p->contacto_nombre }}</td>
-                        <td>{{ $p->contacto_telefono }}</td>
-                        <td>{{ $p->email }}</td>
-                        <td>{{ $p->direccion }}</td>
-                        <td>{{ $p->activo ? 'Activo' : 'Inactivo' }}</td>
-                        <td>
-                            <select class="form-select accion-proveedor" data-id="{{ $p->id }}">
-                                <option value="">Acciones</option>
-                                <option value="ver">Ver</option>
-                                <option value="editar">Editar</option>
-                                <option value="eliminar">Eliminar</option>
-                            </select>
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
+        <tbody id="tabla-proveedores">
+            @foreach($proveedores as $p)
+                <tr data-estado="{{ $p->activo ? 'activo' : 'inactivo' }}" 
+                    data-nombre="{{ $p->nombre }}">
+                    
+                    <td><i class="bi bi-hash"></i> {{ $p->id }}</td>
+
+                    <td>{{ $p->created_at->format('d/m/Y') }}</td>
+
+                    <td class="nombre">
+                        <i class="bi bi-building"></i> {{ $p->nombre }}
+                    </td>
+
+                    <td>{{ $p->contacto_nombre }}</td>
+                    <td>{{ $p->contacto_telefono }}</td>
+                    <td>{{ $p->email }}</td>
+                    <td>{{ $p->direccion }}</td>
+
+                    <td>
+                        <span class="badge estado-badge px-3 py-2
+                            @if($p->activo) bg-success
+                            @else bg-secondary @endif">
+                            
+                            <i class="bi 
+                                @if($p->activo) bi-check-circle-fill
+                                @else bi-x-circle @endif
+                                me-1"></i>
+
+                            {{ $p->activo ? 'Activo' : 'Inactivo' }}
+                        </span>
+                    </td>
+
+                    <td>
+                        <select class="form-select form-select-sm accion-proveedor bg-dark text-white border-secondary" data-id="{{ $p->id }}">
+                            <option value="">⚙️ Acciones</option>
+                            <option value="ver">👁️ Ver</option>
+                            <option value="editar">✏️ Editar</option>
+                            <option value="eliminar">🗑️ Eliminar</option>
+                        </select>
+                    </td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+</div>
 
         <p id="contador"><strong>Mostrando {{ count($proveedores) }} proveedores</strong></p>
 
@@ -204,9 +237,10 @@
                 }
 
                 if (accion === 'eliminar') {
-    console.log('Eliminando producto:', id);
-    if (confirm('¿Seguro que deseas eliminar este producto?')) {
-        fetch(`/productos/${id}/eliminar`, {
+    console.log('Eliminando proveedor:', id);
+
+    if (confirm('¿Seguro que deseas eliminar este proveedor?')) {
+        fetch(`/proveedores/${id}`, { // 👈 ruta correcta REST
             method: 'DELETE',
             headers: { 
                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -217,9 +251,9 @@
             console.log('Response:', res.status);
             if (res.ok) {
                 console.log('Recargando página...');
-                setTimeout(() => window.location.reload(), 500);  // ← Retraso de 500ms
+                setTimeout(() => window.location.reload(), 500);
             } else {
-                alert('Error al eliminar');
+                alert('Error al eliminar proveedor');
             }
         })
         .catch(err => {

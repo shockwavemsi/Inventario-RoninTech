@@ -14,10 +14,22 @@
 
 <body>
 
+    <button id="menu-toggle" class="menu-toggle" aria-label="Abrir menú">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
+    <!-- OVERLAY -->
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <!-- SIDEBAR -->
     <div class="sidebar">
         <h3>{{ $config->nombre_empresa }}</h3>
         <div id="menu-contenedor"></div>
-        <a href="{{ route('logout') }}" class="mt-4">Cerrar sesión</a>
+        <a href="{{ route('logout') }}" class="mt-4">
+            <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+        </a>
     </div>
 
     <div class="content">

@@ -30,10 +30,12 @@ class ProveedorController extends Controller
     }
 
     public function destroy($id)
-    {
-        Proveedor::findOrFail($id)->delete();
+{
+    Proveedor::findOrFail($id)->delete();
 
-        return redirect()->route('proveedores.index')->with('success', 'Proveedor eliminado con éxito');
-    }
+    return response()->json([
+        'success' => true
+    ]);
+}
 }
 
