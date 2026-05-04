@@ -7,34 +7,25 @@ use App\Models\Producto;
 use App\Models\Compra;
 use App\Models\DevolucionVenta;
 use App\Models\Configuracion;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class AdminController extends Controller
+class UsuarioController extends Controller
 {
     public function index()
     {
-        // Configuración de la empresa
         $config = Configuracion::first();
 
         // ==========================================
         // 1. VENTAS
         // ==========================================
-        
-        // Ventas de hoy
         $ventasHoy = Venta::whereDate('fecha_venta', today())->sum('total');
-        
-        // Ventas de ayer (para el porcentaje)
         $ventasAyer = Venta::whereDate('fecha_venta', today()->subDay())->sum('total');
         $porcentajeVentas = $ventasAyer > 0 ? round((($ventasHoy - $ventasAyer) / $ventasAyer) * 100, 1) : ($ventasHoy > 0 ? 100 : 0);
-        
-        // Ventas totales
         $ventasTotales = Venta::sum('total');
 
         // ==========================================
         // 2. PRODUCTOS
         // ==========================================
-        
         $totalProductos = Producto::where('activo', true)->count();
         $productosAgotados = Producto::where('stock_actual', 0)->where('activo', true)->count();
         $stockCritico = Producto::whereRaw('stock_actual <= stock_minimo')->where('activo', true)->count();
@@ -42,13 +33,11 @@ class AdminController extends Controller
         // ==========================================
         // 3. COMPRAS
         // ==========================================
-        
         $comprasPendientes = Compra::where('estado', 'pendiente')->count();
 
         // ==========================================
         // 4. DEVOLUCIONES
         // ==========================================
-        
         $devolucionesMes = DevolucionVenta::where('estado', 'completada')
             ->whereMonth('fecha', now()->month)
             ->whereYear('fecha', now()->year)
@@ -57,7 +46,6 @@ class AdminController extends Controller
         // ==========================================
         // 5. VENTAS vs DEVOLUCIONES (7 días)
         // ==========================================
-        
         $ventas7Dias = DB::table('ventas')
             ->select(DB::raw('DATE(fecha_venta) as fecha'), DB::raw('SUM(total) as total'))
             ->where('fecha_venta', '>=', now()->subDays(7))
@@ -76,7 +64,6 @@ class AdminController extends Controller
         // ==========================================
         // 6. TOP 5 PRODUCTOS MÁS VENDIDOS
         // ==========================================
-        
         $topProductos = DB::table('ventas_detalle as vd')
             ->join('ventas as v', 'v.id', '=', 'vd.venta_id')
             ->join('productos as p', 'p.id', '=', 'vd.producto_id')
@@ -89,7 +76,6 @@ class AdminController extends Controller
         // ==========================================
         // 7. MARGEN DE GANANCIA ESTIMADO
         // ==========================================
-        
         $margenes = DB::table('productos')
             ->where('activo', true)
             ->select('nombre', 'precio_venta')
@@ -97,7 +83,6 @@ class AdminController extends Controller
             ->get();
         
         foreach ($margenes as $m) {
-            // Estimamos precio de compra como 60% del precio de venta
             $precioCompraEstimado = $m->precio_venta * 0.6;
             $m->margen = round((($m->precio_venta - $precioCompraEstimado) / $m->precio_venta) * 100);
         }
@@ -105,7 +90,6 @@ class AdminController extends Controller
         // ==========================================
         // 8. MOVIMIENTOS DE STOCK (7 días)
         // ==========================================
-        
         $movimientosStock = DB::table('movimientos_stock')
             ->select(
                 DB::raw('DATE(created_at) as fecha'),
@@ -118,75 +102,69 @@ class AdminController extends Controller
             ->get();
 
         // ==========================================
-// 9. ÚLTIMAS ACTIVIDADES (CORREGIDO)
-// ==========================================
-
-// Últimas ventas (guardamos la fecha real)
-$ultimasVentas = Venta::with('usuario')
-    ->orderBy('created_at', 'desc')
-    ->limit(5)
-    ->get()
-    ->map(function($item) {
-        return (object)[
-            'tipo' => 'venta',
-            'icono' => 'bi-cart-check',
-            'color' => 'success',
-            'descripcion' => "Venta #{$item->numero_factura} - $" . number_format($item->total, 2) . " - {$item->cliente}",
-            'tiempo' => $item->created_at->diffForHumans(),
-            'fecha' => $item->created_at,  // ✅ Guardamos la fecha real para ordenar
-            'usuario' => $item->usuario->name ?? 'sistema'
-        ];
-    });
-
-// Últimas compras
-$ultimasCompras = Compra::with('proveedor', 'usuario')
-    ->orderBy('created_at', 'desc')
-    ->limit(5)
-    ->get()
-    ->map(function($item) {
-        return (object)[
-            'tipo' => 'compra',
-            'icono' => 'bi-truck',
-            'color' => 'info',
-            'descripcion' => "Compra #{$item->numero_factura} - " . ($item->proveedor->nombre ?? 'N/A'),
-            'tiempo' => $item->created_at->diffForHumans(),
-            'fecha' => $item->created_at,  // ✅ Guardamos la fecha real
-            'usuario' => $item->usuario->name ?? 'sistema'
-        ];
-    });
-
-// Últimas devoluciones
-$ultimasDevoluciones = DevolucionVenta::with('usuario')
-    ->orderBy('created_at', 'desc')
-    ->limit(5)
-    ->get()
-    ->map(function($item) {
-        return (object)[
-            'tipo' => 'devolucion',
-            'icono' => 'bi-arrow-return-left',
-            'color' => 'warning',
-            'descripcion' => "Devolución #{$item->id} - $" . number_format($item->total_devuelto, 2),
-            'tiempo' => $item->created_at->diffForHumans(),
-            'fecha' => $item->created_at,  // ✅ Guardamos la fecha real
-            'usuario' => $item->usuario->name ?? 'sistema'
-        ];
-    });
-
-// Combinar y ordenar por FECHA REAL (no por el string)
-$ultimasActividades = collect()
-    ->concat($ultimasVentas)
-    ->concat($ultimasCompras)
-    ->concat($ultimasDevoluciones)
-    ->sortByDesc(function($item) {
-        return $item->fecha;  // ✅ Ordenar por la fecha real
-    })
-    ->take(10);
-
+        // 9. ÚLTIMAS ACTIVIDADES
         // ==========================================
-        // RETORNAR VISTA CON TODOS LOS DATOS
-        // ==========================================
+        $ultimasVentas = Venta::with('usuario')
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get()
+            ->map(function($item) {
+                return (object)[
+                    'tipo' => 'venta',
+                    'icono' => 'bi-cart-check',
+                    'color' => 'success',
+                    'descripcion' => "Venta #{$item->numero_factura} - $" . number_format($item->total, 2) . " - {$item->cliente}",
+                    'tiempo' => $item->created_at->diffForHumans(),
+                    'fecha' => $item->created_at,
+                    'usuario' => $item->usuario->name ?? 'sistema'
+                ];
+            });
         
-        return view('admin.index', compact(
+        $ultimasCompras = Compra::with('proveedor', 'usuario')
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get()
+            ->map(function($item) {
+                return (object)[
+                    'tipo' => 'compra',
+                    'icono' => 'bi-truck',
+                    'color' => 'info',
+                    'descripcion' => "Compra #{$item->numero_factura} - " . ($item->proveedor->nombre ?? 'N/A'),
+                    'tiempo' => $item->created_at->diffForHumans(),
+                    'fecha' => $item->created_at,
+                    'usuario' => $item->usuario->name ?? 'sistema'
+                ];
+            });
+        
+        $ultimasDevoluciones = DevolucionVenta::with('usuario')
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get()
+            ->map(function($item) {
+                return (object)[
+                    'tipo' => 'devolucion',
+                    'icono' => 'bi-arrow-return-left',
+                    'color' => 'warning',
+                    'descripcion' => "Devolución #{$item->id} - $" . number_format($item->total_devuelto, 2),
+                    'tiempo' => $item->created_at->diffForHumans(),
+                    'fecha' => $item->created_at,
+                    'usuario' => $item->usuario->name ?? 'sistema'
+                ];
+            });
+        
+        $ultimasActividades = collect()
+            ->concat($ultimasVentas)
+            ->concat($ultimasCompras)
+            ->concat($ultimasDevoluciones)
+            ->sortByDesc(function($item) {
+                return $item->fecha;
+            })
+            ->take(10);
+
+        // ==========================================
+        // RETORNAR VISTA DE USUARIO NORMAL
+        // ==========================================
+        return view('user.index', compact(
             'config',
             'ventasHoy',
             'ventasTotales',
@@ -205,4 +183,3 @@ $ultimasActividades = collect()
         ));
     }
 }
-

@@ -2,7 +2,7 @@
     "menu": [
         {
             "nombre": "Dashboard",
-            "url": "/dashboard"
+            "url": "/usuario"
         },
         {
             "nombre": "Compras",

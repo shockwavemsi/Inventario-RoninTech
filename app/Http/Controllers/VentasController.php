@@ -8,6 +8,8 @@ use App\Models\Producto;
 use App\Models\Configuracion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Notifications\StockBajoNotification;
+use Illuminate\Support\Facades\Notification;
 
 class VentasController extends Controller
 {
@@ -87,6 +89,8 @@ class VentasController extends Controller
                 // ✅ RESTAR STOCK SIEMPRE (creada la venta, el producto se reserva)
                 $prod = Producto::findOrFail($producto['producto_id']);
                 $prod->decrement('stock_actual', $producto['cantidad']);
+                // ✅ NOTIFICAR STOCK BAJO si es necesario
+    $this->verificarYNotificarStockBajo($prod);
 
                 // Registrar movimiento de stock
                 $this->registrarMovimientoStock(
@@ -209,4 +213,145 @@ class VentasController extends Controller
 
         \Log::info("Movimiento stock registrado: Producto {$productoId}, Tipo {$tipo}, Cantidad {$cantidad}");
     }
+
+    // 📈 VENTAS POR MES
+public function ventasPorMes()
+{
+    $data = DB::table('ventas')
+        ->selectRaw("DATE_FORMAT(fecha_venta, '%Y-%m') as mes, SUM(total) as total")
+        ->groupBy('mes')
+        ->orderBy('mes')
+        ->get();
+
+    return response()->json($data);
+}
+
+// 📦 TOP PRODUCTOS
+public function topProductos()
+{
+    $data = DB::table('ventas_detalle as vd')
+        ->join('productos as p', 'p.id', '=', 'vd.producto_id')
+        ->select('p.nombre', DB::raw('SUM(vd.cantidad) as total'))
+        ->groupBy('p.nombre')
+        ->orderByDesc('total')
+        ->limit(5)
+        ->get();
+
+    return response()->json($data);
+}
+
+// 🔄 MOVIMIENTOS DE STOCK
+public function movimientosStock()
+{
+    $data = DB::table('movimientos_stock')
+        ->selectRaw("
+            DATE(created_at) as fecha,
+            SUM(CASE WHEN tipo = 'entrada_compra' THEN cantidad ELSE 0 END) as entradas,
+            SUM(CASE WHEN tipo = 'salida_venta' THEN cantidad ELSE 0 END) as salidas
+        ")
+        ->groupBy('fecha')
+        ->orderBy('fecha')
+        ->get();
+
+    return response()->json($data);
+}
+// Agrega este método a tu VentasController.php
+
+// 📊 DEVOLUCIONES POR PRODUCTO (para gráfica apilada)
+public function devolucionesVsVentas()
+{
+    // Obtener ventas por producto
+    $ventasData = DB::table('ventas_detalle as vd')
+        ->join('productos as p', 'p.id', '=', 'vd.producto_id')
+        ->select(
+            'p.id as producto_id',
+            'p.nombre',
+            DB::raw('SUM(vd.cantidad) as total_vendido')
+        )
+        ->groupBy('p.id', 'p.nombre')
+        ->get();
+
+    // Obtener devoluciones por producto
+    $devolucionesData = DB::table('devoluciones_detalle as dd')
+        ->join('productos as p', 'p.id', '=', 'dd.producto_id')
+        ->join('devolucion_ventas as dv', 'dv.id', '=', 'dd.devolucion_venta_id')
+        ->where('dv.estado', 'completada')  // Solo devoluciones completadas que afectan stock
+        ->select(
+            'p.id as producto_id',
+            'p.nombre',
+            DB::raw('SUM(dd.cantidad) as total_devuelto')
+        )
+        ->groupBy('p.id', 'p.nombre')
+        ->get();
+
+    // Combinar datos
+    $resultado = [];
+    $productosIds = $ventasData->pluck('producto_id')->merge($devolucionesData->pluck('producto_id'))->unique();
+
+    foreach ($productosIds as $id) {
+        $venta = $ventasData->firstWhere('producto_id', $id);
+        $devolucion = $devolucionesData->firstWhere('producto_id', $id);
+        
+        $resultado[] = [
+            'nombre' => $venta->nombre ?? $devolucion->nombre,
+            'vendido' => $venta->total_vendido ?? 0,
+            'devuelto' => $devolucion->total_devuelto ?? 0,
+            'neto' => ($venta->total_vendido ?? 0) - ($devolucion->total_devuelto ?? 0)
+        ];
+    }
+
+    // Ordenar por más vendido
+    usort($resultado, function($a, $b) {
+        return $b['vendido'] - $a['vendido'];
+    });
+
+    // Limitar a top 8 productos
+    $resultado = array_slice($resultado, 0, 8);
+
+    return response()->json($resultado);
+}
+
+// 📈 VENTAS vs DEVOLUCIONES por MES (línea comparativa)
+public function ventasVsDevolucionesMensual()
+{
+    // Ventas por mes
+    $ventasMensual = DB::table('ventas')
+        ->selectRaw("
+            DATE_FORMAT(fecha_venta, '%Y-%m') as mes,
+            SUM(total) as total_ventas,
+            COUNT(*) as cantidad_ventas
+        ")
+        ->groupBy('mes')
+        ->orderBy('mes')
+        ->get();
+
+    // Devoluciones por mes
+    $devolucionesMensual = DB::table('devolucion_ventas')
+        ->where('estado', 'completada')
+        ->selectRaw("
+            DATE_FORMAT(fecha, '%Y-%m') as mes,
+            SUM(total_devuelto) as total_devuelto,
+            COUNT(*) as cantidad_devoluciones
+        ")
+        ->groupBy('mes')
+        ->orderBy('mes')
+        ->get();
+
+    // Combinar datos
+    $todosLosMeses = $ventasMensual->pluck('mes')->merge($devolucionesMensual->pluck('mes'))->unique()->sort();
+
+    $resultado = [];
+    foreach ($todosLosMeses as $mes) {
+        $venta = $ventasMensual->firstWhere('mes', $mes);
+        $devolucion = $devolucionesMensual->firstWhere('mes', $mes);
+        
+        $resultado[] = [
+            'mes' => $mes,
+            'ventas' => $venta ? floatval($venta->total_ventas) : 0,
+            'devoluciones' => $devolucion ? floatval($devolucion->total_devuelto) : 0
+        ];
+    }
+
+    return response()->json($resultado);
+}
 }

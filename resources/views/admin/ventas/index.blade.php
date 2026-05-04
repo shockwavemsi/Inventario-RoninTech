@@ -7,11 +7,17 @@
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="{{ asset('css/menu.css') }}">
     <link rel="stylesheet" href="{{ asset('css/compras.css') }}">
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <script src="{{ asset('js/menu.js') }}"></script>
+    @php
+    $user = auth()->user();
+    $roleName = $user->role->name ?? 'user';  // Accede al nombre del rol
+    $menuScript = $roleName === 'admin' ? 'js/menu.js' : 'js/userMenu.js';
+@endphp
+<script src="{{ asset($menuScript) }}"></script>
 
     <!-- ESTILOS PERSONALIZADOS PARA TABLA -->
     <style>
@@ -223,6 +229,11 @@
         <p id="contador">
             <i class="bi bi-info-circle"></i> <strong>Mostrando {{ count($ventas) }} ventas</strong>
         </p>
+        <div class="text-end mt-3">
+    <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalGraficas">
+        <i class="bi bi-bar-chart-line"></i> Ver gráficas
+    </button>
+</div>
 
     </div>
 
@@ -343,6 +354,90 @@
             </div>
         </div>
     </div>
+    <!-- MODAL DE GRÁFICAS MEJORADO -->
+<div class="modal fade" id="modalGraficas" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-graph-up"></i> Análisis de Ventas y Devoluciones
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="row mb-4">
+                    <!-- Gráfica 1: Ventas mensuales -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card bg-dark text-white">
+                            <div class="card-header">
+                                <i class="bi bi-cash-stack"></i> Ventas mensuales
+                            </div>
+                            <div class="card-body">
+                                <canvas id="ventasMensualChart" style="max-height: 300px;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gráfica 2: Ventas vs Devoluciones mensual -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card bg-dark text-white">
+                            <div class="card-header">
+                                <i class="bi bi-arrow-left-right"></i> Ventas vs Devoluciones (€)
+                            </div>
+                            <div class="card-body">
+                                <canvas id="ventasVsDevolucionesChart" style="max-height: 300px;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <!-- Gráfica 3: Top productos con devoluciones (Gráfico apilado) -->
+                    <div class="col-md-12 mb-4">
+                        <div class="card bg-dark text-white">
+                            <div class="card-header">
+                                <i class="bi bi-bar-chart-steps"></i> Top productos - Ventas (azul) vs Devoluciones (rojo)
+                            </div>
+                            <div class="card-body" style="overflow-x: auto;">
+                                <canvas id="productosVsDevolucionesChart" style="max-height: 400px; min-width: 600px;"></canvas>
+                            </div>
+                            <div class="card-footer small text-muted">
+                                <i class="bi bi-info-circle"></i> Las barras rojas representan productos devueltos
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Gráfica 4: Movimientos de stock original -->
+                    <div class="col-md-12">
+                        <div class="card bg-dark text-white">
+                            <div class="card-header">
+                                <i class="bi bi-arrow-repeat"></i> Movimientos de stock (Entradas vs Salidas)
+                            </div>
+                            <div class="card-body">
+                                <canvas id="movimientosChart" style="max-height: 300px;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Cerrar
+                </button>
+                <button type="button" class="btn btn-primary" onclick="window.print()">
+                    <i class="bi bi-printer"></i> Imprimir
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -515,6 +610,166 @@
                 }
             });
         });
+        let chartsCargados = false;
+
+    document.getElementById('modalGraficas').addEventListener('shown.bs.modal', function () {
+
+        if (chartsCargados) return;
+
+        // 📈 VENTAS POR MES (original)
+        fetch('/api/ventas-mes')
+            .then(res => res.json())
+            .then(data => {
+                new Chart(document.getElementById('ventasMensualChart'), {
+                    type: 'line',
+                    data: {
+                        labels: data.map(v => v.mes),
+                        datasets: [{
+                            label: 'Ventas (€)',
+                            data: data.map(v => v.total),
+                            borderColor: '#0d6efd',
+                            backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                            tension: 0.3,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: { labels: { color: '#fff' } }
+                        }
+                    }
+                });
+            });
+
+        // 📊 VENTAS vs DEVOLUCIONES MENSUAL (comparativa)
+        fetch('/api/ventas-vs-devoluciones-mensual')
+            .then(res => res.json())
+            .then(data => {
+                new Chart(document.getElementById('ventasVsDevolucionesChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: data.map(d => d.mes),
+                        datasets: [
+                            {
+                                label: 'Ventas (€)',
+                                data: data.map(d => d.ventas),
+                                backgroundColor: 'rgba(13, 110, 253, 0.7)',
+                                borderColor: '#0d6efd',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Devoluciones (€)',
+                                data: data.map(d => d.devoluciones),
+                                backgroundColor: 'rgba(220, 53, 69, 0.7)',
+                                borderColor: '#dc3545',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: { labels: { color: '#fff' } },
+                            tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: €${ctx.raw.toFixed(2)}` } }
+                        },
+                        scales: { y: { ticks: { color: '#fff' }, grid: { color: 'rgba(255,255,255,0.1)' } } }
+                    }
+                });
+            });
+
+        // 📦 TOP PRODUCTOS con DEVOLUCIONES (barras apiladas / agrupadas)
+        fetch('/api/devoluciones-vs-ventas')
+            .then(res => res.json())
+            .then(data => {
+                new Chart(document.getElementById('productosVsDevolucionesChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: data.map(p => p.nombre.length > 20 ? p.nombre.substring(0, 20) + '...' : p.nombre),
+                        datasets: [
+                            {
+                                label: 'Unidades Vendidas',
+                                data: data.map(p => p.vendido),
+                                backgroundColor: 'rgba(13, 110, 253, 0.8)',
+                                borderColor: '#0d6efd',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Unidades Devueltas',
+                                data: data.map(p => p.devuelto),
+                                backgroundColor: 'rgba(220, 53, 69, 0.8)',
+                                borderColor: '#dc3545',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: { labels: { color: '#fff' } },
+                            tooltip: {
+                                callbacks: {
+                                    footer: (tooltipItems) => {
+                                        const index = tooltipItems[0].dataIndex;
+                                        const neto = data[index].neto;
+                                        return `📊 Neto vendido: ${neto} unidades`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: { 
+                                ticks: { color: '#fff', stepSize: 1 },
+                                grid: { color: 'rgba(255,255,255,0.1)' },
+                                title: { display: true, text: 'Unidades', color: '#fff' }
+                            },
+                            x: { ticks: { color: '#fff', rotation: 45, maxRotation: 45 } }
+                        }
+                    }
+                });
+            });
+
+        // 🔄 MOVIMIENTOS STOCK (original)
+        fetch('/api/movimientos-stock')
+            .then(res => res.json())
+            .then(data => {
+                new Chart(document.getElementById('movimientosChart'), {
+                    type: 'line',
+                    data: {
+                        labels: data.map(m => m.fecha),
+                        datasets: [
+                            {
+                                label: 'Entradas',
+                                data: data.map(m => m.entradas),
+                                borderColor: '#198754',
+                                backgroundColor: 'rgba(25, 135, 84, 0.1)',
+                                tension: 0.3,
+                                fill: true
+                            },
+                            {
+                                label: 'Salidas',
+                                data: data.map(m => m.salidas),
+                                borderColor: '#dc3545',
+                                backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                                tension: 0.3,
+                                fill: true
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: { legend: { labels: { color: '#fff' } } },
+                        scales: { y: { ticks: { color: '#fff' }, grid: { color: 'rgba(255,255,255,0.1)' } } }
+                    }
+                });
+            });
+
+        chartsCargados = true;
+    });
 
     </script>
 
