@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ==================== MENÚ DINÁMICO (usuario) ====================
 function cargarMenuUsuario() {
+    
     fetch('/userMenu.json')
         .then(response => response.json())
         .then(data => {

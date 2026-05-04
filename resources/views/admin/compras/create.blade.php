@@ -223,7 +223,12 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{{ asset('js/menu.js') }}"></script>
+    @php
+    $user = auth()->user();
+    $roleName = $user->role->name ?? 'user';  // Accede al nombre del rol
+    $menuScript = $roleName === 'admin' ? 'js/menu.js' : 'js/userMenu.js';
+@endphp
+<script src="{{ asset($menuScript) }}"></script>
 
     <script>
         let productosTemp = [];
