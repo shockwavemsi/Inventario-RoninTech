@@ -219,97 +219,220 @@
             </div>
         </div>
     </div>
+    <!-- MODAL EDITAR PROVEEDOR -->
+<div class="modal fade" id="modalEditarProveedor" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <form id="formEditarProveedor">
+                @csrf
+                @method('PUT')
+                <input type="hidden" id="edit_id" name="id">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Proveedor</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <div class="mb-3">
+                        <label>Nombre</label>
+                        <input type="text" name="nombre" id="edit_nombre" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Dirección</label>
+                        <textarea name="direccion" id="edit_direccion" class="form-control"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Persona de Contacto</label>
+                        <input type="text" name="contacto_nombre" id="edit_contacto_nombre" class="form-control">
+                    </div>
+
+                    <div class="mb-3">
+                        <label># de Contacto</label>
+                        <input type="text" name="contacto_telefono" id="edit_contacto_telefono" class="form-control">
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Email</label>
+                        <input type="email" name="email" id="edit_email" class="form-control">
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Estado</label>
+                        <select name="activo" id="edit_activo" class="form-select">
+                            <option value="1">Activo</option>
+                            <option value="0">Desactivado</option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Actualizar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
 
     <!-- JS ACCIONES + BUSCADOR + CONTADOR + VER -->
     <script>
-        // ACCIONES
-        document.querySelectorAll('.accion-proveedor').forEach(select => {
-            select.addEventListener('change', function () {
-                const id = this.dataset.id;
-                const accion = this.value;
+    // ==================== ACCIONES (VER, EDITAR, ELIMINAR) ====================
+    document.querySelectorAll('.accion-proveedor').forEach(select => {
+        select.addEventListener('change', function () {
+            const id = this.dataset.id;
+            const accion = this.value;
 
-                if (accion === 'ver') {
-                    mostrarProveedor(id);
-                }
-
-                if (accion === 'editar') {
-                    window.location.href = `/proveedores/${id}/editar`;
-                }
-
-                if (accion === 'eliminar') {
-    console.log('Eliminando proveedor:', id);
-
-    if (confirm('¿Seguro que deseas eliminar este proveedor?')) {
-        fetch(`/proveedores/${id}`, { // 👈 ruta correcta REST
-            method: 'DELETE',
-            headers: { 
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Content-Type': 'application/json'
+            if (accion === 'ver') {
+                mostrarProveedor(id);
             }
-        })
-        .then(res => {
-            console.log('Response:', res.status);
-            if (res.ok) {
-                console.log('Recargando página...');
-                setTimeout(() => window.location.reload(), 500);
-            } else {
-                alert('Error al eliminar proveedor');
+
+            if (accion === 'editar') {
+                editarProveedor(id);
             }
-        })
-        .catch(err => {
-            console.error('Error:', err);
-            alert('Error en la solicitud');
+
+            if (accion === 'eliminar') {
+                console.log('Eliminando proveedor:', id);
+
+                if (confirm('¿Seguro que deseas eliminar este proveedor?')) {
+                    fetch(`/proveedores/${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(res => {
+                        if (res.ok) {
+                            window.location.reload();
+                        } else {
+                            alert('Error al eliminar proveedor');
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error:', err);
+                        alert('Error en la solicitud');
+                    });
+                }
+            }
+
+            // Resetear el select
+            this.value = '';
+        });
+    });
+
+    // ==================== VER PROVEEDOR (MODAL) ====================
+    function mostrarProveedor(id) {
+        fetch(`/proveedores/${id}/json`)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('ver_nombre').textContent = data.nombre;
+                document.getElementById('ver_direccion').textContent = data.direccion ?? '—';
+                document.getElementById('ver_contacto').textContent = data.contacto_nombre ?? '—';
+                document.getElementById('ver_telefono').textContent = data.contacto_telefono ?? '—';
+                document.getElementById('ver_email').textContent = data.email ?? '—';
+
+                const estado = document.getElementById('ver_estado');
+                estado.textContent = data.activo ? 'Activo' : 'Inactivo';
+                estado.className = data.activo ? 'badge bg-success' : 'badge bg-danger';
+
+                const modal = new bootstrap.Modal(document.getElementById('modalVerProveedor'));
+                modal.show();
+            });
+    }
+
+    // ==================== EDITAR PROVEEDOR (MODAL) ====================
+    function editarProveedor(id) {
+        fetch(`/proveedores/${id}/json`)
+            .then(res => res.json())
+            .then(data => {
+                // Cargar datos en el modal de edición
+                document.getElementById('edit_id').value = data.id;
+                document.getElementById('edit_nombre').value = data.nombre;
+                document.getElementById('edit_direccion').value = data.direccion ?? '';
+                document.getElementById('edit_contacto_nombre').value = data.contacto_nombre ?? '';
+                document.getElementById('edit_contacto_telefono').value = data.contacto_telefono ?? '';
+                document.getElementById('edit_email').value = data.email ?? '';
+                document.getElementById('edit_activo').value = data.activo ? '1' : '0';
+
+                const modal = new bootstrap.Modal(document.getElementById('modalEditarProveedor'));
+                modal.show();
+            });
+    }
+
+    // ==================== ENVÍO DEL FORMULARIO DE EDICIÓN (AJAX) ====================
+    const formEditar = document.getElementById('formEditarProveedor');
+    if (formEditar) {
+        formEditar.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('edit_id').value;
+            const formData = new FormData(this);
+
+            // Convertir FormData a objeto JSON
+            const data = {};
+            formData.forEach((value, key) => {
+                if (key !== '_method' && key !== '_token') {
+                    data[key] = value;
+                }
+            });
+
+            fetch(`/proveedores/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(res => res.json())
+            .then(respuesta => {
+                if (respuesta.success) {
+                    // Cerrar modal y recargar la página para ver cambios
+                    bootstrap.Modal.getInstance(document.getElementById('modalEditarProveedor')).hide();
+                    window.location.reload();
+                } else {
+                    alert('Error al actualizar: ' + (respuesta.message || 'Error desconocido'));
+                }
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                alert('Error en la solicitud de actualización');
+            });
         });
     }
-}
-            });
+
+    // ==================== BUSCADOR + CONTADOR ====================
+    const buscador = document.getElementById('buscador');
+    const filas = document.querySelectorAll('#tabla-proveedores tr');
+    const contador = document.getElementById('contador');
+    const total = filas.length;
+
+    buscador.addEventListener('keyup', function () {
+        const filtro = this.value.toLowerCase();
+        let visibles = 0;
+
+        filas.forEach(fila => {
+            const nombre = fila.querySelector('.nombre').textContent.toLowerCase();
+
+            if (nombre.includes(filtro)) {
+                fila.style.display = '';
+                visibles++;
+            } else {
+                fila.style.display = 'none';
+            }
         });
 
-        // FUNCIÓN PARA VER PROVEEDOR
-        function mostrarProveedor(id) {
-            fetch(`/proveedores/${id}/json`)
-                .then(res => res.json())
-                .then(data => {
-
-                    document.getElementById('ver_nombre').textContent = data.nombre;
-                    document.getElementById('ver_direccion').textContent = data.direccion ?? '—';
-                    document.getElementById('ver_contacto').textContent = data.contacto_nombre ?? '—';
-                    document.getElementById('ver_telefono').textContent = data.contacto_telefono ?? '—';
-                    document.getElementById('ver_email').textContent = data.email ?? '—';
-
-                    const estado = document.getElementById('ver_estado');
-                    estado.textContent = data.activo ? 'Activo' : 'Inactivo';
-                    estado.className = data.activo ? 'badge bg-success' : 'badge bg-danger';
-
-                    const modal = new bootstrap.Modal(document.getElementById('modalVerProveedor'));
-                    modal.show();
-                });
-        }
-
-        // BUSCADOR + CONTADOR
-        const buscador = document.getElementById('buscador');
-        const filas = document.querySelectorAll('#tabla-proveedores tr');
-        const contador = document.getElementById('contador');
-        const total = filas.length;
-
-        buscador.addEventListener('keyup', function () {
-            const filtro = this.value.toLowerCase();
-            let visibles = 0;
-
-            filas.forEach(fila => {
-                const nombre = fila.querySelector('.nombre').textContent.toLowerCase();
-
-                if (nombre.includes(filtro)) {
-                    fila.style.display = '';
-                    visibles++;
-                } else {
-                    fila.style.display = 'none';
-                }
-            });
-
-            contador.innerHTML = `<strong>Mostrando ${visibles} de ${total} proveedores</strong>`;
-        });
-    </script>
+        contador.innerHTML = `<strong>Mostrando ${visibles} de ${total} proveedores</strong>`;
+    });
+</script>
 
     <!-- BOOTSTRAP JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

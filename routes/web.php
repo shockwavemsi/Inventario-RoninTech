@@ -51,7 +51,9 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/usuarios', [UserController::class, 'index'])->name('usuarios.index');
     Route::get('/usuarios/crear', [UserController::class, 'create'])->name('usuarios.create');
     Route::post('/usuarios/guardar', [UserController::class, 'store'])->name('usuarios.store');
-    Route::delete('/usuarios/{id}/eliminar', [UserController::class, 'destroy'])->name('usuarios.destroy');
+    Route::delete('/usuarios/{id}', [UserController::class, 'destroy'])->name('usuarios.destroy');
+    Route::get('/usuarios/{id}/edit', [UserController::class, 'edit']);
+Route::put('/usuarios/{id}', [UserController::class, 'update']);
 });
 
 // PROVEEDORES - SOLO ADMIN
@@ -129,6 +131,8 @@ Route::middleware(['auth'])->group(function () {
 Route::get('/proveedores/{id}/json', function($id) {
     return \App\Models\Proveedor::findOrFail($id);
 })->middleware(['auth']);
+Route::get('/proveedores/{id}/edit', [ProveedorController::class, 'edit']);   // Para obtener datos
+Route::put('/proveedores/{id}', [ProveedorController::class, 'update']);       // Para actualizar
 
 // Producto JSON (solo lectura) - Accesible para ambos
 Route::get('/productos/{id}/json', function($id) {

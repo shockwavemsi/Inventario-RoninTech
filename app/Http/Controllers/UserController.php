@@ -34,12 +34,31 @@ class UserController extends Controller
         return redirect()->route('usuarios.index')->with('success', 'Usuario creado con éxito');
     }
     public function destroy($id)
-    {
-        $user = User::findOrFail($id);
-        $user->delete();
+{
+    $user = User::findOrFail($id);
+    $user->delete();
 
-        return redirect()->route('usuarios.index')->with('success', 'Usuario eliminado con éxito');
+    return response()->json(['success' => true]);
+}
+    public function edit($id)
+{
+    $user = User::with('role')->findOrFail($id);
+    return response()->json($user);
+}
+
+public function update(Request $request, $id)
+{
+    $user = User::findOrFail($id);
+    $user->name = $request->name;
+    $user->email = $request->email;
+    if ($request->filled('password')) {
+        $user->password = bcrypt($request->password);
     }
+    $user->role_id = $request->role_id;
+    $user->save();
+
+    return response()->json(['success' => true]);
+}
 
 }
 

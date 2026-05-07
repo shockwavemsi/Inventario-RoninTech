@@ -159,57 +159,164 @@
         </div>
     </div>
 </div>
+<!-- MODAL EDITAR USUARIO -->
+<div class="modal fade" id="modalEditarUsuario" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="formEditarUsuario">
+                @csrf
+                @method('PUT')
+                <input type="hidden" id="edit_id" name="id">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Usuario</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label>Nombre</label>
+                        <input type="text" name="name" id="edit_name" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Email</label>
+                        <input type="email" name="email" id="edit_email" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Nueva Contraseña (dejar en blanco para no cambiar)</label>
+                        <input type="password" name="password" id="edit_password" class="form-control">
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Tipo de Usuario</label>
+                        <select name="role_id" id="edit_role_id" class="form-select">
+                            <option value="1">Administrador</option>
+                            <option value="2">Usuario</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Actualizar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
     <!-- JS ACCIONES + BUSCADOR + CONTADOR -->
     <script>
-        // ACCIONES EDITAR / ELIMINAR
-        document.querySelectorAll('.accion-usuario').forEach(select => {
-            select.addEventListener('change', function () {
-                const id = this.dataset.id;
-                const accion = this.value;
+    // ACCIONES EDITAR / ELIMINAR (ahora editar abre modal)
+    document.querySelectorAll('.accion-usuario').forEach(select => {
+        select.addEventListener('change', function () {
+            const id = this.dataset.id;
+            const accion = this.value;
 
-                if (accion === 'editar') {
-                    window.location.href = `/usuarios/${id}/editar`;
-                }
+            if (accion === 'editar') {
+                editarUsuario(id);
+            }
 
-                if (accion === 'eliminar') {
-                    if (confirm('¿Seguro que deseas eliminar este usuario?')) {
-                        fetch(`/usuarios/${id}/eliminar`, {
-                            method: 'DELETE',
-                            headers: {
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                            }
-                        })
-                        .then(() => window.location.reload());
-                    }
+            if (accion === 'eliminar') {
+                if (confirm('¿Seguro que deseas eliminar este usuario?')) {
+                    fetch(`/usuarios/${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(res => {
+                        if (res.ok) {
+                            window.location.reload();
+                        } else {
+                            alert('Error al eliminar usuario');
+                        }
+                    })
+                    .catch(err => alert('Error en la solicitud'));
                 }
+            }
+
+            // Resetear select
+            this.value = '';
+        });
+    });
+
+    // Función para cargar datos en modal de edición
+    function editarUsuario(id) {
+        fetch(`/usuarios/${id}/edit`)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('edit_id').value = data.id;
+                document.getElementById('edit_name').value = data.name;
+                document.getElementById('edit_email').value = data.email;
+                document.getElementById('edit_role_id').value = data.role_id;
+                document.getElementById('edit_password').value = ''; // limpiar campo contraseña
+
+                const modal = new bootstrap.Modal(document.getElementById('modalEditarUsuario'));
+                modal.show();
             });
+    }
+
+    // Envío del formulario de edición vía AJAX
+    document.getElementById('formEditarUsuario').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const id = document.getElementById('edit_id').value;
+        const formData = new FormData(this);
+
+        const data = {};
+        formData.forEach((value, key) => {
+            if (key !== '_method' && key !== '_token') {
+                data[key] = value;
+            }
         });
 
-        // BUSCADOR + CONTADOR
-        const buscador = document.getElementById('buscador');
-        const filas = document.querySelectorAll('#tabla-usuarios tr');
-        const contador = document.getElementById('contador');
-        const totalUsuarios = filas.length;
+        fetch(`/usuarios/${id}`, {
+            method: 'PUT',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(res => res.json())
+        .then(respuesta => {
+            if (respuesta.success) {
+                bootstrap.Modal.getInstance(document.getElementById('modalEditarUsuario')).hide();
+                window.location.reload();
+            } else {
+                alert('Error al actualizar usuario');
+            }
+        })
+        .catch(err => alert('Error en la solicitud'));
+    });
 
-        buscador.addEventListener('keyup', function () {
-            const filtro = this.value.toLowerCase();
-            let visibles = 0;
+    // BUSCADOR + CONTADOR (sin cambios)
+    const buscador = document.getElementById('buscador');
+    const filas = document.querySelectorAll('#tabla-usuarios tr');
+    const contador = document.getElementById('contador');
+    const totalUsuarios = filas.length;
 
-            filas.forEach(fila => {
-                const nombre = fila.querySelector('.nombre').textContent.toLowerCase();
+    buscador.addEventListener('keyup', function () {
+        const filtro = this.value.toLowerCase();
+        let visibles = 0;
 
-                if (nombre.includes(filtro)) {
-                    fila.style.display = '';
-                    visibles++;
-                } else {
-                    fila.style.display = 'none';
-                }
-            });
-
-            contador.innerHTML = `<strong>Mostrando ${visibles} de ${totalUsuarios} usuarios</strong>`;
+        filas.forEach(fila => {
+            const nombre = fila.querySelector('.nombre').textContent.toLowerCase();
+            if (nombre.includes(filtro)) {
+                fila.style.display = '';
+                visibles++;
+            } else {
+                fila.style.display = 'none';
+            }
         });
-    </script>
+
+        contador.innerHTML = `<strong>Mostrando ${visibles} de ${totalUsuarios} usuarios</strong>`;
+    });
+</script>
 
 </body>
 </html>

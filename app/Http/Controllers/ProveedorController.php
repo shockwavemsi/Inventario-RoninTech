@@ -37,5 +37,23 @@ class ProveedorController extends Controller
         'success' => true
     ]);
 }
+// app/Http/Controllers/ProveedorController.php
+
+public function edit($id)
+{
+    $proveedor = Proveedor::findOrFail($id);
+    return response()->json($proveedor); // Mismo formato que el JSON actual
+}
+
+public function update(Request $request, $id)
+{
+    $proveedor = Proveedor::findOrFail($id);
+    $proveedor->update($request->all());
+    
+    return response()->json([
+        'success' => true,
+        'message' => 'Proveedor actualizado correctamente'
+    ]);
+}
 }
 
