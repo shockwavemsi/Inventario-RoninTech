@@ -175,7 +175,7 @@
 
     </script>
 
-    <script src="{{ asset('js/stocks/stock.js') }}"></script>
+    <script src="{{ secure_asset('js/stocks/stock.js') }}"></script>
 
 </body>
 </html>
