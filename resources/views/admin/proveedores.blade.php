@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="{{ secure_asset('css/menu.css') }}">
     <link rel="stylesheet" href="{{ secure_asset('css/index.css') }}">
     <link rel="stylesheet" href="{{ secure_asset('css/compras.css') }}">
-    <script src="{{ asset('js/menu.js') }}"></script>
+    <script src="{{ secure_asset('js/menu.js') }}"></script>
 </head>
 
 <body>

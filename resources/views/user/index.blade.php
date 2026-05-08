@@ -141,7 +141,7 @@
             border-radius: 20px;
         }
     </style>
-    <script src="{{ asset('js/userMenu.js') }}"></script>
+    <script src="{{ secure_asset('js/userMenu.js') }}"></script>
 </head>
 
 <body>

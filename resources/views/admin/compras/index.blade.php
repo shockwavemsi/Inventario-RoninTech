@@ -378,15 +378,15 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{{ asset('js/compras/compras.js') }}"></script>
-    <script src="{{ asset('js/compras/compras-ver.js') }}"></script>
-    <script src="{{ asset('js/compras/compras-estado.js') }}"></script>
-    <script src="{{ asset('js/compras/compras-eliminar.js') }}"></script>
-    <script src="{{ asset('js/compras/compras-buscador.js') }}"></script>
-    <script src="{{ asset('js/compras/compras-crear.js') }}"></script>
-    <script src="{{ asset('js/compras/compras-actualizar.js') }}"></script>
-    <script src="{{ asset('js/compras/compras-stats.js') }}"></script>
-    <script src="{{ asset('js/compras/model-fix.js') }}"></script>
+    <script src="{{ secure_asset('js/compras/compras.js') }}"></script>
+<script src="{{ secure_asset('js/compras/compras-ver.js') }}"></script>
+<script src="{{ secure_asset('js/compras/compras-estado.js') }}"></script>
+<script src="{{ secure_asset('js/compras/compras-eliminar.js') }}"></script>
+<script src="{{ secure_asset('js/compras/compras-buscador.js') }}"></script>
+<script src="{{ secure_asset('js/compras/compras-crear.js') }}"></script>
+<script src="{{ secure_asset('js/compras/compras-actualizar.js') }}"></script>
+<script src="{{ secure_asset('js/compras/compras-stats.js') }}"></script>
+<script src="{{ secure_asset('js/compras/model-fix.js') }}"></script>
     <script>
         let filtroActual = 'todos';
         function aplicarFiltros() {
