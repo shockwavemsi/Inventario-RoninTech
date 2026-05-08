@@ -229,7 +229,8 @@
     $roleName = $user->role->name ?? 'user';  // Accede al nombre del rol
     $menuScript = $roleName === 'admin' ? 'js/menu.js' : 'js/userMenu.js';
 @endphp
-<script src="{{ asset($menuScript) }}"></script>
+<script src="{{ secure_asset($menuScript) }}"></script>
+
 
     <script>
         let productosTemp = [];
