@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="{{ asset('css/compras.css') }}">
 
     <!-- Chart.js para gráficas -->
+     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
        @php
             $user = auth()->user();
             $roleName = $user->role->name ?? 'user';  // Accede al nombre del rol
