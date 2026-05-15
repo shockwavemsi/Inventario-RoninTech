@@ -8,11 +8,15 @@
     <!-- Bootstrap -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="{{ secure_asset('css/menu.css') }}">
-    <link rel="stylesheet" href="{{ secure_asset('css/compras.css') }}">
-    
+    <link rel="stylesheet" href="{{ asset('css/menu.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/compras.css') }}">
+
     <!-- Chart.js para gráficas -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+       @php
+            $user = auth()->user();
+            $roleName = $user->role->name ?? 'user';  // Accede al nombre del rol
+            $menuScript = $roleName === 'admin' ? 'js/menu.js' : 'js/userMenu.js';
+        @endphp
 
     <style>
         /* CONTENIDO */
@@ -141,7 +145,7 @@
             border-radius: 20px;
         }
     </style>
-    <script src="{{ secure_asset('js/menu.js') }}"></script>
+    <script src="{{ asset('js/menu.js') }}"></script>
 </head>
 
 <body>
@@ -165,12 +169,12 @@
 
     <!-- CONTENIDO -->
     <div class="content">
-        
+
         <!-- ENCABEZADO CON FECHA -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1 class="mb-0">📊 Dashboard</h1>
             <div class="text-end">
-                
+
             </div>
         </div>
         <!-- ========================================== -->
@@ -215,7 +219,7 @@
         <div class="row g-4 mb-4">
             <!-- Ventas Hoy -->
             <div class="col-md-4 col-lg-2">
-                <a href="{{ route('ventas.index') }}" class="block-link">
+               
                     <div class="card-box bg-red">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
@@ -236,7 +240,7 @@
 
             <!-- Ventas Totales -->
             <div class="col-md-4 col-lg-2">
-                <a href="{{ route('ventas.index') }}" class="block-link">
+                
                     <div class="card-box bg-pink">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
@@ -252,7 +256,7 @@
 
             <!-- Productos -->
             <div class="col-md-4 col-lg-2">
-                <a href="{{ route('productos.index') }}" class="block-link">
+                
                     <div class="card-box bg-darkblue">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
@@ -268,7 +272,7 @@
 
             <!-- Compras Pendientes -->
             <div class="col-md-4 col-lg-2">
-                <a href="{{ route('compras.index') }}" class="block-link">
+                
                     <div class="card-box bg-blue">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
@@ -284,7 +288,7 @@
 
             <!-- Devoluciones Mes -->
             <div class="col-md-4 col-lg-2">
-                <a href="{{ route('devoluciones.index') }}" class="block-link">
+                
                     <div class="card-box bg-orange">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
@@ -300,7 +304,7 @@
 
             <!-- Stock Crítico -->
             <div class="col-md-4 col-lg-2">
-                <a href="{{ route('productos.index') }}" class="block-link">
+                
                     <div class="card-box {{ ($stockCritico ?? 0) > 0 ? 'bg-red' : 'bg-green' }}">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
@@ -379,7 +383,7 @@
                         <div class="activity-content">
                             <p class="activity-text">{{ $actividad->descripcion }}</p>
                             <small class="activity-time">
-                                <i class="bi bi-person-circle"></i> {{ $actividad->usuario }} • 
+                                <i class="bi bi-person-circle"></i> {{ $actividad->usuario }} •
                                 {{ $actividad->tiempo }}
                             </small>
                         </div>
@@ -404,7 +408,7 @@
         @isset($ventas7Dias)
         const ventas7Dias = @json($ventas7Dias);
         const devoluciones7Dias = @json($devoluciones7Dias);
-        
+
         // Crear array de fechas (últimos 7 días)
         const fechas = [];
         for (let i = 6; i >= 0; i--) {
@@ -412,7 +416,7 @@
             fecha.setDate(fecha.getDate() - i);
             fechas.push(fecha.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }));
         }
-        
+
         // Mapear datos
         const ventasData = fechas.map(fecha => {
             const venta = ventas7Dias.find(v => {
@@ -421,7 +425,7 @@
             });
             return venta ? venta.total : 0;
         });
-        
+
         const devolucionesData = fechas.map(fecha => {
             const dev = devoluciones7Dias.find(d => {
                 const fechaDev = new Date(d.fecha).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' });
@@ -429,7 +433,7 @@
             });
             return dev ? dev.total : 0;
         });
-        
+
         new Chart(document.getElementById('ventasDevolucionesChart'), {
             type: 'line',
             data: {

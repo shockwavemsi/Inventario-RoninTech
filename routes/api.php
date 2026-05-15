@@ -1,18 +1,22 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\PdfController;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. Enjoy building your API!
-|
-*/
+// ============================================
+// RUTAS DE GENERACIÓN DE PDFs CON CARBONE
+// ============================================
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
+Route::prefix('pdf')->group(function () {
+
+    // Facturas
+    Route::get('/factura/{id}', [PdfController::class, 'descargarFactura'])
+        ->name('pdf.factura');
+
+    // Pedidos
+    Route::get('/pedido/{id}', [PdfController::class, 'descargarPedido'])
+        ->name('pdf.pedido');
+
+    // Albaranes
+    Route::get('/albarani/{id}', [PdfController::class, 'descargarAlbarani'])
+        ->name('pdf.albarani');
 });

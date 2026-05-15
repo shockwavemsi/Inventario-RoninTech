@@ -1,777 +1,441 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $config->nombre_empresa }} - Ventas</title>
+@extends('layouts.app')
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="{{ secure_asset('css/menu.css') }}">
-    <link rel="stylesheet" href="{{ secure_asset('css/compras.css') }}">
+@section('title', 'Sistema de Ventas')
 
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    @php
-    $user = auth()->user();
-    $roleName = $user->role->name ?? 'user';  // Accede al nombre del rol
-    $menuScript = $roleName === 'admin' ? 'js/menu.js' : 'js/userMenu.js';
-@endphp
-<script src="{{ secure_asset($menuScript) }}"></script>
+@section('content')
 
-    <!-- ESTILOS PERSONALIZADOS PARA TABLA -->
-    <style>
-        /* Override Bootstrap para tema cyberpunk */
-        .table {
-            color: #f0f0f0;
-        }
-
-        .table-dark {
-            background-color: rgba(15, 15, 20, 0.9) !important;
-        }
-
-        .table-dark thead th {
-            border-color: #e63946 !important;
-            background-color: rgba(230, 57, 70, 0.15) !important;
-        }
-
-        .table-dark tbody + thead th {
-            border-color: #e63946 !important;
-        }
-
-        .table-hover tbody tr:hover {
-            background-color: rgba(230, 57, 70, 0.1) !important;
-            color: #f0f0f0;
-        }
-
-        .table-striped tbody tr:nth-of-type(odd) {
-            background-color: rgba(20, 20, 25, 0.3) !important;
-        }
-
-        .table-striped tbody tr:nth-of-type(even) {
-            background-color: transparent;
-        }
-
-        .table-bordered {
-            border-color: rgba(230, 57, 70, 0.2) !important;
-        }
-
-        .table-bordered th,
-        .table-bordered td {
-            border-color: rgba(230, 57, 70, 0.2) !important;
-        }
-    </style>
-
-</head>
-
-<body>
-
-    <!-- BOTÓN HAMBURGUESA -->
-    <button id="menu-toggle" class="menu-toggle" aria-label="Abrir menú">
-        <span></span>
-        <span></span>
-        <span></span>
-    </button>
-
-    <!-- OVERLAY -->
-    <div id="sidebar-overlay" class="sidebar-overlay"></div>
-
-    <!-- SIDEBAR -->
-    <div class="sidebar">
-        <h3>{{ $config->nombre_empresa }}</h3>
-        <div id="menu-contenedor"></div>
-        <a href="{{ route('logout') }}" class="mt-4">
-            <i class="bi bi-box-arrow-right"></i> Cerrar sesión
-        </a>
+<!-- HEADER PERSONALIZADO -->
+<div style="background: linear-gradient(to right, #0d0d0e 0%, #111111 100%); border-bottom: 2px solid #e63946; padding: 1.5rem 0; margin: -30px -30px 30px -30px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 0 30px; display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <div style="width: 50px; height: 50px; background-color: #e63946; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 28px; color: white;">💰</div>
+            <div>
+                <h1 style="font-size: 1.8rem; font-weight: bold; color: #f0f0f0; margin: 0;">SISTEMA DE VENTAS</h1>
+                <p style="font-size: 0.75rem; color: #a0a0a0; margin: 0;">RoninTech - Gestión Integral de Ventas</p>
+            </div>
+        </div>
     </div>
-
-    <!-- CONTENIDO PRINCIPAL -->
-    <div class="content">
-
-        <h1>
-            <i class="bi bi-bag-check"></i> Ventas
-        </h1>
-
-        @if(session('success'))
-            <div class="alert alert-success">
-                <i class="bi bi-check-circle-fill"></i> {{ session('success') }}
-            </div>
-        @endif
-
-        <!-- TARJETAS ESTADÍSTICAS -->
-        <div class="row mb-4">
-            <div class="col-md-3 col-sm-6 mb-3">
-                <div class="stat-card">
-                    <div class="d-flex align-items-center gap-3">
-                        <i class="bi bi-bag-check" style="font-size: 2.5rem; color: var(--neon-red); opacity: 0.7;"></i>
-                        <div>
-                            <div class="stat-label">Total de Ventas</div>
-                            <div class="stat-value">{{ count($ventas) }}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-3 col-sm-6 mb-3">
-                <div class="stat-card">
-                    <div class="d-flex align-items-center gap-3">
-                        <i class="bi bi-hourglass-split" style="font-size: 2.5rem; color: var(--neon-red); opacity: 0.7;"></i>
-                        <div>
-                            <div class="stat-label">Pendientes</div>
-                            <div class="stat-value">{{ $ventas->where('estado', 'pendiente')->count() }}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-3 col-sm-6 mb-3">
-                <div class="stat-card">
-                    <div class="d-flex align-items-center gap-3">
-                        <i class="bi bi-check-circle-fill" style="font-size: 2.5rem; color: var(--neon-red); opacity: 0.7;"></i>
-                        <div>
-                            <div class="stat-label">Completadas</div>
-                            <div class="stat-value">{{ $ventas->where('estado', 'completada')->count() }}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-3 col-sm-6 mb-3">
-                <div class="stat-card">
-                    <div class="d-flex align-items-center gap-3">
-                        <i class="bi bi-cash-coin" style="font-size: 2.5rem; color: var(--neon-red); opacity: 0.7;"></i>
-                        <div>
-                            <div class="stat-label">Valor Total</div>
-                            <div class="stat-value">${{ number_format($ventas->sum('total'), 0) }}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- FILTROS Y CONTROLES -->
-        <div class="d-flex justify-content-between align-items-center mb-4 gap-3">
-            <a href="{{ route('ventas.create') }}" class="btn btn-primary">
-                <i class="bi bi-plus-circle"></i> Nueva Venta
-            </a>
-
-            <div class="d-flex gap-2" style="flex: 1; max-width: 600px;">
-                <select id="filtro-estado" class="form-select filtro-select">
-                    <option value="todos">Todos</option>
-                    <option value="completada">Completadas</option>
-                    <option value="pendiente">Pendientes</option>
-                </select>
-                <input type="text" id="buscador" class="form-control" placeholder="🔍 Buscar por código o cliente...">
-            </div>
-        </div>
-
-        <!-- TABLA DE VENTAS -->
-        <div class="table-responsive">
-            <table class="table table-dark table-striped table-hover table-bordered">
-                <thead>
-                    <tr class="table-active">
-                        <th><i class="bi bi-barcode"></i> Código</th>
-                        <th><i class="bi bi-calendar"></i> Fecha</th>
-                        <th><i class="bi bi-person"></i> Cliente</th>
-                        <th><i class="bi bi-cash-coin"></i> Total</th>
-                        <th><i class="bi bi-info-circle"></i> Estado</th>
-                        <th><i class="bi bi-person-badge"></i> Usuario</th>
-                        <th style="width: 150px"><i class="bi bi-gear"></i> Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="tabla-ventas">
-                    @foreach($ventas as $v)
-                        <tr data-estado="{{ $v->estado }}" data-codigo="{{ $v->numero_factura }}" data-cliente="{{ $v->cliente }}">
-                            <td class="codigo">
-                                <i class="bi bi-receipt"></i> {{ $v->numero_factura }}
-                            </td>
-                            <td>{{ $v->fecha_venta->format('d/m/Y') }}</td>
-                            <td class="cliente">{{ $v->cliente }}</td>
-                            <td><strong>${{ number_format($v->total, 2) }}</strong></td>
-                            <td>
-                                <span class="badge estado-badge px-3 py-2
-                                    @if($v->estado === 'pendiente') bg-warning text-dark
-                                    @elseif($v->estado === 'completada') bg-success
-                                    @else bg-secondary @endif">
-                                    <i class="bi 
-                                        @if($v->estado === 'pendiente') bi-clock-history
-                                        @elseif($v->estado === 'completada') bi-check-circle-fill
-                                        @else bi-question-circle @endif
-                                        me-1"></i>
-                                    {{ ucfirst($v->estado) }}
-                                </span>
-                            </td>
-                            <td>{{ $v->usuario->name ?? '—' }}</td>
-                            <td>
-                                <div class="btn-group btn-group-sm" role="group">
-                                    <button type="button" class="btn btn-info ver-venta" 
-                                            data-id="{{ $v->id }}" title="Ver detalles">
-                                        <i class="bi bi-eye"></i>
-                                    </button>
-                                    @if($v->estado === 'pendiente')
-                                        <button type="button" class="btn btn-success confirmar-venta" 
-                                                data-id="{{ $v->id }}" title="Confirmar venta">
-                                            <i class="bi bi-check-circle"></i>
-                                        </button>
-                                    @endif
-                                    <button type="button" class="btn btn-danger eliminar-venta" 
-                                            data-id="{{ $v->id }}" title="Eliminar venta">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-
-        <p id="contador">
-            <i class="bi bi-info-circle"></i> <strong>Mostrando {{ count($ventas) }} ventas</strong>
-        </p>
-        <div class="text-end mt-3">
-    <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalGraficas">
-        <i class="bi bi-bar-chart-line"></i> Ver gráficas
-    </button>
 </div>
 
+<!-- FLUJO SECTION -->
+<div style="background-color: rgba(20, 20, 25, 0.65); border-bottom: 2px solid #e63946; padding: 2rem 0; margin: -30px -30px 30px -30px; backdrop-filter: blur(20px);">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 0 30px;">
+        <p style="font-size: 0.875rem; color: #a0a0a0; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 1px;">Flujo de Ventas</p>
+
+        <div style="display: flex; justify-content: center; align-items: center; gap: 2rem; flex-wrap: wrap;">
+            <!-- VENTA -->
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; cursor: pointer;" onclick="document.getElementById('nav-ventas').click()">
+                <div style="width: 60px; height: 60px; background: rgba(230, 57, 70, 0.2); border: 2px solid #e63946; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; color: #e63946; font-weight: 700; transition: all 0.3s;">
+                    1️⃣
+                </div>
+                <span style="font-size: 0.85rem; color: #f0f0f0; font-weight: 600;">VENTA</span>
+            </div>
+
+            <!-- FLECHA -->
+            <div style="font-size: 2rem; color: #e63946; margin-top: 1.5rem;">→</div>
+
+            <!-- FACTURA VENTA -->
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; cursor: pointer;" onclick="document.getElementById('nav-facturas').click()">
+                <div style="width: 60px; height: 60px; background: rgba(230, 57, 70, 0.2); border: 2px solid #e63946; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; color: #e63946; font-weight: 700;">
+                    2️⃣
+                </div>
+                <span style="font-size: 0.85rem; color: #f0f0f0; font-weight: 600;">FACTURA</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div style="max-width: 1200px; margin: 0 auto;">
+
+    <!-- ============ PESTAÑAS / TABS ============ -->
+    <ul class="nav nav-tabs" style="border-bottom: 2px solid #e63946; margin-bottom: 2rem; background: rgba(20, 20, 25, 0.5); border-radius: 8px 8px 0 0; padding: 0.5rem;">
+        <li class="nav-item">
+            <button type="button" id="nav-ventas" class="nav-link active" data-bs-toggle="tab" data-bs-target="#ventas-tab" style="color: #e63946; font-weight: 700; border: none;">
+                📋 VENTAS
+            </button>
+        </li>
+        <li class="nav-item">
+            <button type="button" id="nav-facturas" class="nav-link" data-bs-toggle="tab" data-bs-target="#facturas-tab" style="color: #a0a0a0; font-weight: 700; border: none;">
+                🧾 FACTURAS VENTA
+            </button>
+        </li>
+    </ul>
+
+    <!-- ============ CONTENIDO TABS ============ -->
+    <div class="tab-content">
+
+        <!-- TAB: VENTAS -->
+        <div class="tab-pane fade show active" id="ventas-tab">
+            <div style="background: rgba(20, 20, 25, 0.65); border: 1px solid rgba(230, 57, 70, 0.2); border-radius: 8px; padding: 1.5rem; backdrop-filter: blur(20px); margin-bottom: 2rem;">
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h5 style="color: #e63946; font-weight: 700; margin: 0;">📦 Ventas Registradas</h5>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="window.CrearVentaModal.mostrar()">
+                        ➕ Nueva Venta
+                    </button>
+                </div>
+
+                <div style="overflow-x: auto; border-radius: 8px;">
+                    <table class="table table-dark table-hover" style="margin: 0;">
+                        <thead style="background: rgba(230, 57, 70, 0.15);">
+                            <tr>
+                                <th style="color: #e63946; font-weight: 700;">Nº Venta</th>
+                                <th style="color: #e63946; font-weight: 700;">Cliente</th>
+                                <th style="color: #e63946; font-weight: 700;">Fecha</th>
+                                <th style="color: #e63946; font-weight: 700;">Método Pago</th>
+                                <th style="color: #e63946; font-weight: 700;">Total</th>
+                                <th style="color: #e63946; font-weight: 700;">Estado</th>
+                                <th style="color: #e63946; font-weight: 700;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablasVentas">
+                            @forelse($ventas as $venta)
+                                <tr>
+                                    <td style="color: #e63946; font-weight: 600;">{{ $venta['numero_factura'] }}</td>
+                                    <td style="color: #f0f0f0;">{{ $venta['cliente'] }}</td>
+                                    <td style="color: #a0a0a0;">{{ $venta['fecha_venta'] }}</td>
+                                    <td style="color: #f0f0f0;">{{ $venta['metodo_pago'] }}</td>
+                                    <td style="color: #90ee90; font-weight: 600;">€{{ number_format($venta['total'], 2, ',', '.') }}</td>
+                                    <td>
+                                        <span class="badge" style="background: {{ $venta['estado'] === 'completada' ? '#90ee90' : ($venta['estado'] === 'pendiente' ? '#ffc107' : '#dc3545') }}; color: black; font-size: 0.75rem;">
+                                            {{ ucfirst($venta['estado']) }}
+                                        </span>
+                                    </td>
+                                    <td style="font-size: 0.85rem; gap: 0.25rem; display: flex;">
+<!-- ✅ CORRECTO - llamar a ModalVerVenta.mostrar() -->
+<button type="button" class="btn btn-sm btn-warning" onclick="window.ModalVerVenta.mostrar({{ $venta['id'] }})" style="padding: 0.25rem 0.5rem;">👁️</button>
+                                        <form action="{{ route('ventas.destroy', $venta['id']) }}" method="POST" style="display: inline;">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar venta?')" style="padding: 0.25rem 0.5rem;">🗑️</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="7" style="text-align: center; padding: 2rem; color: #a0a0a0;">📭 Sin ventas registradas</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: FACTURAS VENTA -->
+        <div class="tab-pane fade" id="facturas-tab">
+            <div style="background: rgba(20, 20, 25, 0.65); border: 1px solid rgba(230, 57, 70, 0.2); border-radius: 8px; padding: 1.5rem; backdrop-filter: blur(20px); margin-bottom: 2rem;">
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h5 style="color: #e63946; font-weight: 700; margin: 0;">🧾 Facturas de Venta</h5>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="window.CrearFacturaVentaModal.mostrar()">
+                        ➕ Nueva Factura
+                    </button>
+                </div>
+
+                <div style="overflow-x: auto; border-radius: 8px;">
+                    <table class="table table-dark table-hover" style="margin: 0;">
+                        <thead style="background: rgba(230, 57, 70, 0.15);">
+                            <tr>
+                                <th style="color: #e63946; font-weight: 700;">Nº Factura</th>
+                                <th style="color: #e63946; font-weight: 700;">Venta</th>
+                                <th style="color: #e63946; font-weight: 700;">Cliente</th>
+                                <th style="color: #e63946; font-weight: 700;">Fecha</th>
+                                <th style="color: #e63946; font-weight: 700;">Total</th>
+                                <th style="color: #e63946; font-weight: 700;">Estado</th>
+                                <th style="color: #e63946; font-weight: 700;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablasFacturas">
+                            <tr>
+                                <td colspan="7" style="text-align: center; padding: 2rem; color: #a0a0a0;">📭 Sin facturas registradas</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <!-- MODAL VER VENTA -->
-    <div class="modal fade" id="modalVerVenta" tabindex="-1">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title">
-                        <i class="bi bi-receipt"></i> Detalles de la Venta
-                    </h5>
+</div>
+
+<!-- ============ MODAL CREAR VENTA ============ -->
+<div class="modal fade" id="modalVenta" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content" style="background: rgba(20, 20, 25, 0.95); border: 1px solid rgba(230, 57, 70, 0.3);">
+            <form action="{{ route('ventas.store') }}" method="POST" id="formVenta">
+                @csrf
+
+                <div class="modal-header" style="background: rgba(230, 57, 70, 0.15); border-bottom: 2px solid #e63946;">
+                    <h5 class="modal-title" style="color: #e63946; font-weight: 700;">➕ Nueva Venta</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
 
-                <div class="modal-body">
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h6 class="card-subtitle mb-3">
-                                        <i class="bi bi-info-circle"></i> Información General
-                                    </h6>
-                                    <p class="mb-2">
-                                        <strong>Código:</strong><br>
-                                        <span id="ver_codigo" class="badge bg-dark py-2"></span>
-                                    </p>
-                                    <p class="mb-2">
-                                        <strong>Cliente:</strong><br>
-                                        <span id="ver_cliente"></span>
-                                    </p>
-                                    <p class="mb-2">
-                                        <strong>Documento:</strong><br>
-                                        <span id="ver_documento"></span>
-                                    </p>
-                                    <p class="mb-0">
-                                        <strong>Fecha Venta:</strong><br>
-                                        <span id="ver_fecha"></span>
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
+                <div class="modal-body" style="color: #f0f0f0; padding: 1.5rem; max-height: 80vh; overflow-y: auto;">
 
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h6 class="card-subtitle mb-3">
-                                        <i class="bi bi-dash-circle"></i> Estado y Detalles
-                                    </h6>
-                                    <p class="mb-2">
-                                        <strong>Estado:</strong><br>
-                                        <span id="ver_estado" class="badge"></span>
-                                    </p>
-                                    <p class="mb-2">
-                                        <strong>Método de Pago:</strong><br>
-                                        <span id="ver_metodo"></span>
-                                    </p>
-                                    <p class="mb-0">
-                                        <strong>Usuario:</strong><br>
-                                        <span id="ver_usuario"></span>
-                                    </p>
-                                </div>
-                            </div>
+                    <!-- NÚMERO Y CLIENTE -->
+                    <div class="row mb-3" style="gap: 0.5rem;">
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold" style="font-size: 0.85rem;">Nº Venta</label>
+                            <input type="text" name="numero_factura" id="numeroVenta" class="form-control form-control-sm" readonly style="background: rgba(100, 100, 100, 0.2); font-size: 0.9rem;">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold" style="font-size: 0.85rem;">Cliente *</label>
+                            <input type="text" name="cliente" id="cliente" class="form-control form-control-sm" placeholder="Nombre del cliente" required style="background: rgba(20, 20, 25, 0.8); border-color: rgba(230, 57, 70, 0.3); color: #f0f0f0; font-size: 0.9rem;">
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label fw-bold" style="font-size: 0.85rem;">Documento (Opcional)</label>
+                            <input type="text" name="cliente_documento" id="clienteDocumento" class="form-control form-control-sm" placeholder="DNI/NIF/Pasaporte" style="background: rgba(20, 20, 25, 0.8); border-color: rgba(230, 57, 70, 0.3); color: #f0f0f0; font-size: 0.9rem;">
                         </div>
                     </div>
 
-                    <h6 class="mb-3">
-                        <i class="bi bi-bag"></i> Productos Vendidos
-                    </h6>
+                    <!-- MÉTODO PAGO -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold" style="font-size: 0.85rem;">Método de Pago *</label>
+                            <select name="metodo_pago_id" id="metodoPago" class="form-select form-select-sm" required style="background: rgba(20, 20, 25, 0.8); border-color: rgba(230, 57, 70, 0.3); color: #f0f0f0; font-size: 0.9rem;">
+                                <option value="">Selecciona...</option>
+                                @foreach($metodosPago as $metodo)
+                                    <option value="{{ $metodo->id }}">{{ $metodo->nombre }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold" style="font-size: 0.85rem;">Estado</label>
+                            <select name="estado" id="estado" class="form-select form-select-sm" style="background: rgba(20, 20, 25, 0.8); border-color: rgba(230, 57, 70, 0.3); color: #f0f0f0; font-size: 0.9rem;">
+                                <option value="pendiente">Pendiente</option>
+                                <option value="completada" selected>Completada</option>
+                                <option value="cancelada">Cancelada</option>
+                            </select>
+                        </div>
+                    </div>
 
-                    <div class="table-responsive">
-                        <table class="table table-dark table-striped table-hover table-bordered">
-                            <thead>
-                                <tr class="table-active">
-                                    <th>Producto</th>
-                                    <th class="text-center" width="10%">Cantidad</th>
-                                    <th class="text-end" width="12%">Precio Unit.</th>
-                                    <th class="text-end" width="12%">Subtotal</th>
+                    <hr style="border-color: rgba(230, 57, 70, 0.3); margin: 1rem 0;">
+
+                    <!-- BUSCADOR DE PRODUCTOS -->
+                    <h6 style="color: #e63946; font-weight: 700; font-size: 0.9rem; margin-bottom: 0.75rem;">🔍 Buscar Productos</h6>
+                    <div style="position: relative; margin-bottom: 1rem;">
+                        <input type="text" id="buscadorProductos" class="form-control form-control-sm" placeholder="Escribe nombre, marca, modelo..." autocomplete="off" style="background: rgba(20, 20, 25, 0.8); border-color: rgba(230, 57, 70, 0.3); color: #f0f0f0; font-size: 0.9rem;">
+                        <div id="listaProductos" class="list-group" style="max-height: 200px; overflow-y: auto; display: none; position: absolute; width: 100%; z-index: 1000; background: rgba(20, 20, 25, 0.95); border: 1px solid rgba(230, 57, 70, 0.3); border-radius: 6px; margin-top: 0.25rem; top: 100%; left: 0;"></div>
+                    </div>
+
+                    <hr style="border-color: rgba(230, 57, 70, 0.3); margin: 1rem 0;">
+
+                    <!-- TABLA PRODUCTOS -->
+                    <h6 style="color: #e63946; font-weight: 700; font-size: 0.9rem; margin-bottom: 0.75rem;">📦 Líneas de Venta</h6>
+                    <div class="table-responsive mb-2" style="border: 1px solid rgba(230, 57, 70, 0.2); border-radius: 6px;">
+                        <table class="table table-sm" id="tablaLineas" style="margin: 0;">
+                            <thead style="background: rgba(230, 57, 70, 0.15);">
+                                <tr>
+                                    <th style="color: #e63946; width: 5%; font-size: 0.8rem;">#</th>
+                                    <th style="color: #e63946; width: 30%; font-size: 0.8rem;">Producto</th>
+                                    <th style="color: #e63946; width: 10%; font-size: 0.8rem;">Stock</th>
+                                    <th style="color: #e63946; width: 10%; font-size: 0.8rem;">Cantidad</th>
+                                    <th style="color: #e63946; width: 15%; font-size: 0.8rem;">Precio Unit.</th>
+                                    <th style="color: #e63946; width: 15%; font-size: 0.8rem;">Subtotal</th>
+                                    <th style="color: #e63946; width: 8%; font-size: 0.8rem;">Acción</th>
                                 </tr>
                             </thead>
-                            <tbody id="detalles-venta">
-                                <tr>
-                                    <td colspan="4" class="text-center text-muted">
-                                        <i class="bi bi-inbox"></i> Cargando detalles...
-                                    </td>
-                                </tr>
-                            </tbody>
-                            <tfoot>
-                                <tr>
-                                    <td colspan="3" class="text-end fw-bold">SUBTOTAL:</td>
-                                    <td class="text-end fw-bold" id="ver_subtotal">$0.00</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="3" class="text-end fw-bold">IMPUESTO (21%):</td>
-                                    <td class="text-end fw-bold" id="ver_impuesto">$0.00</td>
-                                </tr>
-                                <tr class="table-active">
-                                    <td colspan="3" class="text-end fw-bold fs-5">TOTAL:</td>
-                                    <td class="text-end fw-bold fs-5 text-primary" id="ver_total">$0.00</td>
-                                </tr>
-                            </tfoot>
+                            <tbody id="lineasList"></tbody>
                         </table>
                     </div>
 
-                    <div class="alert alert-secondary mt-3">
-                        <strong><i class="bi bi-chat-left-text"></i> Observaciones:</strong><br>
-                        <span id="ver_observaciones"></span>
+                    <button type="button" class="btn btn-sm btn-success mb-2" onclick="window.CrearVentaModal.agregarFila()" style="font-size: 0.85rem;">
+                        ➕ Agregar Línea
+                    </button>
+
+                    <hr style="border-color: rgba(230, 57, 70, 0.3); margin: 1rem 0;">
+
+                    <!-- TOTALES -->
+                    <div style="background: rgba(230, 57, 70, 0.1); padding: 1rem; border-radius: 6px; border-left: 3px solid #e63946;">
+                        <div class="d-flex justify-content-between" style="margin-bottom: 0.5rem; font-size: 0.9rem;">
+                            <span style="color: #a0a0a0;">SUBTOTAL:</span>
+                            <strong id="subtotalDisplay" style="color: #f0f0f0;">0.00€</strong>
+                        </div>
+                        <div class="d-flex justify-content-between" style="margin-bottom: 0.5rem; font-size: 0.9rem;">
+                            <span style="color: #a0a0a0;">IVA:</span>
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                <input type="number" name="iva_porcentaje" id="ivaPorcentaje" value="21" min="0" max="100" step="0.01" 
+                                    onchange="window.CrearVentaModal.calcularTotales()"
+                                    style="width: 50px; padding: 0.25rem; background: rgba(20, 20, 25, 0.8); border-color: rgba(230, 57, 70, 0.3); color: #f0f0f0; text-align: right; font-size: 0.85rem;">
+                                <span>%</span>
+                                <strong id="ivaDisplay" style="color: #f0f0f0; min-width: 60px; text-align: right;">0.00€</strong>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between" style="font-size: 1.1rem; padding-top: 0.75rem; border-top: 1px solid rgba(230, 57, 70, 0.3);">
+                            <span style="color: #e63946; font-weight: 700;">TOTAL:</span>
+                            <strong id="totalDisplay" style="color: #e63946; font-size: 1.3rem;">0.00€</strong>
+                        </div>
                     </div>
+
+                    <hr style="border-color: rgba(230, 57, 70, 0.3); margin: 1rem 0;">
+
+                    <!-- OBSERVACIONES -->
+                    <label class="form-label fw-bold" style="font-size: 0.85rem;">Observaciones</label>
+                    <textarea name="observaciones" id="observaciones" class="form-control form-control-sm" rows="2" placeholder="Notas sobre la venta..." style="background: rgba(20, 20, 25, 0.8); border-color: rgba(230, 57, 70, 0.3); color: #f0f0f0; font-size: 0.9rem;"></textarea>
+
+                    <!-- Hidden input para guardar líneas -->
+                    <input type="hidden" name="lineas" id="lineasJson" value="[]">
+
                 </div>
 
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="bi bi-x-circle"></i> Cerrar
-                    </button>
-                    <button type="button" class="btn btn-primary" onclick="window.print()">
-                        <i class="bi bi-printer"></i> Imprimir
-                    </button>
+                <div class="modal-footer" style="border-top: 1px solid rgba(230, 57, 70, 0.3);">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger btn-sm">✓ Guardar Venta</button>
                 </div>
-            </div>
+
+            </form>
         </div>
     </div>
-    <!-- MODAL DE GRÁFICAS MEJORADO -->
-<div class="modal fade" id="modalGraficas" tabindex="-1">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable">
-        <div class="modal-content">
+</div>
 
-            <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title">
-                    <i class="bi bi-graph-up"></i> Análisis de Ventas y Devoluciones
-                </h5>
+<!-- ============ MODAL CREAR FACTURA VENTA ============ -->
+<div class="modal fade" id="modalFacturaVenta" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content" style="background: rgba(20, 20, 25, 0.95); border: 1px solid rgba(230, 57, 70, 0.3);">
+            <div class="modal-header" style="background: rgba(230, 57, 70, 0.15); border-bottom: 2px solid #e63946;">
+                <h5 class="modal-title" style="color: #e63946; font-weight: 700;">🧾 Nueva Factura de Venta</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-
-            <div class="modal-body">
-
-                <div class="row mb-4">
-                    <!-- Gráfica 1: Ventas mensuales -->
-                    <div class="col-md-6 mb-4">
-                        <div class="card bg-dark text-white">
-                            <div class="card-header">
-                                <i class="bi bi-cash-stack"></i> Ventas mensuales
-                            </div>
-                            <div class="card-body">
-                                <canvas id="ventasMensualChart" style="max-height: 300px;"></canvas>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Gráfica 2: Ventas vs Devoluciones mensual -->
-                    <div class="col-md-6 mb-4">
-                        <div class="card bg-dark text-white">
-                            <div class="card-header">
-                                <i class="bi bi-arrow-left-right"></i> Ventas vs Devoluciones (€)
-                            </div>
-                            <div class="card-body">
-                                <canvas id="ventasVsDevolucionesChart" style="max-height: 300px;"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row mb-4">
-                    <!-- Gráfica 3: Top productos con devoluciones (Gráfico apilado) -->
-                    <div class="col-md-12 mb-4">
-                        <div class="card bg-dark text-white">
-                            <div class="card-header">
-                                <i class="bi bi-bar-chart-steps"></i> Top productos - Ventas (azul) vs Devoluciones (rojo)
-                            </div>
-                            <div class="card-body" style="overflow-x: auto;">
-                                <canvas id="productosVsDevolucionesChart" style="max-height: 400px; min-width: 600px;"></canvas>
-                            </div>
-                            <div class="card-footer small text-muted">
-                                <i class="bi bi-info-circle"></i> Las barras rojas representan productos devueltos
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <!-- Gráfica 4: Movimientos de stock original -->
-                    <div class="col-md-12">
-                        <div class="card bg-dark text-white">
-                            <div class="card-header">
-                                <i class="bi bi-arrow-repeat"></i> Movimientos de stock (Entradas vs Salidas)
-                            </div>
-                            <div class="card-body">
-                                <canvas id="movimientosChart" style="max-height: 300px;"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="bi bi-x-circle"></i> Cerrar
-                </button>
-                <button type="button" class="btn btn-primary" onclick="window.print()">
-                    <i class="bi bi-printer"></i> Imprimir
-                </button>
+            <div class="modal-body" style="color: #f0f0f0; padding: 2rem; text-align: center;">
+                <p style="color: #a0a0a0; font-size: 1.1rem;">⏳ Funcionalidad en desarrollo...</p>
+                <p style="color: #a0a0a0; font-size: 0.9rem;">Las facturas de venta se crearán desde las ventas existentes.</p>
             </div>
         </div>
     </div>
 </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<!-- ============ MODAL VER VENTA ============ -->
+<div class="modal fade" id="modalVerVenta" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content" style="background: rgba(20, 20, 25, 0.95); border: 1px solid rgba(230, 57, 70, 0.3);">
 
+            <div class="modal-header" style="background: rgba(230, 57, 70, 0.15); border-bottom: 2px solid #e63946;">
+                <h5 class="modal-title" style="color: #e63946; font-weight: 700;">📋 Detalles de la Venta</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body" style="color: #f0f0f0; padding: 1.5rem; max-height: 80vh; overflow-y: auto;">
+
+                <!-- INFORMACIÓN GENERAL -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <h6 style="color: #e63946; font-weight: 700; margin-bottom: 1rem;">📌 Información General</h6>
+                        <div style="background: rgba(230, 57, 70, 0.1); padding: 1rem; border-radius: 6px; border-left: 3px solid #e63946;">
+                            <div style="margin-bottom: 0.5rem;">
+                                <span style="color: #a0a0a0; font-size: 0.85rem;">Código:</span>
+                                <strong id="detalleNumero" style="color: #e63946; display: block;">V-001</strong>
+                            </div>
+                            <div style="margin-bottom: 0.5rem;">
+                                <span style="color: #a0a0a0; font-size: 0.85rem;">Cliente:</span>
+                                <strong id="detalleCliente" style="color: #f0f0f0; display: block;">Juan Pérez</strong>
+                            </div>
+                            <div style="margin-bottom: 0.5rem;">
+                                <span style="color: #a0a0a0; font-size: 0.85rem;">Documento:</span>
+                                <strong id="detalleDocumento" style="color: #f0f0f0; display: block;">12345678A</strong>
+                            </div>
+                            <div>
+                                <span style="color: #a0a0a0; font-size: 0.85rem;">Fecha Venta:</span>
+                                <strong id="detalleFecha" style="color: #f0f0f0; display: block;">15/3/2025</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ESTADO Y DETALLES -->
+                    <div class="col-md-6">
+                        <h6 style="color: #e63946; font-weight: 700; margin-bottom: 1rem;">⚙️ Estado y Detalles</h6>
+                        <div style="background: rgba(230, 57, 70, 0.1); padding: 1rem; border-radius: 6px; border-left: 3px solid #e63946;">
+                            <div style="margin-bottom: 0.5rem;">
+                                <span style="color: #a0a0a0; font-size: 0.85rem;">Estado:</span>
+                                <span id="detalleEstado" style="display: inline-block; padding: 0.25rem 0.75rem; border-radius: 20px; background: #90ee90; color: black; font-weight: 600; font-size: 0.8rem;">Completada</span>
+                            </div>
+                            <div style="margin-bottom: 0.5rem;">
+                                <span style="color: #a0a0a0; font-size: 0.85rem;">Método de Pago:</span>
+                                <strong id="detalleMetodo" style="color: #f0f0f0; display: block;">Tarjeta</strong>
+                            </div>
+                            <div>
+                                <span style="color: #a0a0a0; font-size: 0.85rem;">Usuario:</span>
+                                <strong id="detalleUsuario" style="color: #f0f0f0; display: block;">User</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr style="border-color: rgba(230, 57, 70, 0.3); margin: 1.5rem 0;">
+
+                <!-- PRODUCTOS VENDIDOS -->
+                <h6 style="color: #e63946; font-weight: 700; margin-bottom: 1rem;">📦 Productos Vendidos</h6>
+                <div class="table-responsive mb-3" style="border: 1px solid rgba(230, 57, 70, 0.2); border-radius: 6px;">
+                    <table class="table table-sm" id="tablaProductosDetalle" style="margin: 0;">
+                        <thead style="background: rgba(230, 57, 70, 0.15);">
+                            <tr>
+                                <th style="color: #e63946; font-size: 0.8rem;">Producto</th>
+                                <th style="color: #e63946; width: 10%; text-align: center; font-size: 0.8rem;">Cantidad</th>
+                                <th style="color: #e63946; width: 15%; text-align: right; font-size: 0.8rem;">Precio Unit.</th>
+                                <th style="color: #e63946; width: 15%; text-align: right; font-size: 0.8rem;">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody id="detalleProductos" style="color: #f0f0f0; font-size: 0.875rem;">
+                            <!-- Se rellena con JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- TOTALES -->
+                <div style="background: rgba(230, 57, 70, 0.1); padding: 1rem; border-radius: 6px; border-left: 3px solid #e63946; margin-bottom: 1rem;">
+                    <div class="d-flex justify-content-between" style="margin-bottom: 0.5rem; font-size: 0.9rem;">
+                        <span style="color: #a0a0a0;">SUBTOTAL:</span>
+                        <strong id="detalleSub" style="color: #f0f0f0;">€0.00</strong>
+                    </div>
+                    <div class="d-flex justify-content-between" style="margin-bottom: 0.5rem; font-size: 0.9rem;">
+                        <span style="color: #a0a0a0;">IMPUESTO (21%):</span>
+                        <strong id="detalleIva" style="color: #f0f0f0;">€0.00</strong>
+                    </div>
+                    <div class="d-flex justify-content-between" style="font-size: 1.1rem; padding-top: 0.75rem; border-top: 1px solid rgba(230, 57, 70, 0.3);">
+                        <span style="color: #e63946; font-weight: 700;">TOTAL:</span>
+                        <strong id="detalleTotal" style="color: #e63946; font-size: 1.3rem;">€0.00</strong>
+                    </div>
+                </div>
+
+                <!-- OBSERVACIONES -->
+                <h6 style="color: #e63946; font-weight: 700; margin-bottom: 0.5rem;">💬 Observaciones:</h6>
+                <div style="background: rgba(20, 20, 25, 0.8); padding: 0.75rem; border-radius: 6px; border-left: 3px solid #e63946; color: #a0a0a0; font-size: 0.9rem; min-height: 50px;">
+                    <span id="detalleObservaciones">—</span>
+                </div>
+
+            </div>
+
+            <div class="modal-footer" style="border-top: 1px solid rgba(230, 57, 70, 0.3);">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">❌ Cerrar</button>
+                <button type="button" class="btn btn-danger btn-sm" onclick="window.ModalVerVenta.imprimir()">🖨️ Imprimir</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ✅ CARGAR MODAL VER VENTA (SIN MÓDULOS - ANTES QUE NADA) -->
+<script src="{{ asset('js/ventas/modales/modal-ver-venta.js') }}"></script>
+
+@push('scripts')
     <script>
-
-        // BOTÓN HAMBURGUESA
-        const menuToggle = document.getElementById('menu-toggle');
-        const sidebar = document.querySelector('.sidebar');
-        const overlay = document.getElementById('sidebar-overlay');
-
-        menuToggle.addEventListener('click', function() {
-            sidebar.classList.toggle('activo');
-            overlay.classList.toggle('activo');
-        });
-
-        overlay.addEventListener('click', function() {
-            sidebar.classList.remove('activo');
-            overlay.classList.remove('activo');
-        });
-
-        // Cerrar sidebar al hacer click en un link
-        document.querySelectorAll('.sidebar a').forEach(link => {
-            link.addEventListener('click', function() {
-                sidebar.classList.remove('activo');
-                overlay.classList.remove('activo');
-            });
-        });
-
-        let filtroActual = 'todos';
-
-        // FILTROS
-        function aplicarFiltros() {
-            const filas = document.querySelectorAll('#tabla-ventas tr');
-            const buscador = document.getElementById('buscador').value.toLowerCase();
-            let contadorVisible = 0;
-
-            filas.forEach(fila => {
-                const estado = fila.dataset.estado;
-                const codigo = fila.dataset.codigo.toLowerCase();
-                const cliente = fila.dataset.cliente.toLowerCase();
-
-                const cumpleFiltroEstado = filtroActual === 'todos' || estado === filtroActual;
-                const cumpleBuscador = codigo.includes(buscador) || cliente.includes(buscador);
-
-                if (cumpleFiltroEstado && cumpleBuscador) {
-                    fila.style.display = '';
-                    contadorVisible++;
-                } else {
-                    fila.style.display = 'none';
-                }
-            });
-
-            const contador = document.getElementById('contador');
-            if (contador) {
-                contador.innerHTML = `<i class="bi bi-info-circle"></i> <strong>Mostrando ${contadorVisible} ventas</strong>`;
-            }
+        // Verificar que se cargó correctamente
+        console.log('🔍 Verificando ModalVerVenta...');
+        if (window.ModalVerVenta) {
+            console.log('✅ ModalVerVenta cargado correctamente');
+            window.ModalVerVenta.init();
+        } else {
+            console.error('❌ ModalVerVenta NO está disponible');
         }
-
-        document.getElementById('filtro-estado').addEventListener('change', function() {
-            filtroActual = this.value;
-            aplicarFiltros();
-        });
-
-        document.getElementById('buscador').addEventListener('input', aplicarFiltros);
-
-        // VER VENTA
-        document.querySelectorAll('.ver-venta').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const id = this.dataset.id;
-
-                fetch(`/ventas/${id}/json`)
-                    .then(res => res.json())
-                    .then(data => {
-                        document.getElementById('ver_codigo').textContent = data.numero_factura;
-                        document.getElementById('ver_cliente').textContent = data.cliente;
-                        document.getElementById('ver_documento').textContent = data.cliente_documento || '—';
-                        document.getElementById('ver_fecha').textContent = new Date(data.fecha_venta).toLocaleDateString('es-ES');
-                        document.getElementById('ver_metodo').textContent = data.metodo_pago;
-                        document.getElementById('ver_usuario').textContent = data.usuario?.name ?? '—';
-
-                        const estadoSpan = document.getElementById('ver_estado');
-                        estadoSpan.textContent = data.estado.charAt(0).toUpperCase() + data.estado.slice(1);
-                        estadoSpan.className = 'badge ' + (data.estado === 'pendiente' ? 'bg-warning text-dark' : data.estado === 'completada' ? 'bg-success' : 'bg-secondary');
-
-                        document.getElementById('ver_subtotal').textContent = '$' + parseFloat(data.subtotal).toFixed(2);
-                        document.getElementById('ver_impuesto').textContent = '$' + (parseFloat(data.subtotal) * 0.21).toFixed(2);
-                        document.getElementById('ver_total').textContent = '$' + parseFloat(data.total).toFixed(2);
-                        document.getElementById('ver_observaciones').textContent = data.observaciones || 'Sin observaciones';
-
-                        const tbody = document.getElementById('detalles-venta');
-                        tbody.innerHTML = '';
-
-                        if (data.detalles && data.detalles.length > 0) {
-                            data.detalles.forEach(det => {
-                                tbody.innerHTML += `
-                                    <tr>
-                                        <td>${det.producto?.nombre || '—'}</td>
-                                        <td class="text-center">${det.cantidad}</td>
-                                        <td class="text-end">$${parseFloat(det.precio_unitario).toFixed(2)}</td>
-                                        <td class="text-end">$${parseFloat(det.subtotal).toFixed(2)}</td>
-                                    </tr>
-                                `;
-                            });
-                        }
-
-                        const modal = new bootstrap.Modal(document.getElementById('modalVerVenta'));
-                        modal.show();
-                    })
-                    .catch(err => {
-                        console.error(err);
-                        alert('Error al cargar venta');
-                    });
-            });
-        });
-
-        // CONFIRMAR VENTA
-        document.querySelectorAll('.confirmar-venta').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const id = this.dataset.id;
-                fetch(`/ventas/${id}/estado`, {
-                    method: 'PATCH',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ estado: 'completada' })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('✅ Venta confirmada');
-                        window.location.reload();
-                    } else {
-                        alert('❌ ' + data.message);
-                    }
-                })
-                .catch(err => {
-                    console.error(err);
-                    alert('Error al confirmar');
-                });
-            });
-        });
-
-        // ELIMINAR VENTA
-        document.querySelectorAll('.eliminar-venta').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const id = this.dataset.id;
-                if (confirm('¿Seguro que deseas eliminar esta venta?')) {
-                    fetch(`/ventas/${id}/eliminar`, {
-                        method: 'DELETE',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
-                        }
-                    })
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert(data.message);
-                            window.location.reload();
-                        } else {
-                            alert('❌ ' + data.message);
-                        }
-                    })
-                    .catch(err => {
-                        console.error(err);
-                        alert('Error al eliminar');
-                    });
-                }
-            });
-        });
-        let chartsCargados = false;
-
-    document.getElementById('modalGraficas').addEventListener('shown.bs.modal', function () {
-
-        if (chartsCargados) return;
-
-        // 📈 VENTAS POR MES (original)
-        fetch('/api/ventas-mes')
-            .then(res => res.json())
-            .then(data => {
-                new Chart(document.getElementById('ventasMensualChart'), {
-                    type: 'line',
-                    data: {
-                        labels: data.map(v => v.mes),
-                        datasets: [{
-                            label: 'Ventas (€)',
-                            data: data.map(v => v.total),
-                            borderColor: '#0d6efd',
-                            backgroundColor: 'rgba(13, 110, 253, 0.1)',
-                            tension: 0.3,
-                            fill: true
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: true,
-                        plugins: {
-                            legend: { labels: { color: '#fff' } }
-                        }
-                    }
-                });
-            });
-
-        // 📊 VENTAS vs DEVOLUCIONES MENSUAL (comparativa)
-        fetch('/api/ventas-vs-devoluciones-mensual')
-            .then(res => res.json())
-            .then(data => {
-                new Chart(document.getElementById('ventasVsDevolucionesChart'), {
-                    type: 'bar',
-                    data: {
-                        labels: data.map(d => d.mes),
-                        datasets: [
-                            {
-                                label: 'Ventas (€)',
-                                data: data.map(d => d.ventas),
-                                backgroundColor: 'rgba(13, 110, 253, 0.7)',
-                                borderColor: '#0d6efd',
-                                borderWidth: 1
-                            },
-                            {
-                                label: 'Devoluciones (€)',
-                                data: data.map(d => d.devoluciones),
-                                backgroundColor: 'rgba(220, 53, 69, 0.7)',
-                                borderColor: '#dc3545',
-                                borderWidth: 1
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: true,
-                        plugins: {
-                            legend: { labels: { color: '#fff' } },
-                            tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: €${ctx.raw.toFixed(2)}` } }
-                        },
-                        scales: { y: { ticks: { color: '#fff' }, grid: { color: 'rgba(255,255,255,0.1)' } } }
-                    }
-                });
-            });
-
-        // 📦 TOP PRODUCTOS con DEVOLUCIONES (barras apiladas / agrupadas)
-        fetch('/api/devoluciones-vs-ventas')
-            .then(res => res.json())
-            .then(data => {
-                new Chart(document.getElementById('productosVsDevolucionesChart'), {
-                    type: 'bar',
-                    data: {
-                        labels: data.map(p => p.nombre.length > 20 ? p.nombre.substring(0, 20) + '...' : p.nombre),
-                        datasets: [
-                            {
-                                label: 'Unidades Vendidas',
-                                data: data.map(p => p.vendido),
-                                backgroundColor: 'rgba(13, 110, 253, 0.8)',
-                                borderColor: '#0d6efd',
-                                borderWidth: 1
-                            },
-                            {
-                                label: 'Unidades Devueltas',
-                                data: data.map(p => p.devuelto),
-                                backgroundColor: 'rgba(220, 53, 69, 0.8)',
-                                borderColor: '#dc3545',
-                                borderWidth: 1
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: true,
-                        plugins: {
-                            legend: { labels: { color: '#fff' } },
-                            tooltip: {
-                                callbacks: {
-                                    footer: (tooltipItems) => {
-                                        const index = tooltipItems[0].dataIndex;
-                                        const neto = data[index].neto;
-                                        return `📊 Neto vendido: ${neto} unidades`;
-                                    }
-                                }
-                            }
-                        },
-                        scales: {
-                            y: { 
-                                ticks: { color: '#fff', stepSize: 1 },
-                                grid: { color: 'rgba(255,255,255,0.1)' },
-                                title: { display: true, text: 'Unidades', color: '#fff' }
-                            },
-                            x: { ticks: { color: '#fff', rotation: 45, maxRotation: 45 } }
-                        }
-                    }
-                });
-            });
-
-        // 🔄 MOVIMIENTOS STOCK (original)
-        fetch('/api/movimientos-stock')
-            .then(res => res.json())
-            .then(data => {
-                new Chart(document.getElementById('movimientosChart'), {
-                    type: 'line',
-                    data: {
-                        labels: data.map(m => m.fecha),
-                        datasets: [
-                            {
-                                label: 'Entradas',
-                                data: data.map(m => m.entradas),
-                                borderColor: '#198754',
-                                backgroundColor: 'rgba(25, 135, 84, 0.1)',
-                                tension: 0.3,
-                                fill: true
-                            },
-                            {
-                                label: 'Salidas',
-                                data: data.map(m => m.salidas),
-                                borderColor: '#dc3545',
-                                backgroundColor: 'rgba(220, 53, 69, 0.1)',
-                                tension: 0.3,
-                                fill: true
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: true,
-                        plugins: { legend: { labels: { color: '#fff' } } },
-                        scales: { y: { ticks: { color: '#fff' }, grid: { color: 'rgba(255,255,255,0.1)' } } }
-                    }
-                });
-            });
-
-        chartsCargados = true;
-    });
-
     </script>
 
-</body>
-</html>
+    <!-- ✅ CARGAR MÓDULOS DE VENTAS DESPUÉS -->
+    <script type="module">
+        console.log('🚀 Cargando módulos de ventas...');
+        import VentaManager from '{{ asset("js/ventas/venta.js") }}';
+    </script>
+@endpush
+
+@endsection

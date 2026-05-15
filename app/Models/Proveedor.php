@@ -31,4 +31,8 @@ class Proveedor extends Model
     {
         return $this->hasMany(Compra::class);
     }
+     public function formasPago()
+    {
+        return $this->hasMany(FormasPagoProveedor::class, 'proveedor_id');
+    }
 }

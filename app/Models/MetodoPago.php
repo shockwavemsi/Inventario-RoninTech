@@ -1,5 +1,4 @@
 <?php
-// app/Models/MetodoPago.php
 
 namespace App\Models;
 
@@ -11,10 +10,11 @@ class MetodoPago extends Model
 
     protected $fillable = [
         'nombre',
-        'activo'
+        'activo',
     ];
 
-    protected $casts = [
-        'activo' => 'boolean',
-    ];
+    public function pagos()
+    {
+        return $this->hasMany(PagoFactura::class, 'metodo_pago_id');
+    }
 }

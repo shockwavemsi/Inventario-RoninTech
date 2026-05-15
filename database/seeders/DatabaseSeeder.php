@@ -2,35 +2,60 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
-    /**
-     * Seed the application's database.
-     */
-     public function run()
+    public function run(): void
     {
+        echo "\n🚀 ========== INICIANDO SEEDERS ==========\n\n";
+
+        // ===== BASE =====
+        echo "📋 Cargando configuración...\n";
         $this->call([
-            RolesSeeder::class,      // Crea roles y usuarios
-            MetodoPagoSeeder::class, // Crear Métodos de pago
-            ConfiguracionSeeder::class, // Crear Configuraciones
-            CategoriaSeeder::class, // Crear categorías
-            ProveedorSeeder::class, // Crear Proveedores
-            ProductoSeeder::class, // Crear Productos
-            CompraSeeder::class, // Crear Compras
-            VentaSeeder::class, // Crear Ventas
+            ConfiguracionSeeder::class,
+            RolesSeeder::class,
         ]);
-        
-        $this->command->info('==============================================');
-        $this->command->info('BASE DE DATOS INICIALIZADA CORRECTAMENTE');
-        $this->command->info('==============================================');
-        $this->command->info('Admin: admin@admin.com / admin123');
-        $this->command->info('User: user@user.com / user123');
-        $this->command->info('==============================================');
+
+        // ===== DATOS MAESTROS =====
+        echo "📦 Cargando datos maestros...\n";
+        $this->call([
+            CategoriaSeeder::class,
+            ProveedorSeeder::class,
+            ProductoSeeder::class,
+        ]);
+
+        // ===== FORMAS DE PAGO =====
+        echo "💳 Cargando formas de pago...\n";
+        $this->call([
+            BancoSeeder::class,
+            FormaPagoSeeder::class,
+            FormasPagoProveedorSeeder::class,
+        ]);
+
+        // ===== COMPRA =====
+        echo "🛒 Cargando datos de compra...\n";
+        $this->call([
+            PedidosCompraSeeder::class,
+            PedidosCompraLineaSeeder::class,
+            AlbaranesCompraSeeder::class,
+            AlbaranesCompraLineaSeeder::class,
+            FacturasCompraSeeder::class,
+            FacturasCompraLineaSeeder::class,
+            PagoFacturaSeeder::class,
+        ]);
+
+        // ===== VENTA (COMENTADA - ACTIVAR DESPUÉS) =====
+        // echo "📊 Cargando datos de venta...\n";
+        // $this->call([
+        //     PedidosVentaSeeder::class,
+        //     PedidosVentaLineaSeeder::class,
+        //     AlbaranesVentaSeeder::class,
+        //     AlbaranesVentaLineaSeeder::class,
+        //     FacturasVentaSeeder::class,
+        //     FacturasVentaLineaSeeder::class,
+        // ]);
+
+        echo "\n✅ ========== SEEDERS COMPLETADOS ==========\n\n";
     }
 }
