@@ -3,57 +3,127 @@
 namespace App\Http\Controllers;
 
 use App\Models\Proveedor;
+use App\Models\FormaPago;
+use App\Models\Banco;
+use App\Models\FormasPagoProveedor;
 use App\Models\Configuracion;
 use Illuminate\Http\Request;
 
 class ProveedorController extends Controller
 {
     public function index()
-    {
-        $config = Configuracion::first();
-        $proveedores = Proveedor::all();
+{
+    $config = Configuracion::first();
+    $proveedores = Proveedor::with('formasPago.formaPago', 'formasPago.banco')->get();
+    $formasPago = FormaPago::where('activo', true)->get();  // ← AGREGAR
+    $bancos = Banco::all();                                   // ← AGREGAR
 
-        return view('admin.proveedores', compact('config', 'proveedores'));
-    }
+    return view('admin.proveedores', compact('config', 'proveedores', 'formasPago', 'bancos'));
+}
 
     public function create()
     {
         $config = Configuracion::first();
-        return view('admin.proveedores_crear', compact('config'));
+        $formasPago = FormaPago::where('activo', true)->get();
+        $bancos = Banco::all();
+
+        return view('admin.proveedores_crear', compact('config', 'formasPago', 'bancos'));
     }
 
     public function store(Request $request)
     {
-        Proveedor::create($request->all());
+        // Validar datos del proveedor
+        $request->validate([
+            'nombre' => 'required|string|max:200',
+            'email' => 'nullable|email',
+            'direccion' => 'nullable|string',
+            'contacto_nombre' => 'nullable|string|max:100',
+            'contacto_telefono' => 'nullable|string|max:20',
+            'telefono' => 'nullable|string|max:20',
+            'ruc' => 'nullable|string|max:20',
+            'activo' => 'nullable|boolean',
+            // Validar forma de pago
+            'forma_pago_id' => 'required|exists:formas_pago,id',
+            'banco_id' => 'nullable|exists:bancos,id',
+            'referencia' => 'nullable|string|max:255',
+            'nombre_banco' => 'nullable|string|max:255',
+        ]);
 
-        return redirect()->route('proveedores.index')->with('success', 'Proveedor creado con éxito');
+        try {
+            // Crear proveedor
+            $proveedor = Proveedor::create([
+                'nombre' => $request->nombre,
+                'ruc' => $request->ruc,
+                'telefono' => $request->telefono,
+                'email' => $request->email,
+                'direccion' => $request->direccion,
+                'contacto_nombre' => $request->contacto_nombre,
+                'contacto_telefono' => $request->contacto_telefono,
+                'activo' => $request->activo ?? true,
+            ]);
+
+            // Crear forma de pago del proveedor
+            FormasPagoProveedor::create([
+                'proveedor_id' => $proveedor->id,
+                'forma_pago_id' => $request->forma_pago_id,
+                'banco_id' => $request->banco_id,
+                'referencia' => $request->referencia,
+                'nombre_banco' => $request->nombre_banco,
+            ]);
+
+            return redirect()->route('proveedores.index')->with('success', '✅ Proveedor creado con éxito (con forma de pago)');
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['error' => 'Error al crear proveedor: ' . $e->getMessage()]);
+        }
+    }
+
+    public function show($id)
+    {
+        $proveedor = Proveedor::with('formasPago.formaPago', 'formasPago.banco')->findOrFail($id);
+        return response()->json($proveedor);
+    }
+
+    public function edit($id)
+    {
+        $proveedor = Proveedor::with('formasPago')->findOrFail($id);
+        return response()->json($proveedor);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'nombre' => 'required|string|max:200',
+            'email' => 'nullable|email',
+            'direccion' => 'nullable|string',
+            'contacto_nombre' => 'nullable|string|max:100',
+            'contacto_telefono' => 'nullable|string|max:20',
+            'telefono' => 'nullable|string|max:20',
+            'ruc' => 'nullable|string|max:20',
+        ]);
+
+        $proveedor = Proveedor::findOrFail($id);
+        $proveedor->update($request->all());
+        
+        return response()->json([
+            'success' => true,
+            'message' => '✅ Proveedor actualizado correctamente'
+        ]);
     }
 
     public function destroy($id)
-{
-    Proveedor::findOrFail($id)->delete();
+    {
+        try {
+            Proveedor::findOrFail($id)->delete();
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 400);
+        }
+    }
 
-    return response()->json([
-        'success' => true
-    ]);
+    // Obtener formas de pago disponibles (JSON para AJAX)
+    public function getFormasPago()
+    {
+        $formasPago = FormaPago::where('activo', true)->get();
+        return response()->json($formasPago);
+    }
 }
-// app/Http/Controllers/ProveedorController.php
-
-public function edit($id)
-{
-    $proveedor = Proveedor::findOrFail($id);
-    return response()->json($proveedor); // Mismo formato que el JSON actual
-}
-
-public function update(Request $request, $id)
-{
-    $proveedor = Proveedor::findOrFail($id);
-    $proveedor->update($request->all());
-    
-    return response()->json([
-        'success' => true,
-        'message' => 'Proveedor actualizado correctamente'
-    ]);
-}
-}
-

@@ -9,6 +9,11 @@ class ProductoSeeder extends Seeder
 {
     public function run(): void
     {
+        // Obtener IDs de tabla_ivas por porcentaje
+        $iva_0 = DB::table('tabla_ivas')->where('porcentaje', 0)->first()->id ?? 1;
+        $iva_21 = DB::table('tabla_ivas')->where('porcentaje', 21)->first()->id ?? 2;
+        $iva_23 = DB::table('tabla_ivas')->where('porcentaje', 23)->first()->id ?? 3;
+
         $categoriaProcesadores = DB::table('categorias')->where('nombre', 'Procesadores')->first();
         $categoriaGraficas = DB::table('categorias')->where('nombre', 'Tarjetas Gráficas')->first();
         $categoriaPerifericos = DB::table('categorias')->where('nombre', 'Periféricos')->first();
@@ -30,9 +35,9 @@ class ProductoSeeder extends Seeder
                 'categoria_id' => $categoriaProcesadores->id,
                 'proveedor_id' => $proveedorAmd->id,
                 'precio_base_compra' => 180.50,
-                'porcentaje_iva_compra' => 21.00,
+                'iva_compra_id' => $iva_21,
                 'precio_base_venta' => 249.99,
-                'porcentaje_iva_venta' => 21.00,
+                'iva_venta_id' => $iva_21,
                 'stock_minimo' => 3,
                 'stock_maximo' => 20,
                 'ubicacion' => 'Estante CPU-1',
@@ -45,9 +50,9 @@ class ProductoSeeder extends Seeder
                 'categoria_id' => $categoriaProcesadores->id,
                 'proveedor_id' => $proveedorAmd->id,
                 'precio_base_compra' => 250.00,
-                'porcentaje_iva_compra' => 21.00,
+                'iva_compra_id' => $iva_21,
                 'precio_base_venta' => 329.99,
-                'porcentaje_iva_venta' => 21.00,
+                'iva_venta_id' => $iva_21,
                 'stock_minimo' => 2,
                 'stock_maximo' => 15,
                 'ubicacion' => 'Estante CPU-2',
@@ -60,15 +65,14 @@ class ProductoSeeder extends Seeder
                 'categoria_id' => $categoriaProcesadores->id,
                 'proveedor_id' => $proveedorIntel->id,
                 'precio_base_compra' => 150.00,
-                'porcentaje_iva_compra' => 21.00,
+                'iva_compra_id' => $iva_21,
                 'precio_base_venta' => 199.99,
-                'porcentaje_iva_venta' => 21.00,
+                'iva_venta_id' => $iva_21,
                 'stock_minimo' => 3,
                 'stock_maximo' => 25,
                 'ubicacion' => 'Estante CPU-3',
                 'activo' => true
             ],
-
             // Tarjetas Gráficas: 21%
             [
                 'nombre' => 'RTX 4060 8GB',
@@ -77,9 +81,9 @@ class ProductoSeeder extends Seeder
                 'categoria_id' => $categoriaGraficas->id,
                 'proveedor_id' => $proveedorDistec->id,
                 'precio_base_compra' => 280.00,
-                'porcentaje_iva_compra' => 21.00,
+                'iva_compra_id' => $iva_21,
                 'precio_base_venta' => 349.99,
-                'porcentaje_iva_venta' => 21.00,
+                'iva_venta_id' => $iva_21,
                 'stock_minimo' => 2,
                 'stock_maximo' => 15,
                 'ubicacion' => 'Estante GPU-1',
@@ -92,15 +96,14 @@ class ProductoSeeder extends Seeder
                 'categoria_id' => $categoriaGraficas->id,
                 'proveedor_id' => $proveedorAmd->id,
                 'precio_base_compra' => 220.00,
-                'porcentaje_iva_compra' => 21.00,
+                'iva_compra_id' => $iva_21,
                 'precio_base_venta' => 279.99,
-                'porcentaje_iva_venta' => 21.00,
+                'iva_venta_id' => $iva_21,
                 'stock_minimo' => 2,
                 'stock_maximo' => 15,
                 'ubicacion' => 'Estante GPU-2',
                 'activo' => true
             ],
-
             // Periféricos: 0% (EXENTO)
             [
                 'nombre' => 'Logitech G203',
@@ -109,9 +112,9 @@ class ProductoSeeder extends Seeder
                 'categoria_id' => $categoriaPerifericos->id,
                 'proveedor_id' => $proveedorLogitech->id,
                 'precio_base_compra' => 18.00,
-                'porcentaje_iva_compra' => 0.00,
+                'iva_compra_id' => $iva_0,
                 'precio_base_venta' => 29.99,
-                'porcentaje_iva_venta' => 0.00,
+                'iva_venta_id' => $iva_0,
                 'stock_minimo' => 5,
                 'stock_maximo' => 30,
                 'ubicacion' => 'Vitrina 2',
@@ -124,15 +127,14 @@ class ProductoSeeder extends Seeder
                 'categoria_id' => $categoriaPerifericos->id,
                 'proveedor_id' => $proveedorLogitech->id,
                 'precio_base_compra' => 35.00,
-                'porcentaje_iva_compra' => 0.00,
+                'iva_compra_id' => $iva_0,
                 'precio_base_venta' => 49.99,
-                'porcentaje_iva_venta' => 0.00,
+                'iva_venta_id' => $iva_0,
                 'stock_minimo' => 3,
                 'stock_maximo' => 20,
                 'ubicacion' => 'Vitrina 3',
                 'activo' => true
             ],
-
             // Almacenamiento: 23%
             [
                 'nombre' => 'Samsung 980 1TB NVMe',
@@ -141,9 +143,9 @@ class ProductoSeeder extends Seeder
                 'categoria_id' => $categoriaAlmacenamiento->id,
                 'proveedor_id' => $proveedorDistec->id,
                 'precio_base_compra' => 65.00,
-                'porcentaje_iva_compra' => 23.00,
+                'iva_compra_id' => $iva_23,
                 'precio_base_venta' => 89.99,
-                'porcentaje_iva_venta' => 23.00,
+                'iva_venta_id' => $iva_23,
                 'stock_minimo' => 4,
                 'stock_maximo' => 25,
                 'ubicacion' => 'Estante SSD-1',
@@ -156,15 +158,14 @@ class ProductoSeeder extends Seeder
                 'categoria_id' => $categoriaAlmacenamiento->id,
                 'proveedor_id' => $proveedorPc->id,
                 'precio_base_compra' => 35.00,
-                'porcentaje_iva_compra' => 23.00,
+                'iva_compra_id' => $iva_23,
                 'precio_base_venta' => 55.99,
-                'porcentaje_iva_venta' => 23.00,
+                'iva_venta_id' => $iva_23,
                 'stock_minimo' => 5,
                 'stock_maximo' => 30,
                 'ubicacion' => 'Estante SSD-2',
                 'activo' => true
             ],
-
             // Memorias RAM: 23%
             [
                 'nombre' => 'Corsair Vengeance 16GB 3200MHz',
@@ -173,9 +174,9 @@ class ProductoSeeder extends Seeder
                 'categoria_id' => $categoriaRam->id,
                 'proveedor_id' => $proveedorDistec->id,
                 'precio_base_compra' => 55.00,
-                'porcentaje_iva_compra' => 23.00,
+                'iva_compra_id' => $iva_23,
                 'precio_base_venta' => 79.99,
-                'porcentaje_iva_venta' => 23.00,
+                'iva_venta_id' => $iva_23,
                 'stock_minimo' => 4,
                 'stock_maximo' => 30,
                 'ubicacion' => 'Estante RAM-1',
@@ -188,9 +189,9 @@ class ProductoSeeder extends Seeder
                 'categoria_id' => $categoriaRam->id,
                 'proveedor_id' => $proveedorPc->id,
                 'precio_base_compra' => 95.00,
-                'porcentaje_iva_compra' => 23.00,
+                'iva_compra_id' => $iva_23,
                 'precio_base_venta' => 139.99,
-                'porcentaje_iva_venta' => 23.00,
+                'iva_venta_id' => $iva_23,
                 'stock_minimo' => 2,
                 'stock_maximo' => 15,
                 'ubicacion' => 'Estante RAM-2',
@@ -199,33 +200,36 @@ class ProductoSeeder extends Seeder
         ];
 
         foreach ($productos as $producto) {
-    $precio_compra_final = $producto['precio_base_compra'] * (1 + ($producto['porcentaje_iva_compra'] / 100));
-    $precio_venta_final = $producto['precio_base_venta'] * (1 + ($producto['porcentaje_iva_venta'] / 100));
+            // Buscar el porcentaje IVA para calcular precio final
+            $iva_compra_porcentaje = DB::table('tabla_ivas')->where('id', $producto['iva_compra_id'])->first()->porcentaje ?? 0;
+            $iva_venta_porcentaje = DB::table('tabla_ivas')->where('id', $producto['iva_venta_id'])->first()->porcentaje ?? 0;
 
-    // ✅ CALCULAR STOCK INICIAL (entre mínimo y máximo)
-    $stock_inicial = rand($producto['stock_minimo'], $producto['stock_maximo']);
+            $precio_compra_final = $producto['precio_base_compra'] * (1 + ($iva_compra_porcentaje / 100));
+            $precio_venta_final = $producto['precio_base_venta'] * (1 + ($iva_venta_porcentaje / 100));
 
-    DB::table('productos')->insert([
-        'nombre' => $producto['nombre'],
-        'marca' => $producto['marca'],
-        'modelo' => $producto['modelo'],
-        'categoria_id' => $producto['categoria_id'],
-        'proveedor_id' => $producto['proveedor_id'],
-        'precio_base_compra' => $producto['precio_base_compra'],
-        'porcentaje_iva_compra' => $producto['porcentaje_iva_compra'],
-        'precio_compra_final' => round($precio_compra_final, 2),
-        'precio_base_venta' => $producto['precio_base_venta'],
-        'porcentaje_iva_venta' => $producto['porcentaje_iva_venta'],
-        'precio_venta_final' => round($precio_venta_final, 2),
-        'stock_actual' => $stock_inicial,  // ✅ STOCK ALEATORIO
-        'stock_minimo' => $producto['stock_minimo'],
-        'stock_maximo' => $producto['stock_maximo'],
-        'ubicacion' => $producto['ubicacion'],
-        'activo' => $producto['activo'],
-        'created_at' => now(),
-        'updated_at' => now()
-    ]);
-}
+            $stock_inicial = rand($producto['stock_minimo'], $producto['stock_maximo']);
+
+            DB::table('productos')->insert([
+                'nombre' => $producto['nombre'],
+                'marca' => $producto['marca'],
+                'modelo' => $producto['modelo'],
+                'categoria_id' => $producto['categoria_id'],
+                'proveedor_id' => $producto['proveedor_id'],
+                'precio_base_compra' => $producto['precio_base_compra'],
+                'iva_compra_id' => $producto['iva_compra_id'],
+                'precio_compra_final' => round($precio_compra_final, 2),
+                'precio_base_venta' => $producto['precio_base_venta'],
+                'iva_venta_id' => $producto['iva_venta_id'],
+                'precio_venta_final' => round($precio_venta_final, 2),
+                'stock_actual' => $stock_inicial,
+                'stock_minimo' => $producto['stock_minimo'],
+                'stock_maximo' => $producto['stock_maximo'],
+                'ubicacion' => $producto['ubicacion'],
+                'activo' => $producto['activo'],
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+        }
 
         $this->command->info('✅ Productos creados con stocks iniciales variados');
     }

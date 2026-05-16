@@ -19,12 +19,12 @@ return new class extends Migration
 
             // COMPRA
             $table->decimal('precio_base_compra', 10, 2)->nullable()->comment('Precio sin IVA');
-            $table->decimal('porcentaje_iva_compra', 5, 2)->default(21.00)->comment('Porcentaje de IVA para compra');
+            $table->foreignId('iva_compra_id')->nullable()->constrained('tabla_ivas')->nullOnDelete()->comment('IVA para compra');
             $table->decimal('precio_compra_final', 10, 2)->nullable()->comment('Precio con IVA');
 
             // VENTA
             $table->decimal('precio_base_venta', 10, 2)->comment('Precio sin IVA');
-            $table->decimal('porcentaje_iva_venta', 5, 2)->default(21.00)->comment('Porcentaje de IVA para venta');
+            $table->foreignId('iva_venta_id')->nullable()->constrained('tabla_ivas')->nullOnDelete()->comment('IVA para venta');
             $table->decimal('precio_venta_final', 10, 2)->nullable()->comment('Precio con IVA');
 
             // STOCK

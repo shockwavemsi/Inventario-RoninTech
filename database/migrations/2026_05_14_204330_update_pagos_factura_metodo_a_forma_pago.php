@@ -8,25 +8,25 @@ use Illuminate\Support\Facades\DB;
 return new class extends Migration
 {
     public function up(): void
-    {
-        Schema::table('pagos_factura', function (Blueprint $table) {
-            // Eliminar la FK antigua
-            if (Schema::hasColumn('pagos_factura', 'metodo_pago_id')) {
-                // Primero eliminar datos
-                DB::table('pagos_factura')->truncate();
+{
+    Schema::table('pagos_factura', function (Blueprint $table) {
+        // Eliminar la FK antigua
+        if (Schema::hasColumn('pagos_factura', 'metodo_pago_id')) {
+            // Primero eliminar datos
+            DB::table('pagos_factura')->truncate();
 
-                // Luego eliminar la columna
-                $table->dropForeign(['metodo_pago_id']);
-                $table->dropColumn('metodo_pago_id');
-            }
+            // Luego eliminar la FK y la columna
+            $table->dropForeign(['metodo_pago_id']);
+            $table->dropColumn('metodo_pago_id');
+        }
 
-            // Agregar columna nueva
-            $table->foreignId('forma_pago_proveedor_id')
-                ->nullable()
-                ->constrained('formas_pago_proveedor')
-                ->nullOnDelete();
-        });
-    }
+        // Agregar columna nueva
+        $table->foreignId('forma_pago_proveedor_id')
+            ->nullable()
+            ->constrained('formas_pago_proveedor')
+            ->nullOnDelete();
+    });
+}
 
     public function down(): void
     {

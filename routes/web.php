@@ -176,10 +176,14 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/proveedores/crear', [ProveedorController::class, 'create'])->name('proveedores.create');
     Route::post('/proveedores/guardar', [ProveedorController::class, 'store'])->name('proveedores.store');
     Route::delete('/proveedores/{id}', [ProveedorController::class, 'destroy']);
+    Route::get('/proveedores/{id}/json', [ProveedorController::class, 'show']);
     Route::get('/proveedores/{id}/formas-pago', [ProveedorController::class, 'getFormasPago']);
     Route::post('/proveedores/{id}/formas-pago', [ProveedorController::class, 'saveFormasPago']);
 
     // PRODUCTOS (CRUD)
+    // En la sección de PRODUCTOS (CRUD)
+Route::get('/productos/{id}/json', [ProductosController::class, 'show'])->name('productos.show');
+Route::get('/productos/modal/lista', [ProductosController::class, 'listaParaModal'])->name('productos.modal-lista');
     Route::get('/productos', [ProductosController::class, 'index'])->name('productos.index');
     Route::get('/productos/crear', [ProductosController::class, 'create'])->name('productos.create');
     Route::post('/productos/guardar', [ProductosController::class, 'store'])->name('productos.store');

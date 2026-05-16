@@ -1,5 +1,4 @@
 <?php
-// app/Models/Producto.php
 
 namespace App\Models;
 
@@ -14,8 +13,12 @@ class Producto extends Model
         'modelo',
         'categoria_id',
         'proveedor_id',
-        'precio_compra',
-        'precio_venta',
+        'precio_base_compra',
+        'iva_compra_id',
+        'precio_compra_final',
+        'precio_base_venta',
+        'iva_venta_id',
+        'precio_venta_final',
         'stock_actual',
         'stock_minimo',
         'stock_maximo',
@@ -26,9 +29,16 @@ class Producto extends Model
 
     protected $casts = [
         'activo' => 'boolean',
+        'precio_base_compra' => 'decimal:2',
+        'precio_compra_final' => 'decimal:2',
+        'precio_base_venta' => 'decimal:2',
+        'precio_venta_final' => 'decimal:2',
     ];
 
-    // Relaciones principales
+    // =============================================
+    // RELACIONES PRINCIPALES
+    // =============================================
+
     public function categoria()
     {
         return $this->belongsTo(Categoria::class);
@@ -39,7 +49,20 @@ class Producto extends Model
         return $this->belongsTo(Proveedor::class);
     }
 
-    // Relaciones con detalles (usando modelos pivote)
+    public function ivaCompra()
+    {
+        return $this->belongsTo(TablaIva::class, 'iva_compra_id');
+    }
+
+    public function ivaVenta()
+    {
+        return $this->belongsTo(TablaIva::class, 'iva_venta_id');
+    }
+
+    // =============================================
+    // RELACIONES CON DETALLES (PIVOTE)
+    // =============================================
+
     public function comprasDetalle()
     {
         return $this->hasMany(CompraDetalle::class);
@@ -55,7 +78,10 @@ class Producto extends Model
         return $this->hasMany(DevolucionDetalle::class);
     }
 
-    // Relaciones many-to-many directas
+    // =============================================
+    // RELACIONES MANY-TO-MANY
+    // =============================================
+
     public function compras()
     {
         return $this->belongsToMany(Compra::class, 'compras_detalle')
@@ -70,7 +96,10 @@ class Producto extends Model
                     ->withPivot('cantidad', 'precio_unitario', 'subtotal');
     }
 
-    // Movimientos de stock
+    // =============================================
+    // MOVIMIENTOS Y ALERTAS
+    // =============================================
+
     public function movimientosStock()
     {
         return $this->hasMany(MovimientoStock::class);
@@ -84,10 +113,11 @@ class Producto extends Model
     // =============================================
     // ATRIBUTOS CALCULADOS
     // =============================================
+
     public function getStockActualAttribute()
-{
-    return $this->attributes['stock_actual'] ?? 0;
-}
+    {
+        return $this->attributes['stock_actual'] ?? 0;
+    }
 
     public function getEstadoStockAttribute()
     {
@@ -101,6 +131,7 @@ class Producto extends Model
     // =============================================
     // MÉTODOS ÚTILES
     // =============================================
+
     public function verificarStockBajo()
     {
         if ($this->stock_actual <= $this->stock_minimo) {

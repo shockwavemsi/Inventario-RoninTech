@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
         // ===== DATOS MAESTROS =====
         echo "📦 Cargando datos maestros...\n";
         $this->call([
+            TablaIvasSeeder::class, 
             CategoriaSeeder::class,
             ProveedorSeeder::class,
             ProductoSeeder::class,
