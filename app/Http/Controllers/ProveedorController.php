@@ -6,20 +6,21 @@ use App\Models\Proveedor;
 use App\Models\FormaPago;
 use App\Models\Banco;
 use App\Models\FormasPagoProveedor;
+use App\Models\DiasVencimientoProveedor;
 use App\Models\Configuracion;
 use Illuminate\Http\Request;
 
 class ProveedorController extends Controller
 {
     public function index()
-{
-    $config = Configuracion::first();
-    $proveedores = Proveedor::with('formasPago.formaPago', 'formasPago.banco')->get();
-    $formasPago = FormaPago::where('activo', true)->get();  // ← AGREGAR
-    $bancos = Banco::all();                                   // ← AGREGAR
+    {
+        $config = Configuracion::first();
+        $proveedores = Proveedor::with('formasPago.formaPago', 'formasPago.banco', 'diasVencimiento')->get();
+        $formasPago = FormaPago::where('activo', true)->get();
+        $bancos = Banco::all();
 
-    return view('admin.proveedores', compact('config', 'proveedores', 'formasPago', 'bancos'));
-}
+        return view('admin.proveedores', compact('config', 'proveedores', 'formasPago', 'bancos'));
+    }
 
     public function create()
     {
@@ -32,7 +33,6 @@ class ProveedorController extends Controller
 
     public function store(Request $request)
     {
-        // Validar datos del proveedor
         $request->validate([
             'nombre' => 'required|string|max:200',
             'email' => 'nullable|email',
@@ -42,7 +42,7 @@ class ProveedorController extends Controller
             'telefono' => 'nullable|string|max:20',
             'ruc' => 'nullable|string|max:20',
             'activo' => 'nullable|boolean',
-            // Validar forma de pago
+            'dias_vencimiento' => 'required|integer|min:1|max:365',
             'forma_pago_id' => 'required|exists:formas_pago,id',
             'banco_id' => 'nullable|exists:bancos,id',
             'referencia' => 'nullable|string|max:255',
@@ -62,6 +62,12 @@ class ProveedorController extends Controller
                 'activo' => $request->activo ?? true,
             ]);
 
+            // Crear días de vencimiento
+            DiasVencimientoProveedor::create([
+                'proveedor_id' => $proveedor->id,
+                'dias_vencimiento' => $request->dias_vencimiento,
+            ]);
+
             // Crear forma de pago del proveedor
             FormasPagoProveedor::create([
                 'proveedor_id' => $proveedor->id,
@@ -71,7 +77,8 @@ class ProveedorController extends Controller
                 'nombre_banco' => $request->nombre_banco,
             ]);
 
-            return redirect()->route('proveedores.index')->with('success', '✅ Proveedor creado con éxito (con forma de pago)');
+            return redirect()->route('proveedores.index')->with('success', '✅ Proveedor creado con éxito');
+
         } catch (\Exception $e) {
             return redirect()->back()->withErrors(['error' => 'Error al crear proveedor: ' . $e->getMessage()]);
         }
@@ -79,13 +86,13 @@ class ProveedorController extends Controller
 
     public function show($id)
     {
-        $proveedor = Proveedor::with('formasPago.formaPago', 'formasPago.banco')->findOrFail($id);
+        $proveedor = Proveedor::with('formasPago.formaPago', 'formasPago.banco', 'diasVencimiento')->findOrFail($id);
         return response()->json($proveedor);
     }
 
     public function edit($id)
     {
-        $proveedor = Proveedor::with('formasPago')->findOrFail($id);
+        $proveedor = Proveedor::with('formasPago', 'diasVencimiento')->findOrFail($id);
         return response()->json($proveedor);
     }
 
@@ -99,11 +106,20 @@ class ProveedorController extends Controller
             'contacto_telefono' => 'nullable|string|max:20',
             'telefono' => 'nullable|string|max:20',
             'ruc' => 'nullable|string|max:20',
+            'dias_vencimiento' => 'nullable|integer|min:1|max:365',
         ]);
 
         $proveedor = Proveedor::findOrFail($id);
         $proveedor->update($request->all());
-        
+
+        // Actualizar días de vencimiento
+        if ($request->has('dias_vencimiento')) {
+            DiasVencimientoProveedor::updateOrCreate(
+                ['proveedor_id' => $id],
+                ['dias_vencimiento' => $request->dias_vencimiento]
+            );
+        }
+
         return response()->json([
             'success' => true,
             'message' => '✅ Proveedor actualizado correctamente'
@@ -120,7 +136,6 @@ class ProveedorController extends Controller
         }
     }
 
-    // Obtener formas de pago disponibles (JSON para AJAX)
     public function getFormasPago()
     {
         $formasPago = FormaPago::where('activo', true)->get();

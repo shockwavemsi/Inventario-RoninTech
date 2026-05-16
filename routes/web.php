@@ -112,20 +112,54 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::get('/api/buscar-pedidos', function() {
-        $query = request()->query('q', '');
-        $pedidos = \DB::table('pedidos_compra')
-            ->where('numero_pedido', 'LIKE', "%{$query}%")
-            ->where('estado', 'abierto')
-            ->whereNotIn('id', function($subquery) {
-                $subquery->select('pedido_compra_id')
-                    ->from('albaranes_compra')
-                    ->whereNull('deleted_at');
-            })
-            ->select('id', 'numero_pedido', 'proveedor_id')
-            ->limit(10)
-            ->get();
-        return response()->json($pedidos);
-    });
+    $query = request()->query('q', '');
+    $pedidos = \DB::table('pedidos_compra')
+        ->where('numero_pedido', 'LIKE', "%{$query}%")
+        ->whereIn('estado', ['abierto', 'parcial'])  // ✅ Solo permitir abierto/parcial
+        ->select('id', 'numero_pedido', 'proveedor_id')
+        ->limit(10)
+        ->get();
+
+    return response()->json($pedidos);
+});
+
+Route::get('/api/pedidos/{id}/productos-faltantes', function($id) {
+    $pedido = \App\Models\PedidoCompra::find($id);
+
+    if (!$pedido) {
+        return response()->json(['error' => 'Pedido no encontrado'], 404);
+    }
+
+    $lineas = $pedido->lineas;
+    $recibidoPorProducto = [];
+
+    foreach ($pedido->albaranes as $albaran) {
+        foreach ($albaran->lineas as $lineaAlbaran) {
+            $productoId = $lineaAlbaran->producto_id;
+            if (!isset($recibidoPorProducto[$productoId])) {
+                $recibidoPorProducto[$productoId] = 0;
+            }
+            $recibidoPorProducto[$productoId] += (int)$lineaAlbaran->cantidad_recibida;  // ✅ CAST A INT
+        }
+    }
+
+    $lineasConFaltante = $lineas->map(function($linea) use ($recibidoPorProducto) {
+        $recibido = $recibidoPorProducto[$linea->producto_id] ?? 0;
+        $cantidadPedida = (int)$linea->cantidad;  // ✅ CAST A INT
+        $faltante = $cantidadPedida - $recibido;
+
+        return [
+            'id' => $linea->id,
+            'producto_id' => $linea->producto_id,
+            'producto_nombre' => $linea->producto?->nombre ?? 'Desconocido',
+            'cantidad_pedida' => $cantidadPedida,
+            'cantidad_recibida' => $recibido,
+            'cantidad_faltante' => max(0, $faltante),  // ✅ AQUÍ DEBE DAR 10, 4, etc
+        ];
+    })->filter(fn($l) => $l['cantidad_faltante'] > 0);
+
+    return response()->json($lineasConFaltante);
+});
 
     Route::get('/api/buscar-albaranes', [FacturaCompraController::class, 'buscarAlbaranes']);
     

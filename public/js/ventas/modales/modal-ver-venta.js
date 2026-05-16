@@ -39,7 +39,7 @@ window.ModalVerVenta = {
         document.getElementById('detalleNumero').textContent = venta.numero_factura || 'V-001';
         document.getElementById('detalleCliente').textContent = venta.cliente || '—';
         document.getElementById('detalleDocumento').textContent = venta.cliente_documento || '—';
-        document.getElementById('detalleFecha').textContent = venta.fecha_venta || '—';
+        document.getElementById('detalleFecha').textContent = window.formatearFecha(venta.fecha_venta);
 
         // ESTADO Y DETALLES
         const estadoMap = {

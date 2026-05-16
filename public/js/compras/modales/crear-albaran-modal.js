@@ -99,112 +99,106 @@ class CrearAlbaranModal {
     }
 
     static cargarProductosPedido() {
-        const pedidoId = document.getElementById('pedidoSelect')?.value;
+    const pedidoId = document.getElementById('pedidoSelect')?.value;
 
-        console.log('📦 Cargando productos del pedido:', pedidoId);
+    console.log('📦 Cargando productos faltantes del pedido:', pedidoId);
 
-        if (!pedidoId) {
-            console.warn('⚠️ No hay pedido seleccionado');
-            return;
-        }
-
-        const pedidosData = window.pedidosData || [];
-        const pedido = pedidosData.find(p => p.id == pedidoId);
-
-        if (!pedido) {
-            console.error('❌ Pedido no encontrado:', pedidoId);
-            return;
-        }
-
-        const tbody = document.getElementById('productosListAlbaran');
-        if (!tbody) {
-            console.error('❌ No se encuentra #productosListAlbaran');
-            return;
-        }
-
-        tbody.innerHTML = '';
-
-        if (!pedido.lineas || pedido.lineas.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #a0a0a0;">Sin productos en este pedido</td></tr>';
-            return;
-        }
-
-        let fila_num = 0;
-        pedido.lineas.forEach((linea, index) => {
-            fila_num++;
-            const cantidadPedida = parseInt(linea.cantidad) || 0;
-            const nombreProducto = linea.producto?.nombre || linea.producto_nombre || 'Producto desconocido';
-
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td style="color: #f0f0f0;">${nombreProducto}</td>
-                <td style="color: #f0f0f0; text-align: center;">${cantidadPedida}</td>
-                <td style="color: #f0f0f0; text-align: center;">
-                    <input type="number" 
-                        name="cantidad_recibida[]" 
-                        value="${cantidadPedida}" 
-                        min="0" 
-                        max="${cantidadPedida}"
-                        class="form-control form-control-sm cantidad-recibida" 
-                        data-fila="${fila_num}"
-                        data-pedida="${cantidadPedida}"
-                        style="background: rgba(20, 20, 25, 0.8); border-color: rgba(230, 57, 70, 0.3); color: #f0f0f0; width: 70px; text-align: center;"
-                        onchange="window.CrearAlbaranModal.validarCantidad(this)">
-                </td>
-                <td style="color: #f0f0f0; text-align: center;">
-                    <span class="faltante" data-faltante="0">0</span>
-                </td>
-                <td style="color: #f0f0f0; text-align: center;">
-                    <span class="estado" style="color: #00ff00; font-weight: bold;">Completo</span>
-                </td>
-                <td style="text-align: center;">
-                    <input type="hidden" name="producto_id[]" value="${linea.producto_id || linea.id}">
-                    <input type="hidden" name="cantidad_pedida[]" value="${cantidadPedida}">
-                    <input type="hidden" name="cantidad_faltante[]" value="0">
-                    <input type="hidden" name="estado[]" value="recibido">
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
-
-        console.log('✅ Productos cargados:', pedido.lineas.length);
+    if (!pedidoId) {
+        console.warn('⚠️ No hay pedido seleccionado');
+        return;
     }
+
+    // ✅ LLAMAR AL NUEVO ENDPOINT
+    fetch(`/api/pedidos/${pedidoId}/productos-faltantes`)
+        .then(res => res.json())
+        .then(lineas => {
+            const tbody = document.getElementById('productosListAlbaran');
+            tbody.innerHTML = '';
+
+            if (!lineas || lineas.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #90ee90; padding: 2rem;">✅ Pedido completamente recibido</td></tr>';
+                return;
+            }
+
+            lineas.forEach((linea, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="color: #f0f0f0;">${linea.producto_nombre}</td>
+                    <td style="color: #f0f0f0; text-align: center;">${linea.cantidad_pedida}</td>
+                    <td style="color: #f0f0f0; text-align: center;">
+                        <input type="number" 
+                            name="cantidad_recibida[]" 
+                            value="0" 
+                            min="0" 
+                            max="${linea.cantidad_faltante}"
+                            class="form-control form-control-sm cantidad-recibida" 
+                            data-fila="${index + 1}"
+                            data-faltante="${linea.cantidad_faltante}"
+                            style="background: rgba(20, 20, 25, 0.8); border-color: rgba(230, 57, 70, 0.3); color: #f0f0f0; width: 70px; text-align: center;"
+                            onchange="window.CrearAlbaranModal.validarCantidad(this)">
+                    </td>
+                    <td style="color: #fed7aa; text-align: center; font-weight: bold;">${linea.cantidad_faltante}</td>
+                    <td style="color: #f0f0f0; text-align: center;">
+                        <span class="estado" style="color: #ffc107; font-weight: bold;">PENDIENTE</span>
+                    </td>
+                    <td style="text-align: center;">
+                        <input type="hidden" name="producto_id[]" value="${linea.producto_id}">
+                        <input type="hidden" name="cantidad_pedida[]" value="${linea.cantidad_pedida}">
+                        <input type="hidden" name="cantidad_faltante[]" value="${linea.cantidad_faltante}">
+                        <input type="hidden" name="estado[]" value="recibido">
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            console.log('✅ ${lineas.length} productos cargados');
+        })
+        .catch(err => console.error('❌ Error:', err));
+}
 
     static validarCantidad(input) {
-        const cantidadPedida = parseInt(input.dataset.pedida) || 0;
-        const cantidadRecibida = parseInt(input.value) || 0;
+    const cantidadFaltante = parseInt(input.dataset.faltante) || 0;  // ✅ CAMBIAR A faltante
+    const cantidadRecibida = parseInt(input.value) || 0;
 
-        if (cantidadRecibida > cantidadPedida) {
-            alert(`⚠️ No puedes recibir más de ${cantidadPedida} unidades`);
-            input.value = cantidadPedida;
-            return;
-        }
+    console.log('🔍 Validando:', { cantidadFaltante, cantidadRecibida });  // DEBUG
 
-        if (cantidadRecibida < 0) {
-            alert('⚠️ La cantidad no puede ser negativa');
-            input.value = 0;
-            return;
-        }
+    if (cantidadRecibida > cantidadFaltante) {
+        alert(`⚠️ No puedes recibir más de ${cantidadFaltante} unidades`);
+        input.value = cantidadFaltante;
+        return;
+    }
 
-        const faltante = cantidadPedida - cantidadRecibida;
-        const fila = input.closest('tr');
-        const spanFaltante = fila.querySelector('.faltante');
-        const spanEstado = fila.querySelector('.estado');
-        const inputFaltante = fila.querySelector('input[name="cantidad_faltante[]"]');
+    if (cantidadRecibida < 0) {
+        alert('⚠️ La cantidad no puede ser negativa');
+        input.value = 0;
+        return;
+    }
 
-        spanFaltante.textContent = faltante;
-        inputFaltante.value = faltante;
+    const fila = input.closest('tr');
+    const spanFaltante = fila.querySelector('.faltante');
+    const spanEstado = fila.querySelector('.estado');
+    const inputFaltante = fila.querySelector('input[name="cantidad_faltante[]"]');
 
-        if (faltante === 0) {
+    // Calcular nuevo faltante
+    const nuevoFaltante = cantidadFaltante - cantidadRecibida;
+
+    if (spanFaltante) spanFaltante.textContent = nuevoFaltante;
+    if (inputFaltante) inputFaltante.value = nuevoFaltante;
+
+    if (nuevoFaltante === 0) {
+        if (spanEstado) {
             spanEstado.textContent = 'Completo';
             spanEstado.style.color = '#00ff00';
-            fila.querySelector('input[name="estado[]"]').value = 'recibido';
-        } else {
+        }
+        fila.querySelector('input[name="estado[]"]').value = 'recibido';
+    } else {
+        if (spanEstado) {
             spanEstado.textContent = 'Parcial';
             spanEstado.style.color = '#ffc107';
-            fila.querySelector('input[name="estado[]"]').value = 'falta';
         }
+        fila.querySelector('input[name="estado[]"]').value = 'falta';
     }
+}
 
     static inicializarTabla() {
         const tbody = document.getElementById('productosListAlbaran');

@@ -14,15 +14,16 @@ class PedidoCompraController extends Controller
 {
     public function index()
 {
-    // ✅ CARGAR PEDIDOS Y MAPEAR A ARRAY
-    $pedidosRaw = PedidoCompra::with('proveedor', 'lineas', 'lineas.producto')
-        ->whereDoesntHave('albaranes')
+    // ✅ CARGAR PEDIDOS - MOSTRAR TODOS CON ALBARANES
+    $pedidosRaw = PedidoCompra::with('proveedor', 'lineas', 'lineas.producto', 'albaranes')
         ->get();
 
     $pedidos = $pedidosRaw->map(fn($p) => [
         'id' => (int) $p->id,
         'numero_pedido' => $p->numero_pedido,
         'proveedor_id' => (int) $p->proveedor_id,
+        'estado' => $p->estado,
+        'albaranes_count' => $p->albaranes->count(),
         'lineas' => $p->lineas->map(fn($l) => [
             'producto_id' => (int) $l->producto_id,
             'producto_nombre' => $l->producto?->nombre ?? '—',
@@ -38,6 +39,8 @@ class PedidoCompraController extends Controller
             'id' => (int) $a->id,
             'numero_albaran' => $a->numero_albaran,
             'proveedor' => $a->proveedor?->nombre,
+            'numero_pedido' => $a->pedidoCompra?->numero_pedido,
+            'estado' => $a->estado,
         ])->toArray();
 
     // ✅ FACTURAS
@@ -102,7 +105,7 @@ class PedidoCompraController extends Controller
                 'precio_unitario' => 'required|array',
             ]);
 
-            \Log::info('✅ VALIDACION PASADA');
+
 
             $pedido = PedidoCompra::create([
                 'numero_pedido' => $validated['numero_pedido'],
@@ -118,7 +121,6 @@ class PedidoCompraController extends Controller
                 'observaciones' => $validated['observaciones'],
             ]);
 
-            \Log::info('✅ PEDIDO CREADO:', ['id' => $pedido->id, 'numero' => $pedido->numero_pedido]);
 
             foreach ($request->input('producto_id') as $index => $productoId) {
                 $cantidad = (int)$request->input('cantidad')[$index];
@@ -134,13 +136,11 @@ class PedidoCompraController extends Controller
                 ]);
             }
 
-            \Log::info('✅ LÍNEAS CREADAS');
 
             return redirect()->route('pedidos-compra.index')
                 ->with('success', "✅ Pedido {$pedido->numero_pedido} creado exitosamente");
 
         } catch (\Exception $e) {
-            \Log::error('❌ ERROR EN STORE:', ['mensaje' => $e->getMessage(), 'linea' => $e->getLine()]);
             return back()->withInput()->with('error', '❌ Error: ' . $e->getMessage());
         }
     }
@@ -170,7 +170,9 @@ class PedidoCompraController extends Controller
             if ($pedidoCompra->albaranes) {
                 $albaranes = $pedidoCompra->albaranes->map(fn($a) => [
                     'id' => $a->id,
-                    'numero_albaran' => $a->numero_albaran
+                    'numero_albaran' => $a->numero_albaran,
+                    'estado' => $a->estado,
+                    'fecha_recepcion' => $formatoFecha($a->fecha_recepcion)
                 ])->toArray();
             }
 
@@ -196,12 +198,13 @@ class PedidoCompraController extends Controller
                 'subtotal_total' => (float) $detalles->sum('precio_por_linea'),
                 'descuento_total' => (float) ($pedidoCompra->descuento_cantidad ?? 0),
                 'total_final' => (float) $pedidoCompra->total,
+                'albaranes_count' => count($albaranes),
                 'albaranes' => $albaranes,
                 'facturas' => $facturas
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Error en showJson: ' . $e->getMessage());
+           
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }

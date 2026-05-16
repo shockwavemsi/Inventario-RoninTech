@@ -35,4 +35,9 @@ class Proveedor extends Model
     {
         return $this->hasMany(FormasPagoProveedor::class, 'proveedor_id');
     }
+    
+    public function diasVencimiento()
+    {
+        return $this->hasOne(DiasVencimientoProveedor::class, 'proveedor_id');
+    }
 }

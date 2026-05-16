@@ -307,6 +307,23 @@
     </div>
 </div>
 
+<!-- ✅ FUNCIÓN HELPER PARA FORMATEAR FECHAS -->
+<script>
+    /**
+     * Formatear fecha ISO a formato DD/MM/YYYY
+     */
+    window.formatearFecha = function(fechaISO) {
+        if (!fechaISO) return '—';
+
+        const fecha = new Date(fechaISO);
+        const dia = String(fecha.getDate()).padStart(2, '0');
+        const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+        const año = fecha.getFullYear();
+
+        return `${dia}/${mes}/${año}`;
+    };
+</script>
+
 <!-- ============ MODAL VER VENTA ============ -->
 <div class="modal fade" id="modalVerVenta" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-xl">
@@ -436,6 +453,8 @@
         console.log('🚀 Cargando módulos de ventas...');
         import VentaManager from '{{ asset("js/ventas/venta.js") }}';
     </script>
+
+    
 @endpush
 
 @endsection

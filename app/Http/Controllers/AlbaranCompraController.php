@@ -20,8 +20,8 @@ class AlbaranCompraController extends Controller
 public function index()
 {
     // ✅ CARGAR PEDIDOS DISPONIBLES
-    $pedidosRaw = PedidoCompra::with('proveedor', 'lineas.producto')
-        ->whereDoesntHave('albaranes')
+    $pedidosRaw = PedidoCompra::with('proveedor', 'lineas.producto', 'albaranes')
+        ->where('estado', '!=', 'completo')
         ->get();
 
     $pedidos = $pedidosRaw->map(fn($p) => [
@@ -60,8 +60,8 @@ public function index()
         'pedidos',
         'albaranes',
         'facturas',
-        'proveedores',      // ✅ AGREGADO
-        'productos',        // ✅ AGREGADO
+        'proveedores',
+        'productos',
         'ultimoPedidoId',
         'ultimoAlbaranId',
         'ultimoFacturaId'
@@ -127,14 +127,6 @@ public function index()
                 return back()->with('error', '❌ Pedido no encontrado');
             }
 
-            $albaranExistente = AlbaranCompra::where('pedido_compra_id', $validated['pedido_compra_id'])->first();
-
-            if ($albaranExistente) {
-                return back()
-                    ->withInput()
-                    ->with('error', '❌ Este pedido ya tiene un albarán asignado: ' . $albaranExistente->numero_albaran);
-            }
-
             \Log::info('ALBARÁN RECIBIDO:', $request->all());
 
             $cantidadesRecibidas = $request->input('cantidad_recibida');
@@ -185,6 +177,27 @@ public function index()
                 ]);
             }
 
+            // ✅ ACTUALIZAR ESTADO DEL ALBARÁN SEGÚN CANTIDADES TOTALES
+            $totalFaltante = 0;
+            $totalRecibido = 0;
+
+            foreach ($albaran->lineas as $linea) {
+                $totalFaltante += (int)$linea->cantidad_faltante;
+                $totalRecibido += (int)$linea->cantidad_recibida;
+            }
+
+            if ($totalFaltante == 0 && $totalRecibido > 0) {
+                $albaran->update(['estado' => 'recibido']);
+                \Log::info('✅ Albarán COMPLETO');
+            } elseif ($totalFaltante > 0 && $totalRecibido > 0) {
+                $albaran->update(['estado' => 'parcial']);
+                \Log::info('⚠️ Albarán PARCIAL');
+            } elseif ($totalRecibido == 0) {
+                $albaran->update(['estado' => 'falta']);
+                \Log::info('❌ Albarán SIN RECEPCIÓN');
+            }
+
+            // ✅ CREAR DÉBITOS SI HAY FALTANTES
             if ($estadoAlbaran === 'falta' || $estadoAlbaran === 'parcial') {
                 $productosFaltantes = [];
                 foreach ($request->input('producto_id') as $index => $productoId) {
@@ -223,6 +236,9 @@ public function index()
                     ]);
                 }
             }
+
+            // ✅ ACTUALIZAR ESTADO DEL PEDIDO
+            $this->actualizarEstadoPedido($validated['pedido_compra_id']);
 
             \Log::info('ALBARÁN CREADO:', ['id' => $albaran->id, 'numero' => $albaran->numero_albaran, 'estado' => $estadoAlbaran]);
 
@@ -326,6 +342,49 @@ public function index()
             return response()->json(['success' => true, 'message' => '✅ Albarán eliminado']);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => '❌ Error: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * ✅ ACTUALIZAR ESTADO DEL PEDIDO SEGÚN CANTIDADES TOTALES RECIBIDAS
+     */
+    private function actualizarEstadoPedido($pedidoId)
+    {
+        $pedido = PedidoCompra::find($pedidoId);
+        
+        if (!$pedido) return;
+
+        // Sumar cantidades del pedido
+        $cantidadTotalPedida = (int)$pedido->lineas->sum('cantidad');
+        
+        // Sumar cantidades recibidas en TODOS los albaranes
+        $cantidadTotalRecibida = 0;
+        foreach ($pedido->albaranes as $albaran) {
+            foreach ($albaran->lineas as $linea) {
+                $cantidadTotalRecibida += (int)$linea->cantidad_recibida;
+            }
+        }
+
+        \Log::info('📊 Actualizando pedido:', [
+            'pedido_id' => $pedidoId,
+            'cantidad_pedida' => $cantidadTotalPedida,
+            'cantidad_recibida' => $cantidadTotalRecibida,
+        ]);
+
+        if ($cantidadTotalRecibida >= $cantidadTotalPedida) {
+            // ✅ TODO RECIBIDO
+            $pedido->update(['estado' => 'completo']);
+            \Log::info('✅ Pedido COMPLETO');
+            
+        } elseif ($cantidadTotalRecibida > 0) {
+            // ⚠️ PARCIALMENTE RECIBIDO
+            $pedido->update(['estado' => 'parcial']);
+            \Log::info('⚠️ Pedido PARCIAL');
+            
+        } else {
+            // ❌ NADA RECIBIDO
+            $pedido->update(['estado' => 'abierto']);
+            \Log::info('❌ Pedido ABIERTO');
         }
     }
 }

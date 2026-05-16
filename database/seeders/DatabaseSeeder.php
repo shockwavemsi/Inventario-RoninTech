@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
             CategoriaSeeder::class,
             ProveedorSeeder::class,
             ProductoSeeder::class,
+            DiasVencimientoProveedorSeeder::class,
         ]);
 
         // ===== FORMAS DE PAGO =====

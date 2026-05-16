@@ -414,12 +414,12 @@
                 
                 // PRECIOS COMPRA
                 document.getElementById('ver_precio_base_compra').textContent = (parseFloat(data.precio_base_compra) || 0).toFixed(2);
-                document.getElementById('ver_iva_compra').textContent = (parseFloat(data.ivaCompra?.porcentaje) || 0).toFixed(2);
+                document.getElementById('ver_iva_compra').textContent = (parseFloat(data.iva_compra?.porcentaje) || 0).toFixed(2);
                 document.getElementById('ver_precio_compra_final').textContent = (parseFloat(data.precio_compra_final) || 0).toFixed(2);
                 
                 // PRECIOS VENTA
                 document.getElementById('ver_precio_base_venta').textContent = (parseFloat(data.precio_base_venta) || 0).toFixed(2);
-                document.getElementById('ver_iva_venta').textContent = (parseFloat(data.ivaVenta?.porcentaje) || 0).toFixed(2);
+                document.getElementById('ver_iva_venta').textContent = (parseFloat(data.iva_venta?.porcentaje) || 0).toFixed(2);
                 document.getElementById('ver_precio_venta_final').textContent = (parseFloat(data.precio_venta_final) || 0).toFixed(2);
                 
                 // STOCK
