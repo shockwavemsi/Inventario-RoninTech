@@ -226,23 +226,50 @@ Route::get('/productos/modal/lista', [ProductosController::class, 'listaParaModa
 });
 
 Route::middleware(['auth'])->get('/test/pdf-carbone', function() {
+
     $carbone = new \App\Services\CarboneService();
 
     $datos = [
-        'numero_factura' => 'FAC-2026-001',
-        'fecha' => '17/05/2026',
-        'proveedor' => 'GRUPO JPG S.A.',
-        'total' => '1.250,50 €',
-        'metodo_pago' => 'Transferencia Bancaria'
+        'nFactura' => 'FAC-2026-001',
+        'Fecha_factura' => '17/05/2026',
+        'CIF' => 'A12345678',
+
+        'cliente_nombre' => 'Juan Pérez García',
+        'cliente_dni' => '12345678A',
+        'cliente_correo' => 'juan.perez@email.com',
+        'cliente_telf' => '+34 666 777 888',
+
+        'metodo_pago' => 'Transferencia Bancaria',
+        'banco' => 'BBVA',
+        'referencia_pago' => 'REF-JPG-001-2026',
+
+        'productos' => [
+            [
+                'name' => 'Ryzen 5 5600G',
+                'cantidad' => 2,
+                'precio_unitario' => 150.00,
+                'precio_venta' => 300.00
+            ],
+            [
+                'name' => 'Ryzen 7 5700X',
+                'cantidad' => 1,
+                'precio_unitario' => 350.00,
+                'precio_venta' => 350.00
+            ]
+        ],
+
+        'subTotal' => 650.00,
+        'IVA' => 21,
+        'cantidad_IVA' => 136.50,
+        'total_pagar' => 786.50
     ];
 
     try {
-        $pdf = $carbone->render('factura', $datos, 'test_' . time());
+        $pdf = $carbone->render('factura_venta', $datos, 'test_' . time());
         return response()->download($pdf, 'factura_test.pdf');
     } catch (\Exception $e) {
         return response()->json(['error' => $e->getMessage()], 500);
     }
 });
-
 
 // Nota: la ruta /stocks ya está dentro del grupo de ambos roles

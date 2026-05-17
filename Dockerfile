@@ -1,6 +1,6 @@
 FROM php:8.4-fpm
 
-# 1. Instalamos dependencias del sistema (+ Node.js + LibreOffice)
+# Dependencias del sistema
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -18,33 +18,33 @@ RUN apt-get update && apt-get install -y \
     libreoffice \
     libreoffice-common
 
-# 2. Limpieza de caché de paquetes
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# 3. Instalamos extensiones de PHP
+# Extensiones PHP
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg
 RUN docker-php-ext-install gd pdo_mysql pdo_pgsql mbstring exif pcntl bcmath zip
 
-# 4. Traemos Composer
+# Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# 5. Directorio de trabajo
+# Directorio de trabajo
 WORKDIR /var/www
 
-# 6. Copiamos los archivos del proyecto
+# Copiar proyecto
 COPY . .
 
-# 7. Instalar dependencias npm (incluye Carbone)
+# Instalar dependencias
 RUN npm install
-
-# 8. Permisos para Laravel
-RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
-
-# 9. Instalamos dependencias de PHP
 RUN composer install --no-dev --optimize-autoloader
 
-# 10. Exponemos ambos puertos (9000 para tu Local, 10000 para Railway)
-EXPOSE 9000 10000
+# Permisos
+RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
-# 11. Comando de inicio dual (Sirve para ambos mundos a la vez)
-CMD php artisan config:clear && php artisan cache:clear && php artisan migrate --force && php artisan db:seed --force && php-fpm
+# Railway: PHP-FPM debe escuchar en $PORT
+ENV PORT=10000
+RUN sed -i "s|listen = .*|listen = ${PORT}|" /usr/local/etc/php-fpm.d/www.conf
+
+# Exponer puertos
+EXPOSE 9000
+EXPOSE 10000
+
+# Comando de inicio
+CMD php-fpm
