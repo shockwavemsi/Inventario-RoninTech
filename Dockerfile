@@ -1,51 +1,43 @@
-FROM php:8.4-fpm
+FROM php:8.2-fpm
 
-# Dependencias del sistema
+# Instalar dependencias del sistema
 RUN apt-get update && apt-get install -y \
+    nginx \
     git \
     curl \
+    zip \
+    unzip \
     libpng-dev \
     libjpeg-dev \
     libfreetype6-dev \
     libzip-dev \
     libonig-dev \
-    libxml2-dev \
-    libpq-dev \
-    zip \
-    unzip \
-    nodejs \
-    npm \
-    libreoffice \
-    libreoffice-common
+    libxml2-dev
 
-# Extensiones PHP
+# Extensiones PHP necesarias para Laravel
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg
-RUN docker-php-ext-install gd pdo_mysql pdo_pgsql mbstring exif pcntl bcmath zip
+RUN docker-php-ext-install pdo pdo_mysql mbstring zip exif pcntl bcmath gd
 
-# Composer
+# Instalar Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Directorio de trabajo
 WORKDIR /var/www
 
-# Copiar el proyecto completo
+# Copiar proyecto
 COPY . .
 
-# Instalar dependencias de Node y PHP
-RUN npm install
+# Instalar dependencias PHP
 RUN composer install --no-dev --optimize-autoloader
 
-# Asignar permisos correctos para Laravel
+# Permisos correctos
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
-# --- CONFIGURACIÓN FIJA PARA PRODUCTION EN RAILWAY ---
+# Copiar configuración de Nginx
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Forzamos a PHP-FPM a escuchar directamente en la dirección y puerto 8080 en texto real
-RUN sed -i "s|listen = .*|listen = 0.0.0.0:8080|" /usr/local/etc/php-fpm.d/www.conf
-
-# Declaramos el entorno y exponemos el puerto 8080
-ENV PORT=8080
+# Exponer puerto
 EXPOSE 8080
 
-# Comando de inicio nativo para PHP-FPM
-CMD ["php-fpm"]
+# Iniciar Nginx + PHP-FPM
+CMD service nginx start && php-fpm
