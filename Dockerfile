@@ -1,6 +1,6 @@
 FROM php:8.4-fpm
 
-# 1. Instalamos dependencias del sistema (+ Node.js + LibreOffice + NGINX)
+# 1. Instalamos dependencias del sistema (+ Node.js + LibreOffice)
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -16,8 +16,7 @@ RUN apt-get update && apt-get install -y \
     nodejs \
     npm \
     libreoffice \
-    libreoffice-common \
-    nginx
+    libreoffice-common
 
 # 2. Limpieza de caché de paquetes
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -44,23 +43,8 @@ RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 # 9. Instalamos dependencias de PHP
 RUN composer install --no-dev --optimize-autoloader
 
-# 10. Configuración express de Nginx interno para Railway
-RUN echo 'server { \
-    listen 10000; \
-    root /var/www/public; \
-    index index.php index.html; \
-    location / { try_files $uri $uri/ /index.php?$query_string; } \
-    location ~ \.php$ { \
-        include fastcgi_params; \
-        fastcgi_pass 127.0.0.1:9000; \
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name; \
-    } \
-}' > /etc/nginx/sites-available/default
+# 10. Exponemos ambos puertos (9000 para tu Local, 10000 para Railway)
+EXPOSE 9000 10000
 
-RUN ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
-
-# 11. Exponemos el puerto de Railway
-EXPOSE 10000
-
-# 12. Comando de inicio (Migra, enciende FPM en segundo plano y arranca Nginx)
-CMD php artisan migrate --force && php-fpm -D && nginx -g "daemon off;"
+# 11. Comando de inicio dual (Sirve para ambos mundos a la vez)
+CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=10000 & php-fpm
