@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\PagoFactura;
 use App\Models\FacturaCompra;
-use App\Models\MetodoPago;
+use App\Models\FormasPagoProveedor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -18,7 +18,7 @@ class PagoFacturaController extends Controller
         try {
             $validated = $request->validate([
                 'factura_compra_id' => 'required|exists:facturas_compra,id',
-                'metodo_pago_id' => 'required|exists:metodos_pago,id',
+                'forma_pago_proveedor_id' => 'required|exists:formas_pago_proveedor,id',
                 'monto' => 'required|numeric|min:0.01',
                 'fecha_pago' => 'required|date',
                 'referencia' => 'nullable|string|max:100',
@@ -39,10 +39,17 @@ class PagoFacturaController extends Controller
                 return back()->withInput()->with('error', "❌ Monto excede lo pendiente: {$montoDisponible}€");
             }
 
+            // ✅ OBTENER FORMA DE PAGO Y BANCO
+            $formaPago = FormasPagoProveedor::with('formaPago', 'banco')
+                ->find($validated['forma_pago_proveedor_id']);
+
+            $nombreFormaPago = $formaPago?->formaPago?->nombre ?? '—';
+            $nombreBanco = $formaPago?->banco?->nombre ?? '—';
+
             // Crear pago
             $pago = PagoFactura::create([
                 'factura_compra_id' => $validated['factura_compra_id'],
-                'metodo_pago_id' => $validated['metodo_pago_id'],
+                'forma_pago_proveedor_id' => $validated['forma_pago_proveedor_id'],
                 'monto' => $validated['monto'],
                 'fecha_pago' => $validated['fecha_pago'],
                 'referencia' => $validated['referencia'],
@@ -50,6 +57,8 @@ class PagoFacturaController extends Controller
                 'estado' => $validated['estado'],
                 'usuario_id' => Auth::id(),
                 'notas' => $validated['notas'],
+                'forma_pago_nombre' => $nombreFormaPago,
+                'banco_nombre' => $nombreBanco,
             ]);
 
             // Actualizar estado de factura automáticamente
@@ -59,7 +68,9 @@ class PagoFacturaController extends Controller
                 'pago_id' => $pago->id,
                 'factura_id' => $factura->id,
                 'monto' => $validated['monto'],
-                'estado' => $validated['estado']
+                'estado' => $validated['estado'],
+                'forma_pago' => $nombreFormaPago,
+                'banco' => $nombreBanco
             ]);
 
             return back()->with('success', "✅ Pago de {$validated['monto']}€ registrado correctamente");
@@ -127,15 +138,19 @@ class PagoFacturaController extends Controller
      */
     public function getByFactura(FacturaCompra $facturaCompra)
     {
-        $pagos = $facturaCompra->pagos()->with('metodoPago')->get()->map(fn($p) => [
-            'id' => $p->id,
-            'metodo' => $p->metodoPago?->nombre ?? '—',
-            'monto' => (float) $p->monto,
-            'fecha_pago' => $p->fecha_pago?->format('Y-m-d') ?? '—',
-            'referencia' => $p->referencia ?? '—',
-            'estado' => $p->estado,
-            'notas' => $p->notas,
-        ]);
+        $pagos = $facturaCompra->pagos()
+            ->with('formasPagoProveedor.formaPago', 'formasPagoProveedor.banco')
+            ->get()
+            ->map(fn($p) => [
+                'id' => $p->id,
+                'forma_pago' => $p->forma_pago_nombre ?? '—',
+                'banco' => $p->banco_nombre ?? '—',
+                'monto' => (float) $p->monto,
+                'fecha_pago' => $p->fecha_pago?->format('Y-m-d') ?? '—',
+                'referencia' => $p->referencia ?? '—',
+                'estado' => $p->estado,
+                'notas' => $p->notas,
+            ]);
 
         return response()->json($pagos);
     }

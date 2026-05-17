@@ -60,4 +60,10 @@ class Venta extends Model
         $this->total = $this->subtotal + $this->impuesto;
         $this->save();
     }
+
+    // ✅ RELACIÓN CON CLIENTE
+public function cliente()
+{
+    return $this->belongsTo(Cliente::class, 'cliente_id');
+}
 }

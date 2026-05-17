@@ -23,7 +23,8 @@ class PagoFacturaSeeder extends Seeder
         // FACTURA 1 - Pagada completamente
         if ($facturas->count() >= 1) {
             $f1 = $facturas->get(0);
-            $formaPago1 = FormasPagoProveedor::where('proveedor_id', $f1->proveedor_id)
+            $formaPago1 = FormasPagoProveedor::with('formaPago', 'banco')
+                ->where('proveedor_id', $f1->proveedor_id)
                 ->whereHas('formaPago', fn($q) => $q->where('nombre', 'Transferencia Bancaria'))
                 ->first();
 
@@ -36,9 +37,12 @@ class PagoFacturaSeeder extends Seeder
                     'referencia' => $formaPago1->referencia,
                     'estado' => 'pagado',
                     'usuario_id' => 1,
+                    'forma_pago_nombre' => $formaPago1->formaPago?->nombre ?? '—',
+                    'banco_nombre' => $formaPago1->banco?->nombre ?? '—',
                     'created_at' => now(),
                     'updated_at' => now()
                 ]);
+
                 $this->command->line("✅ Pago agregado a FAC-COMP-{$f1->id}: {$f1->total}€");
             }
         }
@@ -46,11 +50,13 @@ class PagoFacturaSeeder extends Seeder
         // FACTURA 2 - Pagada en partes
         if ($facturas->count() >= 2) {
             $f2 = $facturas->get(1);
-            $formaPago2A = FormasPagoProveedor::where('proveedor_id', $f2->proveedor_id)
+            $formaPago2A = FormasPagoProveedor::with('formaPago', 'banco')
+                ->where('proveedor_id', $f2->proveedor_id)
                 ->whereHas('formaPago', fn($q) => $q->where('nombre', 'Transferencia Bancaria'))
                 ->first();
 
-            $formaPago2B = FormasPagoProveedor::where('proveedor_id', $f2->proveedor_id)
+            $formaPago2B = FormasPagoProveedor::with('formaPago', 'banco')
+                ->where('proveedor_id', $f2->proveedor_id)
                 ->whereHas('formaPago', fn($q) => $q->where('nombre', 'Cheque'))
                 ->first();
 
@@ -66,6 +72,8 @@ class PagoFacturaSeeder extends Seeder
                     'referencia' => $formaPago2A->referencia,
                     'estado' => 'pagado',
                     'usuario_id' => 1,
+                    'forma_pago_nombre' => $formaPago2A->formaPago?->nombre ?? '—',
+                    'banco_nombre' => $formaPago2A->banco?->nombre ?? '—',
                     'created_at' => now(),
                     'updated_at' => now()
                 ]);
@@ -80,6 +88,8 @@ class PagoFacturaSeeder extends Seeder
                     'referencia' => null,
                     'estado' => 'en_transito',
                     'usuario_id' => 1,
+                    'forma_pago_nombre' => $formaPago2B->formaPago?->nombre ?? '—',
+                    'banco_nombre' => $formaPago2B->banco?->nombre ?? '—',
                     'created_at' => now(),
                     'updated_at' => now()
                 ]);
@@ -91,7 +101,8 @@ class PagoFacturaSeeder extends Seeder
         // FACTURA 3 - Efectivo pendiente
         if ($facturas->count() >= 3) {
             $f3 = $facturas->get(2);
-            $formaPago3 = FormasPagoProveedor::where('proveedor_id', $f3->proveedor_id)
+            $formaPago3 = FormasPagoProveedor::with('formaPago', 'banco')
+                ->where('proveedor_id', $f3->proveedor_id)
                 ->whereHas('formaPago', fn($q) => $q->where('nombre', 'Efectivo'))
                 ->first();
 
@@ -104,9 +115,12 @@ class PagoFacturaSeeder extends Seeder
                     'referencia' => null,
                     'estado' => 'pendiente',
                     'usuario_id' => 1,
+                    'forma_pago_nombre' => $formaPago3->formaPago?->nombre ?? '—',
+                    'banco_nombre' => $formaPago3->banco?->nombre ?? '—',
                     'created_at' => now(),
                     'updated_at' => now()
                 ]);
+
                 $this->command->line("✅ Pago pendiente agregado a FAC-COMP-{$f3->id}: {$f3->total}€");
             }
         }

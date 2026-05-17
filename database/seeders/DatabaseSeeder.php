@@ -30,6 +30,8 @@ class DatabaseSeeder extends Seeder
         // ===== FORMAS DE PAGO =====
         echo "💳 Cargando formas de pago...\n";
         $this->call([
+            ClientesSeeder::class,
+            VentasSeeder::class,
             BancoSeeder::class,
             FormaPagoSeeder::class,
             FormasPagoProveedorSeeder::class,

@@ -152,7 +152,7 @@
                     <div style="display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 0.4rem; margin-bottom: 0.5rem;">
                         <div>
                             <label class="form-label fw-bold" style="font-size: 0.75rem; color: #e63946; margin-bottom: 0.15rem;">Base Compra *</label>
-                            <input type="number" name="precio_base_compra" id="precioBaseCompra" class="form-control form-control-sm" step="0.01" required oninput="calcularPrecios()" style="background: rgba(20, 20, 25, 0.8); border-color: rgba(230, 57, 70, 0.3); color: #f0f0f0; height: 30px; font-size: 0.8rem;">
+                            <input type="number" name="precio_base_compra" id="precioBaseCompra" class="form-control form-control-sm" step="0.01" style="background: rgba(20, 20, 25, 0.8); border-color: rgba(230, 57, 70, 0.3); color: #f0f0f0; height: 30px; font-size: 0.8rem;">
                         </div>
                         <div>
                             <label class="form-label fw-bold" style="font-size: 0.75rem; color: #e63946; margin-bottom: 0.15rem;">IVA *</label>
