@@ -430,7 +430,7 @@
 </div>
 
 <!-- ✅ CARGAR MODAL VER VENTA (SIN MÓDULOS - ANTES QUE NADA) -->
-<script src="{{ asset('js/ventas/modales/modal-ver-venta.js') }}"></script>
+<script src="{{ secure_asset('js/ventas/modales/modal-ver-venta.js') }}"></script>
 
 
 </div>
@@ -499,7 +499,7 @@
     <!-- ✅ CARGAR MÓDULOS DE VENTAS DESPUÉS -->
     <script type="module">
         console.log('🚀 Cargando módulos de ventas...');
-        import VentaManager from '{{ asset("js/ventas/venta.js") }}';
+        import VentaManager from '{{ secure_asset("js/ventas/venta.js") }}';
     </script>
 @endpush
 
