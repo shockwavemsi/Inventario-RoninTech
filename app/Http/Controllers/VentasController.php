@@ -278,6 +278,71 @@ class VentasController extends Controller
     }
 
     /**
+ * Generar PDF de venta con Carbone
+ */
+public function generarPDF(Request $request)
+{
+    try {
+        // 📋 Obtener configuración de empresa
+        $config = DB::table('configuracion')->first();
+
+        // 📋 Obtener venta con detalles
+        $venta = Venta::with('detalles.producto', 'usuario')
+            ->findOrFail($request->venta_id);
+
+        // 📋 Preparar datos para Carbone
+        $datos = [
+            // Datos de la empresa (desde Configuración)
+            'nombre_empresa' => $config->nombre_empresa ?? 'Tu Empresa',
+            'cif' => $config->ruc ?? 'A12345678',
+            'dir_empresa' => $config->direccion ?? 'Dirección',
+            'telefono_empresa' => $config->telefono ?? '+34 XXX XXX XXX',
+            'email_empresa' => $config->email ?? 'info@empresa.com',
+            'web_empresa' => 'www.ronintech.es',
+
+            // Datos de la venta
+            'nFactura' => $venta->numero_factura,
+            'Fecha_factura' => $venta->fecha_venta?->format('d/m/Y') ?? date('d/m/Y'),
+
+            // Datos del cliente
+            'cliente_nombre' => $venta->cliente,
+            'cliente_dni' => $venta->cliente_documento ?? '—',
+            'cliente_correo' => $venta->usuario->email ?? '—',
+            'cliente_telf' => '—',
+
+            // Método de pago
+            'metodo_pago' => ucfirst(str_replace('_', ' ', $venta->metodo_pago)),
+            'banco' => 'BBVA',
+            'referencia_pago' => 'REF-' . strtoupper($venta->numero_factura),
+
+            // Productos
+            'productos' => $venta->detalles->map(function($detalle) {
+                return [
+                    'name' => $detalle->producto->nombre,
+                    'cantidad' => (int) $detalle->cantidad,
+                    'precio_unitario' => (float) $detalle->precio_unitario,
+                    'precio_venta' => (float) $detalle->subtotal
+                ];
+            })->toArray(),
+
+            // Totales
+            'subTotal' => (float) $venta->subtotal,
+            'IVA' => (float) $config->impuesto_porcentaje ?? 21,
+            'cantidad_IVA' => (float) $venta->impuesto,
+            'total_pagar' => (float) $venta->total,
+        ];
+
+        // 🔧 Renderizar con Carbone
+        $carbone = new \App\Services\CarboneService();
+        $pdf = $carbone->render('factura_venta', $datos, 'venta_' . time());
+
+        return response()->download($pdf, "Factura_{$venta->numero_factura}.pdf");
+
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
+}
+    /**
      * Cambiar estado
      */
     public function cambiarEstado(Venta $venta, Request $request)

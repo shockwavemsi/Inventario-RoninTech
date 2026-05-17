@@ -105,6 +105,7 @@
                                     <td style="font-size: 0.85rem; gap: 0.25rem; display: flex;">
 <!-- ✅ CORRECTO - llamar a ModalVerVenta.mostrar() -->
 <button type="button" class="btn btn-sm btn-warning" onclick="window.ModalVerVenta.mostrar({{ $venta['id'] }})" style="padding: 0.25rem 0.5rem;">👁️</button>
+<button type="button" class="btn btn-sm btn-info" onclick="generarPDFVenta({{ $venta['id'] }})" style="padding: 0.25rem 0.5rem;">📥</button>
                                         <form action="{{ route('ventas.destroy', $venta['id']) }}" method="POST" style="display: inline;">
                                             @csrf
                                             @method('DELETE')
@@ -424,17 +425,64 @@
 
             </div>
 
-            <div class="modal-footer" style="border-top: 1px solid rgba(230, 57, 70, 0.3);">
-                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">❌ Cerrar</button>
-                <button type="button" class="btn btn-danger btn-sm" onclick="window.ModalVerVenta.imprimir()">🖨️ Imprimir</button>
-            </div>
-
         </div>
     </div>
 </div>
 
 <!-- ✅ CARGAR MODAL VER VENTA (SIN MÓDULOS - ANTES QUE NADA) -->
 <script src="{{ asset('js/ventas/modales/modal-ver-venta.js') }}"></script>
+
+
+</div>
+
+<!-- ✅ FUNCIÓN PARA GENERAR PDF (DEBE ESTAR AQUÍ) -->
+<script>
+    /**
+     * Generar PDF de venta
+     */
+    async function generarPDFVenta(ventaId) {
+        try {
+            // Mostrar loading
+            const btn = event.target;
+            btn.disabled = true;
+
+            // Enviar al backend
+            const response = await fetch('/generar-pdf-venta', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({ venta_id: ventaId })
+            });
+
+            if (response.ok) {
+                // Descargar PDF
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `Factura_V-${ventaId.toString().padStart(3, '0')}.pdf`;
+                link.click();
+                window.URL.revokeObjectURL(url);
+
+                // Restaurar botón
+                btn.disabled = false;
+                btn.innerHTML = '📥 PDF';
+            } else {
+                const error = await response.json();
+                alert('Error: ' + error.error);
+                btn.disabled = false;
+                btn.innerHTML = '📥 PDF';
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al generar el PDF');
+            btn.disabled = false;
+            btn.innerHTML = '📥 PDF';
+        }
+    }
+</script>
 
 @push('scripts')
     <script>
@@ -453,8 +501,6 @@
         console.log('🚀 Cargando módulos de ventas...');
         import VentaManager from '{{ asset("js/ventas/venta.js") }}';
     </script>
-
-    
 @endpush
 
 @endsection

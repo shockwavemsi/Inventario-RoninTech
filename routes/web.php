@@ -233,6 +233,8 @@ Route::middleware(['auth'])->get('/test/pdf-carbone', function() {
         'nFactura' => 'FAC-2026-001',
         'Fecha_factura' => '17/05/2026',
         'CIF' => 'A12345678',
+        'dir_empresa' => 'Calle Principal 123, 28001 Madrid',
+        'telefono_empresa' => '+34 912 345 678',
 
         'cliente_nombre' => 'Juan Pérez García',
         'cliente_dni' => '12345678A',
@@ -271,5 +273,86 @@ Route::middleware(['auth'])->get('/test/pdf-carbone', function() {
         return response()->json(['error' => $e->getMessage()], 500);
     }
 });
+
+Route::middleware(['auth'])->get('/test/pdf-carbone-pedido', function() {
+
+    $carbone = new \App\Services\CarboneService();
+
+    $datos = [
+        'nombre_pedido' => 'PED-2026-001',
+        'fecha_pedido' => '2026-05-05',
+        'fecha_entrega_esperada' => '2026-05-15',
+        'proveedor_CIF' => 'A12345678',
+
+        'proveedor' => 'DISTEC S.L.',
+        'proveedor_contacto' => 'Juan Pérez',
+        'proveedor_telefono' => '611223344',
+        'proveedor_correo' => 'ventas@distec.com',
+        'proveedor_direccion' => 'C/ Mayor 123, Madrid',
+        'proveedor_estado' => 'Activo',
+        'dias_vencimiento' => '15 días',
+
+        'proveedor_informacion' => 'Intel Spain',
+
+        'metodo_pago' => [
+            [
+                'nombre' => 'Transferencia Bancaria',
+                'banco' => 'BBVA',
+                'referencia' => 'ES91 1234 5678 9012 3456 7890 12',
+                'descripcion' => 'Cuenta corriente principal'
+            ],
+            [
+                'nombre' => 'Transferencia Bancaria',
+                'banco' => 'Santander',
+                'referencia' => 'ES93 0049 1234 5678 9012 3456 90',
+                'descripcion' => 'Cuenta secundaria'
+            ],
+            [
+                'nombre' => 'Cheque',
+                'banco' => '—',
+                'referencia' => '—',
+                'descripcion' => 'Cheques corporativos'
+            ],
+            [
+                'nombre' => 'Efectivo',
+                'banco' => '—',
+                'referencia' => '—',
+                'descripcion' => 'Pago en mano'
+            ]
+        ],
+
+        'estado' => 'ABIERTO',
+
+        'productos' => [
+            [   
+                'linea' => 1,
+                'nombre' => 'Core i5-12400F',
+                'cantidad' => 1,
+                'precio_unitario' => 181.50,
+                'subtotal' => 181.50
+            ]
+        ],
+
+        'subTotal' => 181.50,
+        'descuento' => 0.00,
+        'total_pagar' => 181.50,
+
+        'observaciones' => 'Procesadores Intel Core',
+
+        'documentos' => [
+            'alban' => 'ALB-COMP-003',
+            'factura' => 'FAC-COMP-003'
+        ]
+    ];
+
+    try {
+        $pdf = $carbone->render('Factura_compra', $datos, 'pedido_' . time());
+        return response()->download($pdf, 'factura_pedido.pdf');
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
+});
+
+Route::middleware(['auth'])->post('/generar-pdf-venta', [\App\Http\Controllers\VentasController::class, 'generarPDF']);
 
 // Nota: la ruta /stocks ya está dentro del grupo de ambos roles

@@ -32,6 +32,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             ClientesSeeder::class,
             VentasSeeder::class,
+            VentasDetalleSeeder::class,
             BancoSeeder::class,
             FormaPagoSeeder::class,
             FormasPagoProveedorSeeder::class,

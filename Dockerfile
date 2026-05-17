@@ -28,23 +28,24 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Directorio de trabajo
 WORKDIR /var/www
 
-# Copiar proyecto
+# Copiar el proyecto completo
 COPY . .
 
-# Instalar dependencias
+# Instalar dependencias de Node y PHP
 RUN npm install
 RUN composer install --no-dev --optimize-autoloader
 
-# Permisos
+# Asignar permisos correctos para Laravel
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
-# Railway: PHP-FPM debe escuchar en $PORT
-ENV PORT=10000
-RUN sed -i "s|listen = .*|listen = ${PORT}|" /usr/local/etc/php-fpm.d/www.conf
+# --- CONFIGURACIÓN FIJA PARA PRODUCTION EN RAILWAY ---
 
-# Exponer puertos
-EXPOSE 9000
-EXPOSE 10000
+# Forzamos a PHP-FPM a escuchar directamente en la dirección y puerto 8080 en texto real
+RUN sed -i "s|listen = .*|listen = 0.0.0.0:8080|" /usr/local/etc/php-fpm.d/www.conf
 
-# Comando de inicio
-CMD php-fpm
+# Declaramos el entorno y exponemos el puerto 8080
+ENV PORT=8080
+EXPOSE 8080
+
+# Comando de inicio nativo para PHP-FPM
+CMD ["php-fpm"]
