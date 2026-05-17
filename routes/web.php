@@ -2,11 +2,9 @@
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
-
 use App\Models\Venta;
 use App\Models\VentaDetalle;
 use App\Models\Producto;
-
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserController;
@@ -35,6 +33,7 @@ Route::get('/clear-all', function () {
 });
 
 // ============ PÁGINA INICIAL ============
+
 Route::get('/', function () {
     $visited = DB::select('select * from places where visited = ?', [1]); 
     $togo = DB::select('select * from places where visited = ?', [0]);
@@ -42,11 +41,13 @@ Route::get('/', function () {
 });
 
 // ============ LOGIN (SIN AUTENTICACIÓN) ============
+
 Route::get('/login', [LoginController::class, 'showLogin'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
 Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
 
 // ============ DASHBOARDS (CON AUTENTICACIÓN) ============
+
 Route::middleware(['auth', 'role:admin'])->get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
 Route::middleware(['auth', 'role:user'])->get('/usuario', [UsuarioController::class, 'index'])->name('user.dashboard');
 
@@ -57,7 +58,7 @@ Route::middleware(['auth', 'role:user'])->get('/usuario', [UsuarioController::cl
 Route::middleware(['auth'])->group(function () {
 
     // ========== STOCKS ==========
-    Route::get('/stocks', [StockController::class, 'index'])->name('stock.index'); // nombre corregido
+    Route::get('/stocks', [StockController::class, 'index'])->name('stock.index');
 
     // ========== VENTAS ==========
     Route::prefix('ventas')->group(function () {
@@ -72,7 +73,7 @@ Route::middleware(['auth'])->group(function () {
         });
     });
 
-    // ========== COMPRAS (todo el grupo) ==========
+    // ========== COMPRAS ==========
     Route::prefix('compras')->group(function () {
         Route::get('/', [PedidoCompraController::class, 'index'])->name('compras.dashboard');
         Route::get('/pedidos', [PedidoCompraController::class, 'index'])->name('pedidos-compra.index');
@@ -81,38 +82,37 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/pedidos/{pedidoCompra}/edit', [PedidoCompraController::class, 'edit'])->name('pedidos-compra.edit');
         Route::put('/pedidos/{pedidoCompra}', [PedidoCompraController::class, 'update'])->name('pedidos-compra.update');
         Route::delete('/pedidos/{pedidoCompra}', [PedidoCompraController::class, 'destroy']);
-
         Route::get('/albaranes', [AlbaranCompraController::class, 'index'])->name('albaranes-compra.index');
         Route::post('/albaranes', [AlbaranCompraController::class, 'store'])->name('albaranes-compra.store');
         Route::put('/albaranes/{albaranCompra}', [AlbaranCompraController::class, 'update']);
         Route::get('/albaranes/{albaranCompra}/json', [AlbaranCompraController::class, 'showJson']);
         Route::delete('/albaranes/{albaranCompra}', [AlbaranCompraController::class, 'destroy']);
-
         Route::get('/facturas', [FacturaCompraController::class, 'index'])->name('facturas-compra.index');
         Route::post('/facturas', [FacturaCompraController::class, 'store'])->name('facturas-compra.store');
         Route::get('/pdf/factura/{id}', [FacturaPdfController::class, 'descargarFactura']);
         Route::get('/facturas/{facturaCompra}/json', [FacturaCompraController::class, 'showJson']);
         Route::delete('/facturas/{facturaCompra}', [FacturaCompraController::class, 'destroy']);
-
         Route::post('/pagos-factura', [PagoFacturaController::class, 'store'])->name('pagos-factura.store');
         Route::patch('/pagos-factura/{pagoFactura}/estado', [PagoFacturaController::class, 'updateEstado'])->name('pagos-factura.updateEstado');
         Route::delete('/pagos-factura/{pagoFactura}', [PagoFacturaController::class, 'destroy'])->name('pagos-factura.destroy');
         Route::get('/facturas/{facturaCompra}/pagos', [PagoFacturaController::class, 'getByFactura']);
+        Route::get('/api/proveedor/{proveedorId}/dias-vencimiento', [FacturaCompraController::class, 'obtenerDiasVencimiento']);
+        Route::get('/api/buscar-albaranes', [FacturaCompraController::class, 'buscarAlbaranes']);
+        Route::get('/api/proveedor/{proveedorId}/formas-pago', [FacturaCompraController::class, 'obtenerFormasPago']);
     });
 
-    // ========== DEVOLUCIONES ==========
+    // ========== DEVOLUCIONES DE VENTA ==========
     Route::get('/devoluciones', [DevolucionesController::class, 'index'])->name('devoluciones.index');
-    Route::get('/devoluciones/crear', [DevolucionesController::class, 'create'])->name('devoluciones.create');
-    Route::post('/devoluciones/guardar', [DevolucionesController::class, 'store'])->name('devoluciones.store');
+    Route::post('/devoluciones', [DevolucionesController::class, 'store'])->name('devoluciones.store');
     Route::patch('/devoluciones/{id}/estado', [DevolucionesController::class, 'cambiarEstado'])->name('devoluciones.cambiar-estado');
-    Route::delete('/devoluciones/{id}/eliminar', [DevolucionesController::class, 'destroy'])->name('devoluciones.destroy');
+    Route::delete('/devoluciones/{id}', [DevolucionesController::class, 'destroy'])->name('devoluciones.destroy');
     Route::get('/devoluciones/{id}/json', function($id) {
-        return \App\Models\DevolucionVenta::with('usuario', 'venta', 'detalles.producto')->findOrFail($id);
+        return DevolucionVenta::with('usuario', 'venta', 'detalles.producto')->findOrFail($id);
     });
 
     // ========== ENDPOINTS ADICIONALES (JSON) ==========
     Route::get('/api/proveedor/{id}/productos', function($id) {
-        return \DB::table('productos')
+        return DB::table('productos')
             ->where('proveedor_id', $id)
             ->where('activo', 1)
             ->select('id', 'nombre', 'marca', 'precio_compra_final')
@@ -121,61 +121,57 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::get('/api/buscar-pedidos', function() {
-    $query = request()->query('q', '');
-    $pedidos = \DB::table('pedidos_compra')
-        ->where('numero_pedido', 'LIKE', "%{$query}%")
-        ->whereIn('estado', ['abierto', 'parcial'])  // ✅ Solo permitir abierto/parcial
-        ->select('id', 'numero_pedido', 'proveedor_id')
-        ->limit(10)
-        ->get();
+        $query = request()->query('q', '');
+        $pedidos = DB::table('pedidos_compra')
+            ->where('numero_pedido', 'LIKE', "%{$query}%")
+            ->whereIn('estado', ['abierto', 'parcial'])
+            ->select('id', 'numero_pedido', 'proveedor_id')
+            ->limit(10)
+            ->get();
+        return response()->json($pedidos);
+    });
 
-    return response()->json($pedidos);
-});
-
-Route::get('/api/pedidos/{id}/productos-faltantes', function($id) {
-    $pedido = \App\Models\PedidoCompra::find($id);
-
-    if (!$pedido) {
-        return response()->json(['error' => 'Pedido no encontrado'], 404);
-    }
-
-    $lineas = $pedido->lineas;
-    $recibidoPorProducto = [];
-
-    foreach ($pedido->albaranes as $albaran) {
-        foreach ($albaran->lineas as $lineaAlbaran) {
-            $productoId = $lineaAlbaran->producto_id;
-            if (!isset($recibidoPorProducto[$productoId])) {
-                $recibidoPorProducto[$productoId] = 0;
-            }
-            $recibidoPorProducto[$productoId] += (int)$lineaAlbaran->cantidad_recibida;  // ✅ CAST A INT
+    Route::get('/api/pedidos/{id}/productos-faltantes', function($id) {
+        $pedido = \App\Models\PedidoCompra::find($id);
+        if (!$pedido) {
+            return response()->json(['error' => 'Pedido no encontrado'], 404);
         }
-    }
 
-    $lineasConFaltante = $lineas->map(function($linea) use ($recibidoPorProducto) {
-        $recibido = $recibidoPorProducto[$linea->producto_id] ?? 0;
-        $cantidadPedida = (int)$linea->cantidad;  // ✅ CAST A INT
-        $faltante = $cantidadPedida - $recibido;
+        $lineas = $pedido->lineas;
+        $recibidoPorProducto = [];
 
-        return [
-            'id' => $linea->id,
-            'producto_id' => $linea->producto_id,
-            'producto_nombre' => $linea->producto?->nombre ?? 'Desconocido',
-            'cantidad_pedida' => $cantidadPedida,
-            'cantidad_recibida' => $recibido,
-            'cantidad_faltante' => max(0, $faltante),  // ✅ AQUÍ DEBE DAR 10, 4, etc
-        ];
-    })->filter(fn($l) => $l['cantidad_faltante'] > 0);
+        foreach ($pedido->albaranes as $albaran) {
+            foreach ($albaran->lineas as $lineaAlbaran) {
+                $productoId = $lineaAlbaran->producto_id;
+                if (!isset($recibidoPorProducto[$productoId])) {
+                    $recibidoPorProducto[$productoId] = 0;
+                }
+                $recibidoPorProducto[$productoId] += (int)$lineaAlbaran->cantidad_recibida;
+            }
+        }
 
-    return response()->json($lineasConFaltante);
-});
+        $lineasConFaltante = $lineas->map(function($linea) use ($recibidoPorProducto) {
+            $recibido = $recibidoPorProducto[$linea->producto_id] ?? 0;
+            $cantidadPedida = (int)$linea->cantidad;
+            $faltante = $cantidadPedida - $recibido;
+            return [
+                'id' => $linea->id,
+                'producto_id' => $linea->producto_id,
+                'producto_nombre' => $linea->producto?->nombre ?? 'Desconocido',
+                'cantidad_pedida' => $cantidadPedida,
+                'cantidad_recibida' => $recibido,
+                'cantidad_faltante' => max(0, $faltante),
+            ];
+        })->filter(fn($l) => $l['cantidad_faltante'] > 0);
 
-    Route::get('/api/buscar-albaranes', [FacturaCompraController::class, 'buscarAlbaranes']);
-    
+        return response()->json($lineasConFaltante);
+    });
+
     Route::get('/devoluciones/ventas-disponibles', function() {
         $ventasConDevolucion = DevolucionVenta::where('estado', 'completada')
             ->pluck('venta_id')
             ->toArray();
+
         $ventas = Venta::where('estado', 'completada')
             ->whereNotIn('id', $ventasConDevolucion)
             ->orderBy('fecha_venta', 'desc')
@@ -188,12 +184,14 @@ Route::get('/api/pedidos/{id}/productos-faltantes', function($id) {
                 'fecha' => $v->fecha_venta->format('d/m/Y'),
             ])
             ->toArray();
+
         return response()->json(['ventas' => $ventas]);
     });
 
     Route::get('/api/pedidos', [PedidoCompraController::class, 'getAll']);
     Route::get('/api/albaranes', [AlbaranCompraController::class, 'getAll']);
     Route::get('/api/facturas', [FacturaCompraController::class, 'getAll']);
+
 });
 
 // ============================================================
@@ -224,9 +222,8 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::post('/proveedores/{id}/formas-pago', [ProveedorController::class, 'saveFormasPago']);
 
     // PRODUCTOS (CRUD)
-    // En la sección de PRODUCTOS (CRUD)
-Route::get('/productos/{id}/json', [ProductosController::class, 'show'])->name('productos.show');
-Route::get('/productos/modal/lista', [ProductosController::class, 'listaParaModal'])->name('productos.modal-lista');
+    Route::get('/productos/{id}/json', [ProductosController::class, 'show'])->name('productos.show');
+    Route::get('/productos/modal/lista', [ProductosController::class, 'listaParaModal'])->name('productos.modal-lista');
     Route::get('/productos', [ProductosController::class, 'index'])->name('productos.index');
     Route::get('/productos/crear', [ProductosController::class, 'create'])->name('productos.create');
     Route::post('/productos/guardar', [ProductosController::class, 'store'])->name('productos.store');
@@ -234,26 +231,25 @@ Route::get('/productos/modal/lista', [ProductosController::class, 'listaParaModa
 
 });
 
+// ============================================================
+// 3. RUTAS DE PRUEBA
+// ============================================================
+
 Route::middleware(['auth'])->get('/test/pdf-carbone', function() {
-
     $carbone = new \App\Services\CarboneService();
-
     $datos = [
         'nFactura' => 'FAC-2026-001',
         'Fecha_factura' => '17/05/2026',
         'CIF' => 'A12345678',
         'dir_empresa' => 'Calle Principal 123, 28001 Madrid',
         'telefono_empresa' => '+34 912 345 678',
-
         'cliente_nombre' => 'Juan Pérez García',
         'cliente_dni' => '12345678A',
         'cliente_correo' => 'juan.perez@email.com',
         'cliente_telf' => '+34 666 777 888',
-
         'metodo_pago' => 'Transferencia Bancaria',
         'banco' => 'BBVA',
         'referencia_pago' => 'REF-JPG-001-2026',
-
         'productos' => [
             [
                 'name' => 'Ryzen 5 5600G',
@@ -268,7 +264,6 @@ Route::middleware(['auth'])->get('/test/pdf-carbone', function() {
                 'precio_venta' => 350.00
             ]
         ],
-
         'subTotal' => 650.00,
         'IVA' => 21,
         'cantidad_IVA' => 136.50,
@@ -283,85 +278,4 @@ Route::middleware(['auth'])->get('/test/pdf-carbone', function() {
     }
 });
 
-Route::middleware(['auth'])->get('/test/pdf-carbone-pedido', function() {
-
-    $carbone = new \App\Services\CarboneService();
-
-    $datos = [
-        'nombre_pedido' => 'PED-2026-001',
-        'fecha_pedido' => '2026-05-05',
-        'fecha_entrega_esperada' => '2026-05-15',
-        'proveedor_CIF' => 'A12345678',
-
-        'proveedor' => 'DISTEC S.L.',
-        'proveedor_contacto' => 'Juan Pérez',
-        'proveedor_telefono' => '611223344',
-        'proveedor_correo' => 'ventas@distec.com',
-        'proveedor_direccion' => 'C/ Mayor 123, Madrid',
-        'proveedor_estado' => 'Activo',
-        'dias_vencimiento' => '15 días',
-
-        'proveedor_informacion' => 'Intel Spain',
-
-        'metodo_pago' => [
-            [
-                'nombre' => 'Transferencia Bancaria',
-                'banco' => 'BBVA',
-                'referencia' => 'ES91 1234 5678 9012 3456 7890 12',
-                'descripcion' => 'Cuenta corriente principal'
-            ],
-            [
-                'nombre' => 'Transferencia Bancaria',
-                'banco' => 'Santander',
-                'referencia' => 'ES93 0049 1234 5678 9012 3456 90',
-                'descripcion' => 'Cuenta secundaria'
-            ],
-            [
-                'nombre' => 'Cheque',
-                'banco' => '—',
-                'referencia' => '—',
-                'descripcion' => 'Cheques corporativos'
-            ],
-            [
-                'nombre' => 'Efectivo',
-                'banco' => '—',
-                'referencia' => '—',
-                'descripcion' => 'Pago en mano'
-            ]
-        ],
-
-        'estado' => 'ABIERTO',
-
-        'productos' => [
-            [   
-                'linea' => 1,
-                'nombre' => 'Core i5-12400F',
-                'cantidad' => 1,
-                'precio_unitario' => 181.50,
-                'subtotal' => 181.50
-            ]
-        ],
-
-        'subTotal' => 181.50,
-        'descuento' => 0.00,
-        'total_pagar' => 181.50,
-
-        'observaciones' => 'Procesadores Intel Core',
-
-        'documentos' => [
-            'alban' => 'ALB-COMP-003',
-            'factura' => 'FAC-COMP-003'
-        ]
-    ];
-
-    try {
-        $pdf = $carbone->render('Factura_compra', $datos, 'pedido_' . time());
-        return response()->download($pdf, 'factura_pedido.pdf');
-    } catch (\Exception $e) {
-        return response()->json(['error' => $e->getMessage()], 500);
-    }
-});
-
-Route::middleware(['auth'])->post('/generar-pdf-venta', [\App\Http\Controllers\VentasController::class, 'generarPDF']);
-
-// Nota: la ruta /stocks ya está dentro del grupo de ambos roles
+Route::middleware(['auth'])->post('/generar-pdf-venta', [VentasController::class, 'generarPDF']);

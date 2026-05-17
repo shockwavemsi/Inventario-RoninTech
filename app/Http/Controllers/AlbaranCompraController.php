@@ -251,12 +251,14 @@ public function index()
         }
     }
 
-    public function showJson(AlbaranCompra $albaranCompra)
-    {
-        try {
-            $albaranCompra->load(['pedidoCompra', 'lineas.producto', 'proveedor']);
+   public function showJson(AlbaranCompra $albaranCompra)
+{
+    try {
+        $albaranCompra->load(['pedidoCompra', 'lineas.producto', 'proveedor']);
 
-            $detalles = $albaranCompra->lineas->map(fn($linea) => [
+        $detalles = $albaranCompra->lineas
+            ->filter(fn($linea) => $linea->cantidad_recibida > 0)
+            ->map(fn($linea) => [
                 'id' => $linea->id,
                 'producto_id' => $linea->producto_id,
                 'producto_nombre' => $linea->producto?->nombre ?? 'Producto desconocido',
@@ -266,27 +268,28 @@ public function index()
                 'estado' => $linea->estado ?? 'recibido'
             ]);
 
-            return response()->json([
-                'id' => $albaranCompra->id,
-                'numero_albaran' => $albaranCompra->numero_albaran,
-                'numero_pedido' => $albaranCompra->pedidoCompra?->numero_pedido ?? '—',
-                'proveedor' => $albaranCompra->proveedor?->nombre ?? '—',
-                'fecha_albaran' => is_string($albaranCompra->fecha_albaran) 
-                    ? $albaranCompra->fecha_albaran 
-                    : $albaranCompra->fecha_albaran?->format('Y-m-d') ?? '—',
-                'fecha_recepcion' => is_string($albaranCompra->fecha_recepcion) 
-                    ? $albaranCompra->fecha_recepcion 
-                    : $albaranCompra->fecha_recepcion?->format('Y-m-d') ?? '—',
-                'estado' => $albaranCompra->estado ?? 'recibido',
-                'total' => (float) ($albaranCompra->total ?? 0),
-                'observaciones' => $albaranCompra->observaciones ?? null,
-                'detalles' => $detalles,
-            ]);
+        return response()->json([
+            'id' => $albaranCompra->id,
+            'numero_albaran' => $albaranCompra->numero_albaran,
+            'numero_pedido' => $albaranCompra->pedidoCompra?->numero_pedido ?? '—',
+            'proveedor' => $albaranCompra->proveedor?->nombre ?? '—',
+            'proveedor_id' => $albaranCompra->proveedor_id,
+            'fecha_albaran' => is_string($albaranCompra->fecha_albaran) 
+                ? $albaranCompra->fecha_albaran 
+                : $albaranCompra->fecha_albaran?->format('Y-m-d') ?? '—',
+            'fecha_recepcion' => is_string($albaranCompra->fecha_recepcion) 
+                ? $albaranCompra->fecha_recepcion 
+                : $albaranCompra->fecha_recepcion?->format('Y-m-d') ?? '—',
+            'estado' => $albaranCompra->estado ?? 'recibido',
+            'total' => (float) ($albaranCompra->total ?? 0),
+            'observaciones' => $albaranCompra->observaciones ?? null,
+            'detalles' => $detalles->values()
+        ]);
 
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
     }
+}
 
     public function update(Request $request, AlbaranCompra $albaranCompra)
     {
@@ -387,4 +390,6 @@ public function index()
             \Log::info('❌ Pedido ABIERTO');
         }
     }
+
+    
 }

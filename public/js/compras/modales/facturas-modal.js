@@ -28,6 +28,7 @@ class FacturasModal {
             close: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6c757d" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
             edit: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`,
         };
+
         return svgs[type] || '';
     }
 
@@ -35,6 +36,7 @@ class FacturasModal {
         console.log('🔗 Cargando relaciones:', tipo, id);
 
         let endpoint = '';
+
         if (tipo === 'pedido') endpoint = `/compras/pedidos/${id}/json`;
         else if (tipo === 'albaran') endpoint = `/compras/albaranes/${id}/json`;
         else if (tipo === 'factura') endpoint = `/compras/facturas/${id}/json`;
@@ -50,6 +52,7 @@ class FacturasModal {
 
     static renderizarRelaciones(tipo, data) {
         const contenedor = document.getElementById('contenedorRelaciones');
+
         if (!contenedor) {
             console.error('❌ contenedorRelaciones NO encontrado');
             return;
@@ -85,25 +88,16 @@ class FacturasModal {
     static mostrar(item) {
         const titulo = `Factura: ${item.numero_factura}`;
 
-        let total_pagado = 0;
-        let total_pendiente = 0;
+        // ✅ USA LOS DATOS DEL BACKEND, NO CALCULES LOCALMENTE
+        let total_pagado = parseFloat(item.total_pagado) || 0;
+        let total_pendiente = parseFloat(item.pendiente) || 0;
+        let total_factura = parseFloat(item.total) || 0;
+        let estadoFactura = item.estado || 'abierta';
 
-        if (item.pagos && item.pagos.length > 0) {
-            item.pagos.forEach(p => {
-                if (p.estado === 'pagado') {
-                    total_pagado += parseFloat(p.monto) || 0;
-                } else {
-                    total_pendiente += parseFloat(p.monto) || 0;
-                }
-            });
-        }
-
-        let cantidad_debitos = 0;
-        if (item.debito && item.debito.length > 0) {
-            cantidad_debitos = item.debito.reduce((sum, d) => sum + (parseInt(d.cantidad_faltante) || 0), 0);
-        }
+        console.log('📊 Totales:', { total_factura, total_pagado, total_pendiente, estado: estadoFactura });
 
         let filas_lineas = '';
+
         if (item.lineas && item.lineas.length > 0) {
             filas_lineas = item.lineas.map((l, idx) => `
                 <tr style="border-bottom: 1px solid rgba(230, 57, 70, 0.1);">
@@ -119,38 +113,22 @@ class FacturasModal {
             filas_lineas = '<tr><td colspan="6" style="text-align: center; padding: 1rem; color: #a0a0a0;">Sin líneas facturadas</td></tr>';
         }
 
-        let filas_debito = '';
-        if (item.debito && item.debito.length > 0) {
-            filas_debito = item.debito.map((d, idx) => {
-                let colorEstado = '#90ee90';
-                if (d.estado === 'retrasado') colorEstado = '#fed7aa';
-                else if (d.estado === 'falta') colorEstado = '#ff6b6b';
-                return `
-                    <tr style="border-bottom: 1px solid rgba(230, 57, 70, 0.1);">
-                        <td style="padding: 0.75rem; color: #a0a0a0; text-align: center; font-size: 0.875rem;">${idx + 1}</td>
-                        <td style="padding: 0.75rem; color: #f0f0f0; font-weight: 500;">${d.producto_nombre || '—'}</td>
-                        <td style="padding: 0.75rem; color: #f0f0f0; text-align: center; font-weight: 500;">${d.cantidad_faltante || 0}</td>
-                        <td style="padding: 0.75rem; color: ${colorEstado}; text-align: center; font-weight: 600; text-transform: uppercase; font-size: 0.75rem;">${(d.estado || 'pendiente').toUpperCase()}</td>
-                        <td style="padding: 0.75rem; color: #a0a0a0; text-align: center; font-size: 0.875rem;">${d.fecha_estimada || '—'}</td>
-                    </tr>
-                `;
-            }).join('');
-        } else {
-            filas_debito = '<tr><td colspan="5" style="text-align: center; padding: 1rem; color: #a0a0a0;">Todos los productos recibidos</td></tr>';
-        }
-
         let filas_pagos = '';
+
         if (item.pagos && item.pagos.length > 0) {
             filas_pagos = item.pagos.map((p) => {
                 const colorEstado = p.estado === 'pagado' ? '#90ee90' : 
                                    p.estado === 'en_transito' ? '#fed7aa' : '#a0a0a0';
+
                 const bgEstado = p.estado === 'pagado' ? 'rgba(34, 197, 94, 0.1)' :
                                 p.estado === 'en_transito' ? 'rgba(249, 115, 22, 0.1)' : 'rgba(160, 160, 160, 0.1)';
+
                 const iconoEstado = p.estado === 'pagado' ? this.getSVG('check') : 
                                    p.estado === 'en_transito' ? this.getSVG('clock') : this.getSVG('warning');
+
                 return `
                     <tr style="border-bottom: 1px solid rgba(230, 57, 70, 0.1);">
-                        <td style="padding: 0.75rem; color: #f0f0f0; font-weight: 500;">${p.metodo || '—'}</td>
+                        <td style="padding: 0.75rem; color: #f0f0f0; font-weight: 500;">${p.referencia || '—'}</td>
                         <td style="padding: 0.75rem; color: #90ee90; font-weight: 600; text-align: right;">${(parseFloat(p.monto) || 0).toFixed(2)}€</td>
                         <td style="padding: 0.75rem; color: #f0f0f0; text-align: center;">${p.fecha || '—'}</td>
                         <td style="padding: 0.75rem; color: #a0a0a0; text-align: center; font-family: monospace; font-size: 0.875rem;">${p.referencia || '—'}</td>
@@ -167,9 +145,25 @@ class FacturasModal {
             filas_pagos = '<tr><td colspan="5" style="text-align: center; padding: 1rem; color: #a0a0a0;">Sin pagos registrados</td></tr>';
         }
 
+        // ✅ DETERMINAR COLOR DEL BADGE SEGÚN ESTADO
+        let colorEstadoBadge = 'bg-warning';
+        let styleEstadoBadge = '';
+
+        if (estadoFactura === 'pagada') {
+            colorEstadoBadge = 'bg-success';
+            styleEstadoBadge = 'background: #90ee90 !important; color: #000 !important;';
+        } else if (estadoFactura === 'parcial') {
+            colorEstadoBadge = 'bg-info';
+            styleEstadoBadge = 'background: #ffc107 !important; color: #000 !important;';
+        } else {
+            colorEstadoBadge = 'bg-danger';
+            styleEstadoBadge = 'background: #e63946 !important; color: #fff !important;';
+        }
+
         const contenido = `
             <!-- INFORMACIÓN GENERAL Y ESTADO -->
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid rgba(230, 57, 70, 0.2);">
+
                 <div>
                     <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem;">
                         ${this.getSVG('info')}
@@ -190,6 +184,7 @@ class FacturasModal {
                         </div>
                     </div>
                 </div>
+
                 <div>
                     <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem;">
                         ${this.getSVG('chart')}
@@ -197,15 +192,16 @@ class FacturasModal {
                     </div>
                     <div style="margin-bottom: 1.5rem;">
                         <div style="font-size: 0.75rem; color: #a0a0a0; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem;">Estado</div>
-                        <span class="badge ${this.getBadgeClass(item.estado)} px-3 py-2" style="font-weight: 600; font-size: 0.8rem;">
-                            ${(item.estado || 'Desconocido').toUpperCase()}
+                        <span class="badge ${colorEstadoBadge} px-3 py-2" style="font-weight: 600; font-size: 0.8rem; ${styleEstadoBadge}">
+                            ${(estadoFactura).toUpperCase()}
                         </span>
                     </div>
                     <div style="background: rgba(230, 57, 70, 0.08); padding: 1rem; border-radius: 6px; border-left: 3px solid #e63946;">
                         <div style="font-size: 0.7rem; color: #a0a0a0; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.5rem; font-weight: 600;">Total</div>
-                        <div style="color: #e63946; font-weight: 700; font-size: 1.75rem;">${(parseFloat(item.total) || 0).toFixed(2)}€</div>
+                        <div style="color: #e63946; font-weight: 700; font-size: 1.75rem;">${(total_factura).toFixed(2)}€</div>
                     </div>
                 </div>
+
             </div>
 
             <!-- LÍNEAS FACTURADAS -->
@@ -233,31 +229,6 @@ class FacturasModal {
                 </div>
             </div>
 
-            <!-- PRODUCTOS PENDIENTES -->
-            <div style="margin-bottom: 1.5rem;">
-                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
-                    ${this.getSVG('alert')}
-                    <h6 style="margin: 0; color: #e63946; font-weight: 700; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Productos Pendientes</h6>
-                </div>
-                <div style="overflow-x: auto; border-radius: 8px; border: 1px solid rgba(230, 57, 70, 0.2);">
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <thead>
-                            <tr style="background: rgba(230, 57, 70, 0.15);">
-                                <th style="padding: 0.75rem; color: #e63946; text-align: center; font-weight: 700; font-size: 0.875rem;">#</th>
-                                <th style="padding: 0.75rem; color: #e63946; text-align: left; font-weight: 700; font-size: 0.875rem;">PRODUCTO</th>
-                                <th style="padding: 0.75rem; color: #e63946; text-align: center; font-weight: 700; font-size: 0.875rem;">CANTIDAD</th>
-                                <th style="padding: 0.75rem; color: #e63946; text-align: center; font-weight: 700; font-size: 0.875rem;">ESTADO</th>
-                                <th style="padding: 0.75rem; color: #e63946; text-align: center; font-weight: 700; font-size: 0.875rem;">FECHA EST.</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${filas_debito}
-                        </tbody>
-                    </table>
-                </div>
-                ${cantidad_debitos > 0 ? `<div style="display: flex; align-items: center; gap: 0.5rem; color: #fed7aa; margin-top: 0.5rem; font-size: 0.875rem; font-weight: 500;">${this.getSVG('warning')} ${cantidad_debitos} unidades pendientes</div>` : ''}
-            </div>
-
             <!-- FORMAS DE PAGO -->
             <div style="margin-bottom: 1.5rem;">
                 <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
@@ -280,17 +251,26 @@ class FacturasModal {
                         </tbody>
                     </table>
                 </div>
+
                 ${item.pagos && item.pagos.length > 0 ? `
-                    <div style="margin-top: 1rem; padding: 0.75rem; background: rgba(230, 57, 70, 0.05); border-radius: 6px; border-left: 3px solid #e63946; font-size: 0.875rem;">
-                        <div style="color: #e63946; font-weight: 600; margin-bottom: 0.5rem;">TOTAL COMPROMETIDO: ${(parseFloat(item.total) || 0).toFixed(2)}€</div>
-                        <div style="display: flex; align-items: center; gap: 0.5rem; color: #90ee90; font-weight: 500;">
-                            ${this.getSVG('check')} PAGADO: ${total_pagado.toFixed(2)}€
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 0.5rem; color: #fed7aa; font-weight: 500;">
-                            ${this.getSVG('clock')} PENDIENTE: ${total_pendiente.toFixed(2)}€
+                    <div style="margin-top: 1rem; padding: 1rem; background: rgba(230, 57, 70, 0.05); border-radius: 6px; border-left: 3px solid #e63946;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                            <div>
+                                <div style="font-size: 0.7rem; color: #a0a0a0; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.5rem; font-weight: 600;">TOTAL COMPROMETIDO</div>
+                                <div style="color: #e63946; font-weight: 700; font-size: 1.5rem;">${(total_factura).toFixed(2)}€</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.7rem; color: #a0a0a0; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.5rem; font-weight: 600;">💰 PAGADO</div>
+                                <div style="color: #90ee90; font-weight: 700; font-size: 1.5rem;">${(total_pagado).toFixed(2)}€</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.7rem; color: #a0a0a0; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.5rem; font-weight: 600;">⏳ PENDIENTE</div>
+                                <div style="color: #ffc107; font-weight: 700; font-size: 1.5rem;">${(total_pendiente).toFixed(2)}€</div>
+                            </div>
                         </div>
                     </div>
                 ` : ''}
+
             </div>
 
             <!-- OBSERVACIONES -->
@@ -316,11 +296,9 @@ class FacturasModal {
             </div>
         `;
 
-        // ✅ IMPORTANTE: Pasar item.id como tercer parámetro
         this.crearYMostrarModal(titulo, contenido, item.id);
     }
 
-    // ✅ RECIBIR itemId COMO PARÁMETRO
     static crearYMostrarModal(titulo, contenido, itemId) {
         const modalHTML = `
             <div class="modal fade" id="detalleFacturaModal" tabindex="-1">
@@ -333,11 +311,9 @@ class FacturasModal {
                             </h5>
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                         </div>
-
                         <div class="modal-body" style="padding: 1.5rem; color: #f0f0f0;">
                             ${contenido}
                         </div>
-
                         <div class="modal-footer" style="border-top: 1px solid rgba(230, 57, 70, 0.3); padding: 1rem;">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="display: flex; align-items: center; gap: 0.5rem;">
                                 ${this.getSVG('close')}
@@ -357,6 +333,7 @@ class FacturasModal {
         if (modalAnterior) modalAnterior.remove();
 
         document.body.insertAdjacentHTML('beforeend', modalHTML);
+
         const modal = new bootstrap.Modal(document.getElementById('detalleFacturaModal'));
         modal.show();
 
@@ -364,12 +341,10 @@ class FacturasModal {
             this.remove();
         });
 
-        // ✅ AHORA itemId SÍ EXISTE
         setTimeout(() => {
             this.cargarRelaciones('factura', itemId);
         }, 300);
     }
-
 }
 
 export default FacturasModal;
