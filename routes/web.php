@@ -25,6 +25,15 @@ use App\Http\Controllers\DevolucionesController;
 use App\Models\Configuracion;
 use App\Models\DevolucionVenta;
 
+Route::get('/clear-all', function () {
+    Artisan::call('config:clear');
+    Artisan::call('cache:clear');
+    Artisan::call('route:clear');
+    Artisan::call('view:clear');
+    Artisan::call('config:cache');
+    return 'Cache limpiado';
+});
+
 // ============ PÁGINA INICIAL ============
 Route::get('/', function () {
     $visited = DB::select('select * from places where visited = ?', [1]); 
