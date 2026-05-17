@@ -47,4 +47,4 @@ RUN composer install --no-dev --optimize-autoloader
 EXPOSE 9000 10000
 
 # 11. Comando de inicio dual (Sirve para ambos mundos a la vez)
-CMD php artisan migrate --force && php artisan db:seed --force && php artisan serve --host=0.0.0.0 --port=10000 & php-fpm
+CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=10000 & php-fpm
