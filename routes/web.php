@@ -225,4 +225,24 @@ Route::get('/productos/modal/lista', [ProductosController::class, 'listaParaModa
 
 });
 
+Route::middleware(['auth'])->get('/test/pdf-carbone', function() {
+    $carbone = new \App\Services\CarboneService();
+
+    $datos = [
+        'numero_factura' => 'FAC-2026-001',
+        'fecha' => '17/05/2026',
+        'proveedor' => 'GRUPO JPG S.A.',
+        'total' => '1.250,50 €',
+        'metodo_pago' => 'Transferencia Bancaria'
+    ];
+
+    try {
+        $pdf = $carbone->render('factura', $datos, 'test_' . time());
+        return response()->download($pdf, 'factura_test.pdf');
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
+});
+
+
 // Nota: la ruta /stocks ya está dentro del grupo de ambos roles
