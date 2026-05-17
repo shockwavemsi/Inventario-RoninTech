@@ -1,4 +1,4 @@
-FROM php:8.2-fpm
+FROM php:8.4-fpm
 
 RUN apt-get update && apt-get install -y \
     nginx \
@@ -35,3 +35,4 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 8080
 
 CMD ["sh", "-c", "nginx -g 'daemon off;' & php-fpm"]
+
