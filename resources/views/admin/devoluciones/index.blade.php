@@ -88,11 +88,30 @@
                         <th style="color: #0066cc; font-weight: 700;">Acciones</th>
                     </tr>
                 </thead>
-                <tbody id="tablaDevoluciones" style="color: #f0f0f0;">
-                    <tr>
-                        <td colspan="7" style="text-align: center; padding: 2rem; color: #a0a0a0;">📭 Sin devoluciones registradas</td>
-                    </tr>
-                </tbody>
+                <tbody id="tablaDevoluciones">
+    @forelse($devoluciones as $dev)
+    <tr>
+        <td>{{ $dev['numero'] }}</td>      <!-- DEV-0001 -->
+        <td>{{ $dev['cliente'] }}</td>
+        <td>{{ $dev['fecha'] }}</td>
+        <td>{{ $dev['producto'] }}</td>
+        <td>€{{ number_format($dev['total'], 2) }}</td>
+        <td>
+            <span class="badge bg-{{ $dev['estado'] == 'completada' ? 'success' : 'warning' }}">
+                {{ ucfirst($dev['estado']) }}
+            </span>
+        </td>
+        <td>
+            <button class="btn btn-sm btn-info" onclick="verDevolucion({{ $dev['id'] }})">Ver</button>
+            @if($dev['estado'] == 'pendiente')
+                <button class="btn btn-sm btn-success" onclick="cambiarEstado({{ $dev['id'] }}, 'completada')">Completar</button>
+            @endif
+         </td>
+    </tr>
+    @empty
+        <tr><td colspan="7" style="text-align: center;">📭 Sin devoluciones registradas</td></tr>
+    @endforelse
+</tbody>
             </table>
         </div>
     </div>
