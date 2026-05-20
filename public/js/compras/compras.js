@@ -94,6 +94,35 @@ window.abrirModalPedido = function(id) {
     window.comprasApp.abrirDetalles(id, 'pedido');
 };
 
+window.clonarPedidoCompra = async function(id) {
+    if (!id) return;
+
+    const confirmar = confirm('�Clonar este pedido con el mismo proveedor y productos?');
+    if (!confirmar) return;
+
+    try {
+        const response = await fetch(`/compras/pedidos/${id}/clonar`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                'Accept': 'application/json',
+            },
+        });
+
+        const data = await response.json();
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || 'No se pudo clonar el pedido');
+        }
+
+        alert(data.message || 'Pedido clonado correctamente');
+        await window.comprasApp.loadData('pedidos');
+
+    } catch (error) {
+        console.error('Error al clonar pedido:', error);
+        alert(error.message || 'Error al clonar el pedido');
+    }
+};
+
 // ✅ VER DETALLES ALBARÁN
 window.abrirModalAlbaran = function(id) {
     console.log('👁️ Abriendo detalles albarán:', id);
@@ -234,3 +263,4 @@ window.renderizarRelaciones = function(tipo, data) {
 };
 
 export default ComprasApp;
+

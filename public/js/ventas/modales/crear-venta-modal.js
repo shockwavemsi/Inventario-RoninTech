@@ -23,7 +23,15 @@ class CrearVentaModal {
 
         const form = document.getElementById('formVenta');
         if (form) {
+            form.noValidate = true;
             form.addEventListener('submit', (e) => this.onFormSubmit(e));
+        }
+
+        const documentoInput = document.getElementById('clienteDocumento');
+        if (documentoInput) {
+            documentoInput.addEventListener('input', () => {
+                this.actualizarRequerimientoDocumento(this.obtenerTotalActual());
+            });
         }
     }
 
@@ -213,8 +221,64 @@ class CrearVentaModal {
     document.getElementById('subtotalDisplay').textContent = subtotal.toFixed(2) + '€';
     document.getElementById('ivaDisplay').textContent = iva.toFixed(2) + '€';
     document.getElementById('totalDisplay').textContent = total.toFixed(2) + '€';
-
+this.actualizarRequerimientoDocumento(total);
     this.actualizarJsonLineas();
+}
+
+static actualizarRequerimientoDocumento(total) {
+    const documentoInput = document.getElementById('clienteDocumento');
+    if (!documentoInput) return;
+
+    const label = documentoInput.closest('.col-md-5')?.querySelector('label');
+    let aviso = document.getElementById('avisoDocumentoVenta');
+
+    if (total > 3000) {
+        documentoInput.required = false;
+        documentoInput.placeholder = 'DNI/NIF/Pasaporte obligatorio';
+        documentoInput.style.borderColor = documentoInput.value.trim() ? 'rgba(230, 57, 70, 0.3)' : '#ffc107';
+
+        if (label) {
+            label.textContent = 'Documento *';
+        }
+
+        if (!aviso) {
+            aviso = document.createElement('small');
+            aviso.id = 'avisoDocumentoVenta';
+            aviso.style.display = 'block';
+            aviso.style.color = '#ffc107';
+            aviso.style.marginTop = '0.25rem';
+            aviso.textContent = 'Para ventas superiores a 3.000€ debes identificar al cliente con DNI/NIF.';
+            documentoInput.parentNode.appendChild(aviso);
+        }
+    } else {
+        documentoInput.required = false;
+        documentoInput.placeholder = 'DNI/NIF/Pasaporte';
+        documentoInput.style.borderColor = 'rgba(230, 57, 70, 0.3)';
+
+        if (label) {
+            label.textContent = 'Documento (Opcional)';
+        }
+
+        if (aviso) {
+            aviso.remove();
+        }
+    }
+}
+
+static obtenerTotalActual() {
+    let subtotal = 0;
+
+    const cantidadInputs = document.querySelectorAll('.cantidad-input');
+    const precioInputs = document.querySelectorAll('.precio-input');
+
+    cantidadInputs.forEach((input, idx) => {
+        const cantidad = parseFloat(input.value) || 0;
+        const precio = parseFloat(precioInputs[idx]?.value) || 0;
+        subtotal += cantidad * precio;
+    });
+
+    const ivaPorcentaje = parseFloat(document.getElementById('ivaPorcentaje')?.value) || 21;
+    return subtotal + (subtotal * (ivaPorcentaje / 100));
 }
 
     static actualizarJsonLineas() {
@@ -276,7 +340,22 @@ class CrearVentaModal {
         e.preventDefault();
         return;
     }
+const total = this.obtenerTotalActual();
+const documentoInput = document.getElementById('clienteDocumento');
+const documento = formData.get('cliente_documento')?.trim() || '';
 
+if (total > 3000 && !documento) {
+    e.preventDefault();
+    this.actualizarRequerimientoDocumento(total);
+    alert('Para ventas superiores a 3.000 EUR es obligatorio indicar el DNI/NIF del cliente.');
+    if (documentoInput) {
+        documentoInput.required = false;
+        documentoInput.style.borderColor = '#dc3545';
+        documentoInput.focus();
+    }
+
+    return;
+}
     console.log('✅ [FORM] Datos válidos, enviando...');
 }
 

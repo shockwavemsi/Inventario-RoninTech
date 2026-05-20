@@ -78,6 +78,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', [PedidoCompraController::class, 'index'])->name('compras.dashboard');
         Route::get('/pedidos', [PedidoCompraController::class, 'index'])->name('pedidos-compra.index');
         Route::post('/pedidos', [PedidoCompraController::class, 'store'])->name('pedidos-compra.store');
+        Route::post('/pedidos/{pedidoCompra}/clonar', [PedidoCompraController::class, 'clonar'])->name('pedidos-compra.clonar');
         Route::get('/pedidos/{pedidoCompra}/json', [PedidoCompraController::class, 'showJson']);
         Route::get('/pedidos/{pedidoCompra}/edit', [PedidoCompraController::class, 'edit'])->name('pedidos-compra.edit');
         Route::put('/pedidos/{pedidoCompra}', [PedidoCompraController::class, 'update'])->name('pedidos-compra.update');

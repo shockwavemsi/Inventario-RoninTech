@@ -278,9 +278,17 @@ class ComprasUI {
                         </div>
                         ${infoHtml}
                     </div>
-                    <div style="text-align: right;">
+                    <div style="text-align: right; min-width: 170px;">
                         <div style="font-size: 2rem; font-weight: bold; color: #e63946;">${(item.total || 0).toFixed(2)}€</div>
                         <div style="color: #a0a0a0; font-size: 0.75rem; margin-top: 0.25rem;">Total</div>
+                        ${tabId === 'pedidos' ? `
+                            <button type="button"
+                                class="btn btn-sm btn-outline-danger clone-pedido-btn"
+                                data-pedido-id="${item.id}"
+                                style="margin-top: 0.75rem; border-color: #e63946; color: #f0f0f0; background: rgba(230, 57, 70, 0.12);">
+                                <i class="bi bi-files"></i> Clonar
+                            </button>
+                        ` : ''}
                     </div>
                 </div>
             </div>
@@ -294,6 +302,14 @@ class ComprasUI {
                 const id = card.getAttribute('data-item-id');
                 const tipo = card.getAttribute('data-item-type');
                 window.comprasApp.abrirDetalles(id, tipo);
+            });
+        });
+
+        document.querySelectorAll('.clone-pedido-btn').forEach(button => {
+            button.addEventListener('click', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                window.clonarPedidoCompra?.(button.getAttribute('data-pedido-id'));
             });
         });
     }

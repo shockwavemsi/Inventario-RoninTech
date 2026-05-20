@@ -8,6 +8,7 @@ use App\Models\AlbaranCompra;
 use App\Models\Proveedor;
 use App\Models\Producto;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
 class PedidoCompraController extends Controller
@@ -207,6 +208,92 @@ class PedidoCompraController extends Controller
            
             return response()->json(['error' => $e->getMessage()], 500);
         }
+    }
+
+    public function clonar(PedidoCompra $pedidoCompra)
+    {
+        try {
+            $pedidoCompra->load('lineas');
+
+            if ($pedidoCompra->lineas->isEmpty()) {
+                return back()->with('error', 'No se puede clonar un pedido sin lineas.');
+            }
+
+            $nuevoPedido = DB::transaction(function () use ($pedidoCompra) {
+                $pedido = PedidoCompra::create([
+                    'numero_pedido' => $this->generarSiguienteNumeroPedido(),
+                    'proveedor_id' => $pedidoCompra->proveedor_id,
+                    'usuario_id' => Auth::id(),
+                    'fecha_pedido' => now()->toDateString(),
+                    'fecha_entrega_esperada' => null,
+                    'estado' => 'abierto',
+                    'subtotal' => $pedidoCompra->subtotal,
+                    'descuento_porcentaje' => $pedidoCompra->descuento_porcentaje ?? 0,
+                    'descuento_cantidad' => $pedidoCompra->descuento_cantidad ?? 0,
+                    'total' => $pedidoCompra->total,
+                    'observaciones' => $pedidoCompra->observaciones,
+                ]);
+
+                foreach ($pedidoCompra->lineas as $linea) {
+                    PedidoCompraLinea::create([
+                        'pedido_compra_id' => $pedido->id,
+                        'producto_id' => $linea->producto_id,
+                        'cantidad' => $linea->cantidad,
+                        'precio_unitario' => $linea->precio_unitario,
+                        'total' => $linea->total,
+                    ]);
+                }
+
+                return $pedido;
+            });
+
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => "Pedido {$nuevoPedido->numero_pedido} clonado correctamente",
+                    'pedido' => [
+                        'id' => $nuevoPedido->id,
+                        'numero_pedido' => $nuevoPedido->numero_pedido,
+                    ],
+                ]);
+            }
+
+            return redirect()->route('pedidos-compra.index')
+                ->with('success', "Pedido {$nuevoPedido->numero_pedido} clonado correctamente");
+
+        } catch (\Exception $e) {
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error al clonar el pedido: ' . $e->getMessage(),
+                ], 500);
+            }
+
+            return back()->with('error', 'Error al clonar el pedido: ' . $e->getMessage());
+        }
+    }
+
+    private function generarSiguienteNumeroPedido(): string
+    {
+        $ultimoPedido = PedidoCompra::withTrashed()
+            ->where('numero_pedido', 'LIKE', 'PC-%')
+            ->orderBy('id', 'desc')
+            ->first();
+
+        $siguiente = 1;
+        if ($ultimoPedido && preg_match('/PC-(\d+)/', $ultimoPedido->numero_pedido, $matches)) {
+            $siguiente = (int) $matches[1] + 1;
+        }
+
+        do {
+            $numero = 'PC-' . str_pad($siguiente, 3, '0', STR_PAD_LEFT);
+            $existe = PedidoCompra::withTrashed()
+                ->where('numero_pedido', $numero)
+                ->exists();
+            $siguiente++;
+        } while ($existe);
+
+        return $numero;
     }
 
     public function edit(PedidoCompra $pedidoCompra)

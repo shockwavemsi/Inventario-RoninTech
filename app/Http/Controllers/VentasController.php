@@ -180,12 +180,28 @@ class VentasController extends Controller
                 'nombre' => $metodo->nombre,
                 'enum' => $metodoEnum
             ]);
+            // Validar que ventas superiores a 3.000€ tengan DNI/NIF
+$subtotalCalculado = 0;
+
+foreach ($lineas as $linea) {
+    $subtotalCalculado += (float) $linea['cantidad'] * (float) $linea['precio_unitario'];
+}
+
+$ivaPorc = isset($validated['iva_porcentaje']) ? (float) $validated['iva_porcentaje'] : 21;
+$totalCalculado = $subtotalCalculado * (1 + ($ivaPorc / 100));
+$clienteDocumento = trim((string) ($validated['cliente_documento'] ?? ''));
+
+if ($totalCalculado > 3000 && $clienteDocumento === '') {
+    return back()->withInput()->withErrors([
+        'cliente_documento' => 'Para ventas superiores a 3.000€ es obligatorio identificar al cliente con DNI/NIF.'
+    ]);
+}
 
             // ✅ CREAR VENTA
             $venta = Venta::create([
                 'numero_factura' => $validated['numero_factura'],
                 'cliente' => $validated['cliente'],
-                'cliente_documento' => $validated['cliente_documento'] ?? null,
+                'cliente_documento' => $clienteDocumento ?: null,
                 'metodo_pago' => $metodoEnum,  // ✅ USAR VALOR DEL ENUM
                 'estado' => $validated['estado'],
                 'usuario_id' => auth()->id(),
