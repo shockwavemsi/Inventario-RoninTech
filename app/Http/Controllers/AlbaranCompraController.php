@@ -7,8 +7,10 @@ use App\Models\AlbaranCompraLinea;
 use App\Models\PedidoCompra;
 use App\Models\DebitoCompra;
 use App\Models\DebitoCompraLinea;
+use App\Models\MovimientoStock;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use App\Models\Proveedor;
 use App\Models\Producto;
 
@@ -128,6 +130,7 @@ public function index()
             }
 
             \Log::info('ALBARÁN RECIBIDO:', $request->all());
+            DB::beginTransaction();
 
             $cantidadesRecibidas = $request->input('cantidad_recibida');
             $cantidadesPedidas = $request->input('cantidad_pedida');
@@ -175,6 +178,13 @@ public function index()
                     'cantidad_faltante' => $cantidadFaltante,
                     'estado' => $estado,
                 ]);
+
+                $this->ajustarStockProducto(
+                    (int) $productoId,
+                    $cantidadRecibida,
+                    $albaran->id,
+                    "Entrada por albarán {$albaran->numero_albaran}"
+                );
             }
 
             // ✅ ACTUALIZAR ESTADO DEL ALBARÁN SEGÚN CANTIDADES TOTALES
@@ -242,10 +252,16 @@ public function index()
 
             \Log::info('ALBARÁN CREADO:', ['id' => $albaran->id, 'numero' => $albaran->numero_albaran, 'estado' => $estadoAlbaran]);
 
+            DB::commit();
+
             return redirect()->route('albaranes-compra.index')
                 ->with('success', "✅ Albarán {$albaran->numero_albaran} creado correctamente");
 
         } catch (\Exception $e) {
+            if (DB::transactionLevel() > 0) {
+                DB::rollBack();
+            }
+
             \Log::error('Error al crear albarán:', ['error' => $e->getMessage()]);
             return back()->withInput()->with('error', '❌ Error: ' . $e->getMessage());
         }
@@ -301,6 +317,8 @@ public function index()
                 'estado' => 'nullable|array',
             ]);
 
+            DB::beginTransaction();
+
             $albaranCompra->update([
                 'fecha_recepcion' => $validated['fecha_recepcion'] ?? $albaranCompra->fecha_recepcion,
                 'observaciones' => $validated['observaciones'] ?? $albaranCompra->observaciones,
@@ -308,8 +326,10 @@ public function index()
 
             if ($validated['cantidad_recibida'] ?? null) {
                 foreach ($validated['cantidad_recibida'] as $index => $cantidadRecibida) {
-                    $linea = $albaranCompra->lineas()->skip($index)->first();
+                    $linea = $albaranCompra->lineas()->orderBy('id')->skip($index)->first();
                     if ($linea) {
+                        $cantidadRecibida = (int) $cantidadRecibida;
+                        $cantidadAnterior = (int) $linea->cantidad_recibida;
                         $cantidadFaltante = $linea->cantidad_pedida - $cantidadRecibida;
 
                         if ($cantidadRecibida == 0) {
@@ -325,12 +345,25 @@ public function index()
                             'cantidad_faltante' => $cantidadFaltante,
                             'estado' => $estado,
                         ]);
+
+                        $this->ajustarStockProducto(
+                            (int) $linea->producto_id,
+                            $cantidadRecibida - $cantidadAnterior,
+                            $albaranCompra->id,
+                            "Ajuste por edición del albarán {$albaranCompra->numero_albaran}"
+                        );
                     }
                 }
             }
 
+            DB::commit();
+
             return response()->json(['success' => true, 'message' => '✅ Albarán actualizado']);
         } catch (\Exception $e) {
+            if (DB::transactionLevel() > 0) {
+                DB::rollBack();
+            }
+
             return response()->json(['success' => false, 'message' => '❌ Error: ' . $e->getMessage()], 500);
         }
     }
@@ -338,12 +371,31 @@ public function index()
     public function destroy(AlbaranCompra $albaranCompra)
     {
         try {
+            DB::beginTransaction();
+
+            $albaranCompra->load('lineas');
+
+            foreach ($albaranCompra->lineas as $linea) {
+                $this->ajustarStockProducto(
+                    (int) $linea->producto_id,
+                    -((int) $linea->cantidad_recibida),
+                    $albaranCompra->id,
+                    "Reversión por eliminación del albarán {$albaranCompra->numero_albaran}"
+                );
+            }
+
             $albaranCompra->lineas()->delete();
             DebitoCompra::where('albaran_compra_id', $albaranCompra->id)->delete();
             $albaranCompra->delete();
 
+            DB::commit();
+
             return response()->json(['success' => true, 'message' => '✅ Albarán eliminado']);
         } catch (\Exception $e) {
+            if (DB::transactionLevel() > 0) {
+                DB::rollBack();
+            }
+
             return response()->json(['success' => false, 'message' => '❌ Error: ' . $e->getMessage()], 500);
         }
     }
@@ -391,5 +443,47 @@ public function index()
         }
     }
 
-    
+	    
+    private function ajustarStockProducto(int $productoId, int $diferencia, int $albaranId, string $motivo): void
+    {
+        if ($diferencia === 0) {
+            return;
+        }
+
+        $producto = Producto::lockForUpdate()->find($productoId);
+
+        if (!$producto) {
+            throw new \Exception("Producto {$productoId} no encontrado para actualizar stock");
+        }
+
+        $stockAnterior = (int) $producto->stock_actual;
+        $stockNuevo = $stockAnterior + $diferencia;
+
+        if ($stockNuevo < 0) {
+            throw new \Exception("El stock de {$producto->nombre} no puede quedar negativo");
+        }
+
+        $producto->update(['stock_actual' => $stockNuevo]);
+
+        MovimientoStock::create([
+            'producto_id' => $producto->id,
+            'tipo' => $diferencia > 0 ? 'entrada_compra' : 'ajuste',
+            'cantidad' => abs($diferencia),
+            'stock_anterior' => $stockAnterior,
+            'stock_nuevo' => $stockNuevo,
+            'referencia_tipo' => 'albaran_compra',
+            'referencia_id' => $albaranId,
+            'motivo' => $motivo,
+            'usuario_id' => Auth::id(),
+        ]);
+
+        \Log::info('Stock actualizado por albarán de compra', [
+            'producto_id' => $producto->id,
+            'diferencia' => $diferencia,
+            'stock_anterior' => $stockAnterior,
+            'stock_nuevo' => $stockNuevo,
+            'albaran_id' => $albaranId,
+        ]);
+    }
+
 }

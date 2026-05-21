@@ -18,6 +18,7 @@ class Venta extends Model
         'metodo_pago',
         'estado',
         'usuario_id',
+        'cliente_id',
         'observaciones'
     ];
 

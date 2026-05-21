@@ -71,6 +71,62 @@ public function create()
         return redirect()->route('productos.index')->with('success', '!Producto creado correctamente!');
     }
 
+    public function update(Request $request, $id)
+    {
+        $producto = Producto::findOrFail($id);
+
+        $validated = $request->validate([
+            'nombre' => 'required|string|max:200',
+            'descripcion' => 'nullable|string',
+            'marca' => 'nullable|string|max:100',
+            'modelo' => 'nullable|string|max:100',
+            'categoria_id' => 'nullable|exists:categorias,id',
+            'proveedor_id' => 'nullable|exists:proveedores,id',
+            'precio_base_compra' => 'nullable|numeric|min:0',
+            'iva_compra_id' => 'nullable|exists:tabla_ivas,id',
+            'precio_base_venta' => 'nullable|numeric|min:0',
+            'iva_venta_id' => 'nullable|exists:tabla_ivas,id',
+            'stock_minimo' => 'nullable|integer|min:0',
+            'stock_maximo' => 'nullable|integer|min:0',
+            'ubicacion' => 'nullable|string|max:100',
+            'activo' => 'nullable|boolean',
+        ]);
+
+        $ivaCompraId = $validated['iva_compra_id'] ?? $producto->iva_compra_id;
+        $ivaVentaId = $validated['iva_venta_id'] ?? $producto->iva_venta_id;
+
+        $ivaCompra = !empty($ivaCompraId)
+            ? (float) TablaIva::find($ivaCompraId)?->porcentaje
+            : 0;
+
+        $ivaVenta = !empty($ivaVentaId)
+            ? (float) TablaIva::find($ivaVentaId)?->porcentaje
+            : 0;
+
+        $precioBaseCompra = (float) ($validated['precio_base_compra'] ?? $producto->precio_base_compra ?? 0);
+        $precioBaseVenta = (float) ($validated['precio_base_venta'] ?? $producto->precio_base_venta ?? 0);
+
+        $validated['iva_compra_id'] = $ivaCompraId;
+        $validated['iva_venta_id'] = $ivaVentaId;
+        $validated['precio_base_compra'] = $precioBaseCompra;
+        $validated['precio_base_venta'] = $precioBaseVenta;
+
+        $validated['precio_compra_final'] = round($precioBaseCompra * (1 + ($ivaCompra / 100)), 2);
+        $validated['precio_venta_final'] = round($precioBaseVenta * (1 + ($ivaVenta / 100)), 2);
+        $validated['activo'] = $request->has('activo') ? $request->boolean('activo') : $producto->activo;
+
+        $producto->update($validated);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'producto' => $producto->fresh(['categoria', 'proveedor', 'ivaCompra', 'ivaVenta']),
+            ]);
+        }
+
+        return redirect()->route('productos.index')->with('success', 'Producto actualizado correctamente');
+    }
+
     public function destroy($id)
 {
     Producto::findOrFail($id)->delete();

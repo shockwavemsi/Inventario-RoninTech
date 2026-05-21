@@ -20,6 +20,7 @@ use App\Http\Controllers\FacturaCompraController;
 use App\Http\Controllers\FacturaPdfController;
 use App\Http\Controllers\PagoFacturaController;
 use App\Http\Controllers\DevolucionesController;
+use App\Http\Controllers\ClienteController;
 use App\Models\Configuracion;
 use App\Models\DevolucionVenta;
 
@@ -192,6 +193,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/api/pedidos', [PedidoCompraController::class, 'getAll']);
     Route::get('/api/albaranes', [AlbaranCompraController::class, 'getAll']);
     Route::get('/api/facturas', [FacturaCompraController::class, 'getAll']);
+    Route::get('/clientes/buscar', [ClienteController::class, 'buscar'])->name('clientes.buscar');
 
 });
 
@@ -228,7 +230,15 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/productos', [ProductosController::class, 'index'])->name('productos.index');
     Route::get('/productos/crear', [ProductosController::class, 'create'])->name('productos.create');
     Route::post('/productos/guardar', [ProductosController::class, 'store'])->name('productos.store');
+    Route::put('/productos/{id}', [ProductosController::class, 'update'])->name('productos.update');
     Route::delete('/productos/{id}/eliminar', [ProductosController::class, 'destroy'])->name('productos.destroy');
+
+    // CLIENTES (CRUD)
+    Route::get('/clientes', [ClienteController::class, 'index'])->name('clientes.index');
+    Route::post('/clientes', [ClienteController::class, 'store'])->name('clientes.store');
+    Route::get('/clientes/{id}/json', [ClienteController::class, 'show'])->name('clientes.show');
+    Route::put('/clientes/{id}', [ClienteController::class, 'update'])->name('clientes.update');
+    Route::delete('/clientes/{id}', [ClienteController::class, 'destroy'])->name('clientes.destroy');
 
 });
 

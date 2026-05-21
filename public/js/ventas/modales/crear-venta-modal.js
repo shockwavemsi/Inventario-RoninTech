@@ -12,6 +12,7 @@ class CrearVentaModal {
     static init() {
         this.inicializarEventos();
         this.inicializarBuscador();
+        this.inicializarBuscadorClientes();
         console.log('✅ CrearVentaModal inicializado');
     }
 
@@ -33,16 +34,109 @@ class CrearVentaModal {
                 this.actualizarRequerimientoDocumento(this.obtenerTotalActual());
             });
         }
+
+        const clienteInput = document.getElementById('cliente');
+        if (clienteInput) {
+            clienteInput.addEventListener('input', () => {
+                const clienteId = document.getElementById('clienteId');
+                if (clienteId) clienteId.value = '';
+            });
+        }
+	}
+
+    static inicializarBuscadorClientes() {
+        const input = document.getElementById('cliente');
+        const lista = document.getElementById('listaClientesVenta');
+
+        if (!input || !lista) return;
+
+        let timeoutId = null;
+
+        input.addEventListener('focus', () => {
+            this.buscarClientes('', lista);
+        });
+
+        input.addEventListener('input', () => {
+            clearTimeout(timeoutId);
+            const query = input.value.trim();
+
+            if (query.length < 1) {
+                timeoutId = setTimeout(() => this.buscarClientes('', lista), 150);
+                return;
+            }
+
+            timeoutId = setTimeout(() => this.buscarClientes(query, lista), 250);
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#cliente') && !e.target.closest('#listaClientesVenta')) {
+                lista.style.display = 'none';
+            }
+        });
+    }
+
+    static async buscarClientes(query, lista) {
+        try {
+            const response = await fetch(`/clientes/buscar?q=${encodeURIComponent(query)}`);
+            const clientes = await response.json();
+            this.renderizarClientes(clientes, lista, query === '');
+        } catch (error) {
+            console.error('Error buscando clientes:', error);
+            lista.style.display = 'none';
+        }
+    }
+
+    static renderizarClientes(clientes, container, mostrandoRecientes = false) {
+        container.innerHTML = '';
+
+        if (!clientes.length) {
+            container.innerHTML = '<div style="padding: 0.65rem; color: #a0a0a0; font-size: 0.85rem;">Sin coincidencias. Se creará al guardar si indicas documento.</div>';
+            container.style.display = 'block';
+            return;
+        }
+
+        if (mostrandoRecientes) {
+            const header = document.createElement('div');
+            header.style.cssText = 'padding: 0.45rem 0.7rem; color: #a0a0a0; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;';
+            header.textContent = 'Clientes recientes';
+            container.appendChild(header);
+        }
+
+        clientes.forEach(cliente => {
+            const item = document.createElement('button');
+            item.type = 'button';
+            item.className = 'list-group-item list-group-item-action';
+            item.style.cssText = 'padding: 0.7rem; color: #f0f0f0; background: rgba(230, 57, 70, 0.1); border-color: rgba(230, 57, 70, 0.2); text-align: left; font-size: 0.88rem;';
+            item.innerHTML = `
+                <strong>${cliente.nombre_completo}</strong>
+                <br><small style="color: #a0a0a0;">${cliente.documento} · ${cliente.telefono || 'Sin teléfono'}</small>
+            `;
+            item.addEventListener('click', () => this.seleccionarCliente(cliente, container));
+            container.appendChild(item);
+        });
+
+        container.style.display = 'block';
+    }
+
+    static seleccionarCliente(cliente, container) {
+        document.getElementById('clienteId').value = cliente.id;
+        document.getElementById('cliente').value = cliente.nombre_completo;
+        document.getElementById('clienteDocumento').value = cliente.documento || '';
+        document.getElementById('clienteTelefono').value = cliente.telefono || '';
+        container.style.display = 'none';
+        this.actualizarRequerimientoDocumento(this.obtenerTotalActual());
     }
 
     static async onModalOpen() {  // ✅ AGREGAR async
     console.log('✅ Modal venta abierto');
     await this.generarNumeroVenta();  // ✅ ESPERAR la respuesta
-    this.filaIndex = 0;
-    this.lineas = [];
-    this.limpiarLineas();
-    this.calcularTotales();
-}
+	    this.filaIndex = 0;
+	    this.lineas = [];
+        document.getElementById('clienteId').value = '';
+        document.getElementById('clienteTelefono').value = '';
+	    this.limpiarLineas();
+	    this.calcularTotales();
+	}
 
   static async generarNumeroVenta() {  // ✅ AGREGAR async
     try {
@@ -58,15 +152,15 @@ class CrearVentaModal {
         const input = document.getElementById('numeroVenta');
         if (input) input.value = data.numero;
 
-    } catch (error) {
-        console.error('❌ Error:', error);
-        // Fallback: usar el ID local si falla
-        const ultimoId = window.ultimoVentaId || 0;
-        const numeroVenta = 'V-' + String(ultimoId + 1).padStart(3, '0');
-        const input = document.getElementById('numeroVenta');
-        if (input) input.value = numeroVenta;
-    }
-}
+	    } catch (error) {
+	        console.error('❌ Error:', error);
+	        // Fallback: usar el ID local si falla
+	        const ultimoId = window.ultimoVentaId || 0;
+	        const numeroVenta = 'FAC-V-' + String(ultimoId + 1).padStart(4, '0');
+	        const input = document.getElementById('numeroVenta');
+	        if (input) input.value = numeroVenta;
+	    }
+	}
 
     static inicializarBuscador() {
         const buscador = document.getElementById('buscadorProductos');
@@ -166,8 +260,8 @@ class CrearVentaModal {
             </td>
             <td style="padding: 0.75rem;">
                 <input type="number" name="precio_unitario[]" value="${precio.toFixed(2)}" step="0.01" min="0" class="form-control form-control-sm precio-input"
-                    data-idx="${idx}" onchange="window.CrearVentaModal.calcularTotales()"
-                    style="background: rgba(20, 20, 25, 0.8); border-color: rgba(230, 57, 70, 0.3); color: #f0f0f0; text-align: right;">
+    data-idx="${idx}" readonly
+    style="background: rgba(100, 100, 100, 0.2); border-color: rgba(230, 57, 70, 0.2); color: #a0a0a0; text-align: right; cursor: not-allowed;">
             </td>
             <td style="padding: 0.75rem; color: #e63946; font-weight: 600; text-align: right; font-size: 0.875rem;">
                 <span class="subtotal-linea" data-idx="${idx}">0.00€</span>
@@ -214,8 +308,9 @@ class CrearVentaModal {
     });
 
     // ✅ OBTENER IVA DEL INPUT
-    const ivaPorcentaje = parseFloat(document.getElementById('ivaPorcentaje')?.value) || 21;
-    const iva = subtotal * (ivaPorcentaje / 100);
+	    const selectIva = document.getElementById('ivaVentaSelect');
+        const ivaPorcentaje = parseFloat(selectIva?.options[selectIva.selectedIndex]?.dataset.porcentaje) || 0;
+	    const iva = subtotal * (ivaPorcentaje / 100);
     const total = subtotal + iva;
 
     document.getElementById('subtotalDisplay').textContent = subtotal.toFixed(2) + '€';
@@ -229,7 +324,7 @@ static actualizarRequerimientoDocumento(total) {
     const documentoInput = document.getElementById('clienteDocumento');
     if (!documentoInput) return;
 
-    const label = documentoInput.closest('.col-md-5')?.querySelector('label');
+	    const label = documentoInput.parentElement?.querySelector('label');
     let aviso = document.getElementById('avisoDocumentoVenta');
 
     if (total > 3000) {
@@ -277,9 +372,10 @@ static obtenerTotalActual() {
         subtotal += cantidad * precio;
     });
 
-    const ivaPorcentaje = parseFloat(document.getElementById('ivaPorcentaje')?.value) || 21;
-    return subtotal + (subtotal * (ivaPorcentaje / 100));
-}
+	    const selectIva = document.getElementById('ivaVentaSelect');
+        const ivaPorcentaje = parseFloat(selectIva?.options[selectIva.selectedIndex]?.dataset.porcentaje) || 0;
+	    return subtotal + (subtotal * (ivaPorcentaje / 100));
+	}
 
     static actualizarJsonLineas() {
         const cantidadInputs = document.querySelectorAll('.cantidad-input');
@@ -322,7 +418,7 @@ static obtenerTotalActual() {
     console.log('  - Método Pago ID:', formData.get('metodo_pago_id'));
     console.log('  - Estado:', formData.get('estado'));
     console.log('  - Líneas JSON:', formData.get('lineas'));
-    console.log('  - IVA %:', formData.get('iva_porcentaje'));
+    console.log('  - IVA ID:', formData.get('iva_id'));
 
     // Validar datos
     if (!formData.get('numero_factura')) {
@@ -337,6 +433,11 @@ static obtenerTotalActual() {
     }
     if (!formData.get('metodo_pago_id')) {
         console.error('❌ Falta método de pago');
+        e.preventDefault();
+        return;
+    }
+    if (!formData.get('iva_id')) {
+        console.error('❌ Falta IVA');
         e.preventDefault();
         return;
     }

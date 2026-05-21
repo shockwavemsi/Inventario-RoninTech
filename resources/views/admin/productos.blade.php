@@ -658,6 +658,122 @@
 
 </div>
 
+<!-- ============ MODAL EDITAR PRODUCTO ============ -->
+
+<div class="modal fade" id="modalEditarProducto" tabindex="-1">
+
+    <div class="modal-dialog modal-lg">
+
+        <div class="modal-content" style="background: rgba(20, 20, 25, 0.95); border: 1px solid rgba(230, 57, 70, 0.3); border-radius: 8px;">
+
+            <form method="POST" id="formEditarProducto">
+
+                @csrf
+
+                @method('PUT')
+
+                <div class="modal-header" style="background: rgba(230, 57, 70, 0.15); border-bottom: 2px solid #e63946; padding: 0.9rem 1rem;">
+
+                    <h5 class="modal-title fw-bold" style="color: #e63946; margin: 0; font-size: 1.1rem;">✏️ Editar Producto</h5>
+
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+
+                </div>
+
+                <div class="modal-body" style="color: #f0f0f0; padding: 1rem;">
+
+                    <input type="hidden" name="categoria_id" id="editar_categoria_id">
+                    <input type="hidden" name="proveedor_id" id="editar_proveedor_id">
+                    <input type="hidden" name="descripcion" id="editar_descripcion">
+                    <input type="hidden" name="marca" id="editar_marca">
+                    <input type="hidden" name="modelo" id="editar_modelo">
+                    <input type="hidden" name="ubicacion" id="editar_ubicacion">
+                    <input type="hidden" name="precio_base_venta" id="editar_precio_base_venta">
+                    <input type="hidden" name="iva_venta_id" id="editar_iva_venta_id">
+                    <input type="hidden" name="stock_minimo" id="editar_stock_minimo">
+                    <input type="hidden" name="stock_maximo" id="editar_stock_maximo">
+                    <input type="hidden" name="activo" id="editar_activo" value="1">
+
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 0.75rem; margin-bottom: 1rem;">
+
+                        <div>
+
+                            <label class="form-label fw-bold" style="font-size: 0.8rem; color: #e63946;">Nombre *</label>
+
+                            <input type="text" name="nombre" id="editar_nombre" class="form-control form-control-sm" required style="background: rgba(20, 20, 25, 0.8); border-color: rgba(230, 57, 70, 0.3); color: #f0f0f0;">
+
+                        </div>
+
+                    </div>
+
+                    <div style="background: rgba(230, 57, 70, 0.08); border-left: 3px solid #e63946; border-radius: 6px; padding: 0.8rem; margin-bottom: 1rem;">
+
+                        <h6 style="color: #e63946; font-weight: 700; font-size: 0.85rem; margin-bottom: 0.75rem;">Compra</h6>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem;">
+
+                            <div>
+
+                                <label class="form-label fw-bold" style="font-size: 0.75rem; color: #e63946;">Base Compra</label>
+
+                                <input type="number" name="precio_base_compra" id="editar_precio_base_compra" class="form-control form-control-sm" step="0.01" min="0" oninput="calcularPrecioCompraEditar()" style="background: rgba(20, 20, 25, 0.8); border-color: rgba(230, 57, 70, 0.3); color: #f0f0f0;">
+
+                            </div>
+
+                            <div>
+
+                                <label class="form-label fw-bold" style="font-size: 0.75rem; color: #e63946;">IVA</label>
+
+                                <select name="iva_compra_id" id="editar_iva_compra_id" class="form-select form-select-sm" onchange="calcularPrecioCompraEditar()" style="background: rgba(20, 20, 25, 0.8); border-color: rgba(230, 57, 70, 0.3); color: #f0f0f0;">
+
+                                    <option value="">IVA</option>
+
+                                    @foreach($ivas ?? [] as $iva)
+
+                                        <option value="{{ $iva->id }}" data-porcentaje="{{ $iva->porcentaje }}">{{ $iva->descripcion ?? $iva->porcentaje . '%' }}</option>
+
+                                    @endforeach
+
+                                </select>
+
+                            </div>
+
+                            <div>
+
+                                <label class="form-label fw-bold" style="font-size: 0.75rem; color: #90ee90;">Final Compra</label>
+
+                                <div style="background: rgba(76, 175, 80, 0.12); padding: 0.45rem 0.6rem; border-radius: 4px; border-left: 2px solid #4caf50;">
+
+                                    <strong id="editar_precio_compra_final_display" style="color: #90ee90; font-size: 0.9rem;">€0.00</strong>
+
+                                </div>
+
+                                <input type="hidden" name="precio_compra_final" id="editar_precio_compra_final" value="0">
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="modal-footer" style="border-top: 1px solid rgba(230, 57, 70, 0.3); padding: 0.75rem 1rem;">
+
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+
+                    <button type="submit" class="btn btn-danger btn-sm">💾 Guardar cambios</button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
@@ -684,8 +800,8 @@
 
             if (accion === 'editar') {
 
-                window.location.href = `/productos/${id}/editar`;
-
+                editarProducto(id);
+	
             }
 
             
@@ -816,6 +932,56 @@
 
     }
 
+    function editarProducto(id) {
+
+        fetch(`/productos/${id}/json`)
+
+            .then(res => {
+
+                if (!res.ok) throw new Error('No se pudo cargar el producto');
+
+                return res.json();
+
+            })
+
+            .then(data => {
+
+                const form = document.getElementById('formEditarProducto');
+
+                form.action = `/productos/${id}`;
+
+                document.getElementById('editar_nombre').value = data.nombre ?? '';
+                document.getElementById('editar_precio_base_compra').value = parseFloat(data.precio_base_compra ?? 0).toFixed(2);
+                document.getElementById('editar_iva_compra_id').value = data.iva_compra_id ?? '';
+
+                document.getElementById('editar_categoria_id').value = data.categoria_id ?? '';
+                document.getElementById('editar_proveedor_id').value = data.proveedor_id ?? '';
+                document.getElementById('editar_descripcion').value = data.descripcion ?? '';
+                document.getElementById('editar_marca').value = data.marca ?? '';
+                document.getElementById('editar_modelo').value = data.modelo ?? '';
+                document.getElementById('editar_ubicacion').value = data.ubicacion ?? '';
+                document.getElementById('editar_precio_base_venta').value = data.precio_base_venta ?? 0;
+                document.getElementById('editar_iva_venta_id').value = data.iva_venta_id ?? '';
+                document.getElementById('editar_stock_minimo').value = data.stock_minimo ?? 0;
+                document.getElementById('editar_stock_maximo').value = data.stock_maximo ?? 0;
+                document.getElementById('editar_activo').value = data.activo ? 1 : 0;
+
+                calcularPrecioCompraEditar();
+
+                new bootstrap.Modal(document.getElementById('modalEditarProducto')).show();
+
+            })
+
+            .catch(error => {
+
+                console.error('Error:', error);
+
+                alert('Error al cargar el producto para editar');
+
+            });
+
+    }
+
     // BUSCADOR
 
     const buscador = document.getElementById('buscador');
@@ -885,6 +1051,22 @@
         document.getElementById('precioVentaFinal').textContent = '€' + precioVentaFinal.toFixed(2);
 
         document.getElementById('precioVentaFinalInput').value = precioVentaFinal.toFixed(2);
+
+    }
+
+    function calcularPrecioCompraEditar() {
+
+        const precioBaseCompra = parseFloat(document.getElementById('editar_precio_base_compra')?.value) || 0;
+
+        const selectIvaCompra = document.getElementById('editar_iva_compra_id');
+
+        const porcentajeIvaCompra = parseFloat(selectIvaCompra?.options[selectIvaCompra.selectedIndex]?.getAttribute('data-porcentaje')) || 0;
+
+        const precioCompraFinal = precioBaseCompra * (1 + (porcentajeIvaCompra / 100));
+
+        document.getElementById('editar_precio_compra_final_display').textContent = '€' + precioCompraFinal.toFixed(2);
+
+        document.getElementById('editar_precio_compra_final').value = precioCompraFinal.toFixed(2);
 
     }
 

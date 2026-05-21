@@ -1,31 +1,39 @@
 /**
- * Venta - Orquestador Principal
- * Inicializa todos los módulos de ventas
+ * Venta Manager
  */
+
+import UIManager from './ui.js';
+import ApiManager from './api.js';
+import ModalManager from './modales/modal-manager.js';
 import CrearVentaModal from './modales/crear-venta-modal.js';
 import CrearFacturaVentaModal from './modales/crear-factura-venta-modal.js';
-import ModalManager from './modales/modal-manager.js';
 
-class VentaManager {
+export class VentaManager {
     static init() {
-        console.log('🚀 Inicializando Venta Manager...');
-
-        // Inicializar modales
+        console.log('✅ VentaManager inicializado');
+        UIManager.init();
         ModalManager.init();
-
-        // Inicializar módulos
         CrearVentaModal.init();
         CrearFacturaVentaModal.init();
+    }
 
-        // Exponer globalmente
-        window.CrearVentaModal = CrearVentaModal;
-        window.CrearFacturaVentaModal = CrearFacturaVentaModal;
-
-        console.log('✅ Venta Manager ready!');
+    static async cargarVenta(ventaId) {
+        try {
+            const venta = await ApiManager.getVenta(ventaId);
+            return venta;
+        } catch (error) {
+            console.error('Error:', error);
+            return null;
+        }
     }
 }
 
-// Auto-inicializar cuando DOM esté listo
-document.addEventListener('DOMContentLoaded', () => VentaManager.init());
+window.VentaManager = VentaManager;
+window.CrearVentaModal = CrearVentaModal;
+window.CrearFacturaVentaModal = CrearFacturaVentaModal;
+
+document.addEventListener('DOMContentLoaded', () => {
+    VentaManager.init();
+});
 
 export default VentaManager;

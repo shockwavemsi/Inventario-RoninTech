@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Venta;
 use App\Models\VentaDetalle;
 use App\Models\Producto;
+use App\Models\Cliente;
+use App\Models\TablaIva;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -43,8 +45,9 @@ class VentasController extends Controller
                 ->where('activo', true)
                 ->whereIn('nombre', ['Efectivo', 'Tarjeta de Crédito'])
                 ->get();
+            $ivas = TablaIva::where('activo', true)->orderBy('porcentaje')->get();
 
-            return view('admin.ventas.index', compact('ventas', 'ultimoVentaId', 'metodosPago'));
+            return view('admin.ventas.index', compact('ventas', 'ultimoVentaId', 'metodosPago', 'ivas'));
 
         } catch (\Exception $e) {
             return back()->with('error', 'Error: ' . $e->getMessage());
@@ -96,12 +99,13 @@ class VentasController extends Controller
             $ultimaVenta = Venta::orderBy('id', 'desc')->first();
 
             if ($ultimaVenta) {
-                $numero = (int)substr($ultimaVenta->numero_factura, 2) + 1;
+                preg_match('/(\d+)$/', (string) $ultimaVenta->numero_factura, $matches);
+                $numero = isset($matches[1]) ? ((int) $matches[1]) + 1 : ((int) $ultimaVenta->id) + 1;
             } else {
                 $numero = 1;
             }
 
-            $numeroFactura = 'V-' . str_pad($numero, 3, '0', STR_PAD_LEFT);
+            $numeroFactura = 'FAC-V-' . str_pad($numero, 4, '0', STR_PAD_LEFT);
 
             \Log::info('📊 Próximo número generado:', ['numero' => $numeroFactura]);
 
@@ -134,12 +138,14 @@ class VentasController extends Controller
             // ✅ VALIDAR
             $validated = $request->validate([
                 'numero_factura' => 'required|unique:ventas',
+                'cliente_id' => 'nullable|exists:clientes,id',
                 'cliente' => 'required|string|max:200',
                 'cliente_documento' => 'nullable|string|max:20',
+                'cliente_telefono' => 'nullable|string|max:20',
                 'metodo_pago_id' => 'required|exists:formas_pago,id',
                 'estado' => 'required|in:pendiente,completada,cancelada',
                 'observaciones' => 'nullable|string',
-                'iva_porcentaje' => 'nullable|numeric|min:0|max:100',
+                'iva_id' => 'required|exists:tabla_ivas,id',
             ]);
 
             // ✅ VALIDAR LÍNEAS MANUALMENTE
@@ -187,26 +193,34 @@ foreach ($lineas as $linea) {
     $subtotalCalculado += (float) $linea['cantidad'] * (float) $linea['precio_unitario'];
 }
 
-$ivaPorc = isset($validated['iva_porcentaje']) ? (float) $validated['iva_porcentaje'] : 21;
-$totalCalculado = $subtotalCalculado * (1 + ($ivaPorc / 100));
-$clienteDocumento = trim((string) ($validated['cliente_documento'] ?? ''));
-
-if ($totalCalculado > 3000 && $clienteDocumento === '') {
-    return back()->withInput()->withErrors([
-        'cliente_documento' => 'Para ventas superiores a 3.000€ es obligatorio identificar al cliente con DNI/NIF.'
+    $ivaSeleccionado = TablaIva::findOrFail($validated['iva_id']);
+	$ivaPorc = (float) $ivaSeleccionado->porcentaje;
+	$totalCalculado = $subtotalCalculado * (1 + ($ivaPorc / 100));
+	$clienteDocumento = trim((string) ($validated['cliente_documento'] ?? ''));
+    $cliente = $this->obtenerOCrearClienteVenta(
+        $validated['cliente_id'] ?? null,
+        $validated['cliente'],
+        $clienteDocumento,
+        $validated['cliente_telefono'] ?? null
+    );
+	
+	if ($totalCalculado > 3000 && $clienteDocumento === '') {
+	    return back()->withInput()->withErrors([
+	        'cliente_documento' => 'Para ventas superiores a 3.000€ es obligatorio identificar al cliente con DNI/NIF.'
     ]);
 }
 
             // ✅ CREAR VENTA
             $venta = Venta::create([
                 'numero_factura' => $validated['numero_factura'],
-                'cliente' => $validated['cliente'],
-                'cliente_documento' => $clienteDocumento ?: null,
-                'metodo_pago' => $metodoEnum,  // ✅ USAR VALOR DEL ENUM
-                'estado' => $validated['estado'],
-                'usuario_id' => auth()->id(),
-                'observaciones' => $validated['observaciones'] ?? null,
-            ]);
+	                'cliente' => $validated['cliente'],
+	                'cliente_documento' => $clienteDocumento ?: null,
+	                'metodo_pago' => $metodoEnum,  // ✅ USAR VALOR DEL ENUM
+	                'estado' => $validated['estado'],
+	                'usuario_id' => auth()->id(),
+                    'cliente_id' => $cliente?->id,
+	                'observaciones' => $validated['observaciones'] ?? null,
+	            ]);
 
             \Log::info('✅ Venta creada:', ['id' => $venta->id, 'numero' => $venta->numero_factura]);
 
@@ -239,7 +253,7 @@ if ($totalCalculado > 3000 && $clienteDocumento === '') {
             \Log::info('✅ Líneas guardadas');
 
             // ✅ CALCULAR TOTALES
-            $ivaPorc = isset($validated['iva_porcentaje']) ? floatval($validated['iva_porcentaje']) : 21;
+            $ivaPorc = (float) $ivaSeleccionado->porcentaje;
             $impuesto = $subtotal * ($ivaPorc / 100);
             $total = $subtotal + $impuesto;
 
@@ -371,5 +385,35 @@ public function generarPDF(Request $request)
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
+    }
+
+    private function obtenerOCrearClienteVenta(?int $clienteId, string $nombreCompleto, ?string $documento, ?string $telefono): ?Cliente
+    {
+        if ($clienteId) {
+            return Cliente::find($clienteId);
+        }
+
+        $documento = trim((string) $documento);
+
+        if ($documento === '') {
+            return null;
+        }
+
+        $clienteExistente = Cliente::where('documento', $documento)->first();
+        if ($clienteExistente) {
+            return $clienteExistente;
+        }
+
+        $partes = preg_split('/\s+/', trim($nombreCompleto), 2);
+        $nombre = $partes[0] ?? trim($nombreCompleto);
+        $apellido = $partes[1] ?? 'Sin apellido';
+
+        return Cliente::create([
+            'nombre' => $nombre,
+            'apellido' => $apellido,
+            'documento' => $documento,
+            'telefono' => trim((string) $telefono) ?: 'Sin teléfono',
+            'activo' => true,
+        ]);
     }
 }

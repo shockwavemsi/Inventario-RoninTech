@@ -21,6 +21,10 @@
             "url": "/ventas"
         },
         {
+            "nombre": "Clientes",
+            "url": "/clientes"
+        },
+        {
             "nombre": "Mantenimiento",
             "url": "#",
             "submenu": [
