@@ -127,51 +127,111 @@ class ComprasUI {
     }
 
     renderContent(tabId, data) {
-        const mainContent = document.getElementById('mainContent');
-        const tab = TABS.find(t => t.id === tabId);
-        if (!tab) return;
+    this.currentTabId = tabId;
+    this.currentData = this.currentData || {};
+    this.visibleCounts = this.visibleCounts || {};
 
-        const titulo = {
-            'pedidos': 'PEDIDOS DE COMPRA',
-            'albaranes': 'ALBARANES DE COMPRA',
-            'facturas': 'FACTURAS DE COMPRA'
-        }[tabId];
+    this.currentData[tabId] = data || [];
+    this.visibleCounts[tabId] = 3;
 
-        const textoBoton = {
-            'pedidos': 'Crear Nuevo Pedido',
-            'albaranes': 'Crear Nuevo Albarán',
-            'facturas': 'Crear Nueva Factura'
-        }[tabId];
+    this.renderCurrentPage(tabId);
+}
 
-        let html = `
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; animation: fadeIn 0.3s ease-in;">
-                <h2 style="font-size: 1.875rem; font-weight: bold; color: #e63946; margin: 0;">
-                    <i class="bi bi-${tab.icon}" style="margin-right: 0.5rem;"></i>${titulo}
-                </h2>
-                <button class="btn btn-primary" onclick="window.abrirCrearDocumento('${tabId}')" style="background: #e63946; border: none;">
-                    <i class="bi bi-plus-lg"></i> ${textoBoton}
-                </button>
+renderCurrentPage(tabId) {
+    const mainContent = document.getElementById('mainContent');
+    const tab = TABS.find(t => t.id === tabId);
+    if (!tab) return;
+
+    const data = this.currentData?.[tabId] || [];
+    const visibleCount = this.visibleCounts?.[tabId] || 3;
+    const visibleData = data.slice(0, visibleCount);
+
+    const titulo = {
+        'pedidos': 'PEDIDOS DE COMPRA',
+        'albaranes': 'ALBARANES DE COMPRA',
+        'facturas': 'FACTURAS DE COMPRA'
+    }[tabId];
+
+    const textoBoton = {
+        'pedidos': 'Crear Nuevo Pedido',
+        'albaranes': 'Crear Nuevo Albarán',
+        'facturas': 'Crear Nueva Factura'
+    }[tabId];
+
+    let html = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; animation: fadeIn 0.3s ease-in;">
+            <h2 style="font-size: 1.875rem; font-weight: bold; color: #e63946; margin: 0;">
+                <i class="bi bi-${tab.icon}" style="margin-right: 0.5rem;"></i>${titulo}
+            </h2>
+            <button class="btn btn-primary" onclick="window.abrirCrearDocumento('${tabId}')" style="background: #e63946; border: none;">
+                <i class="bi bi-plus-lg"></i> ${textoBoton}
+            </button>
+        </div>
+        <div id="comprasCardsContainer" style="display: grid; gap: 1rem;">
+    `;
+
+    if (!data || data.length === 0) {
+        html += `
+            <div style="text-align: center; padding: 3rem; color: #a0a0a0;">
+                <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                <p>Sin registros en esta sección</p>
             </div>
-            <div style="display: grid; gap: 1rem;">
         `;
+    } else {
+        visibleData.forEach((item, idx) => {
+            html += this.renderCard(item, tabId, idx);
+        });
+    }
 
-        if (!data || data.length === 0) {
-            html += `
-                <div style="text-align: center; padding: 3rem; color: #a0a0a0;">
-                    <i class="bi bi-inbox" style="font-size: 2rem;"></i>
-                    <p>Sin registros en esta sección</p>
+    html += `</div>`;
+
+    if (data.length > visibleCount) {
+        html += `
+            <div id="comprasScrollLoader" style="text-align: center; padding: 1.5rem; color: #a0a0a0;">
+                <div class="spinner-border text-danger" role="status" style="width: 1.5rem; height: 1.5rem;">
+                    <span class="visually-hidden">Cargando...</span>
                 </div>
-            `;
-        } else {
-            data.forEach((item, idx) => {
-                html += this.renderCard(item, tabId, idx);
-            });
+                <div style="font-size: 0.8rem; margin-top: 0.5rem;">Baja para cargar más</div>
+            </div>
+        `;
+    }
+
+    mainContent.innerHTML = html;
+    this.attachCardListeners(tabId);
+    this.initInfiniteScroll(tabId);
+}
+
+initInfiniteScroll(tabId) {
+    const loader = document.getElementById('comprasScrollLoader');
+    if (!loader) return;
+
+    if (this.scrollObserver) {
+        this.scrollObserver.disconnect();
+    }
+
+    this.scrollObserver = new IntersectionObserver((entries) => {
+        const entry = entries[0];
+        if (!entry.isIntersecting) return;
+
+        const data = this.currentData?.[tabId] || [];
+        const current = this.visibleCounts?.[tabId] || 3;
+
+        if (current >= data.length) {
+            this.scrollObserver.disconnect();
+            loader.remove();
+            return;
         }
 
-        html += `</div>`;
-        mainContent.innerHTML = html;
-        this.attachCardListeners(tabId);
-    }
+        this.visibleCounts[tabId] = current + 3;
+        this.renderCurrentPage(tabId);
+    }, {
+        root: null,
+        rootMargin: '120px',
+        threshold: 0.1
+    });
+
+    this.scrollObserver.observe(loader);
+}
 
     renderCard(item, tabId, idx) {
         const badgeEstado = this.getBadgeClass(item.estado);

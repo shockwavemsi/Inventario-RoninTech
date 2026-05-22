@@ -10,6 +10,7 @@ use App\Models\Configuracion;
 use App\Models\DevolucionVenta;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Models\Cliente;
 
 class UsuarioController extends Controller
 {
@@ -170,6 +171,19 @@ class UsuarioController extends Controller
             ->sortByDesc('fecha')
             ->take(10);
 
+            $clientes = Venta::select(
+        'cliente as nombre',
+        'cliente_documento as documento',
+        DB::raw('COUNT(*) as ventas_count'),
+        DB::raw('SUM(total) as total_comprado'),
+        DB::raw('MAX(fecha_venta) as ultima_compra')
+    )
+    ->whereNotNull('cliente')
+    ->where('cliente', '<>', '')
+    ->groupBy('cliente', 'cliente_documento')
+    ->orderByDesc('ultima_compra')
+    ->limit(8)
+    ->get();
         // ==========================================
         // 10. RETORNAR VISTA
         // ==========================================
@@ -188,7 +202,8 @@ class UsuarioController extends Controller
             'topProductos',
             'margenes',
             'movimientosStock',
-            'ultimasActividades'
+            'ultimasActividades',
+            'clientes'
         ));
     }
 }

@@ -402,7 +402,7 @@
             <div class="d-flex align-items-center gap-3 flex-wrap">
                 <i class="bi bi-exclamation-triangle-fill fs-3" style="color: #dc3545;"></i>
                 <div class="flex-grow-1">
-                    <strong style="color: #fff; font-size: 1rem;">⚠️ Stock Crítico Detectado</strong>
+                    <strong style="color: #fff; font-size: 1rem;">Stock Crítico Detectado</strong>
                     <div class="row mt-2 g-2">
                         @foreach($productosCriticos as $producto)
                         <div class="col-md-4 col-sm-6">
@@ -528,7 +528,40 @@
                 <canvas id="movimientosStockChart"></canvas>
             </div>
         </div>
+<!-- REGISTRO DE CLIENTES -->
+<div class="activity-card" style="margin-bottom: 20px;">
+    <div class="activity-header">
+        <i class="bi bi-people"></i>
+        <span>Clientes con Ventas</span>
+    </div>
 
+    @forelse($clientes ?? [] as $cliente)
+        <div class="activity-item">
+            <div class="activity-icon" style="background: rgba(230, 57, 70, 0.12); color: #e63946;">
+                <i class="bi bi-person-badge"></i>
+            </div>
+
+            <div class="activity-content" style="flex: 1;">
+                <p>{{ $cliente->nombre }}</p>
+
+                <small>
+                    <i class="bi bi-credit-card-2-front"></i> {{ $cliente->documento ?: 'Sin documento' }}
+                    &nbsp;•&nbsp;
+                    <i class="bi bi-cart-check"></i> {{ $cliente->ventas_count }} ventas
+                    &nbsp;•&nbsp;
+                    Total: €{{ number_format($cliente->total_comprado, 2, ',', '.') }}
+                    &nbsp;•&nbsp;
+                    Última compra: {{ \Carbon\Carbon::parse($cliente->ultima_compra)->timezone('Europe/Madrid')->format('d/m/Y H:i') }}
+                </small>
+            </div>
+        </div>
+    @empty
+        <div class="activity-empty">
+            <i class="bi bi-people" style="font-size: 2rem; display: block; margin-bottom: 8px;"></i>
+            No hay clientes con ventas registradas
+        </div>
+    @endforelse
+</div>
         <!-- ACTIVIDADES RECIENTES (con los iconos originales) -->
         <div class="activity-card">
             <div class="activity-header">
