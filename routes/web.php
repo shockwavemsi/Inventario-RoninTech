@@ -105,6 +105,7 @@ Route::middleware(['auth'])->group(function () {
 
     // ========== DEVOLUCIONES DE VENTA ==========
     Route::get('/devoluciones', [DevolucionesController::class, 'index'])->name('devoluciones.index');
+    
     Route::post('/devoluciones', [DevolucionesController::class, 'store'])->name('devoluciones.store');
     Route::patch('/devoluciones/{id}/estado', [DevolucionesController::class, 'cambiarEstado'])->name('devoluciones.cambiar-estado');
     Route::delete('/devoluciones/{id}', [DevolucionesController::class, 'destroy'])->name('devoluciones.destroy');
@@ -219,6 +220,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/proveedores', [ProveedorController::class, 'index'])->name('proveedores.index');
     Route::get('/proveedores/crear', [ProveedorController::class, 'create'])->name('proveedores.create');
     Route::post('/proveedores/guardar', [ProveedorController::class, 'store'])->name('proveedores.store');
+    Route::put('/proveedores/{id}', [ProveedorController::class, 'update'])->name('proveedores.update');
     Route::delete('/proveedores/{id}', [ProveedorController::class, 'destroy']);
     Route::get('/proveedores/{id}/json', [ProveedorController::class, 'show']);
     Route::get('/proveedores/{id}/formas-pago', [ProveedorController::class, 'getFormasPago']);

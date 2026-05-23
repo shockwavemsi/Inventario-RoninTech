@@ -14,9 +14,13 @@ class ProductosController extends Controller
 public function index()
 {
     $config = Configuracion::first();
-    $productos = Producto::with('categoria', 'proveedor', 'ivaCompra', 'ivaVenta')
-        ->orderBy('id', 'desc')  // ← Nuevos primero
-        ->paginate(10);           // ← Paginación de 10
+
+    // ✅ Solo mostrar ACTIVOS
+    $productos = Producto::where('activo', true)
+        ->with('categoria', 'proveedor', 'ivaCompra', 'ivaVenta')
+        ->orderBy('id', 'desc')
+        ->paginate(10);
+
     $categorias = Categoria::all();
     $proveedores = Proveedor::all();
     $ivas = TablaIva::where('activo', true)->get();
@@ -129,10 +133,14 @@ public function create()
 
     public function destroy($id)
 {
-    Producto::findOrFail($id)->delete();
+    $producto = Producto::findOrFail($id);
+
+    // ✅ En lugar de eliminar, marca como inactivo
+    $producto->update(['activo' => false]);
 
     return response()->json([
-        'success' => true
+        'success' => true,
+        'mensaje' => 'Producto archivado correctamente'
     ]);
 }
 }

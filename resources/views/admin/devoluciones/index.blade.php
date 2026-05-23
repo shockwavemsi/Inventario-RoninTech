@@ -28,25 +28,31 @@
 
 </div>
 
-<!-- ESTADÍSTICAS -->
+<!-- ESTADÍSTICAS DINÁMICAS -->
 
-<div class="row mb-4" style="max-width: 1200px; margin: 2rem auto 0;">
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; max-width: 1200px; margin: 2rem auto; padding: 0 30px;">
 
-    <div class="col-md-3">
+    <!-- WIDGET 1: TOTAL DEVOLUCIONES -->
 
-        <div style="background: rgba(20, 20, 25, 0.65); border: 1px solid rgba(211, 47, 47, 0.2); border-radius: 8px; padding: 1.5rem;">
+    <div class="widget-stat" id="widget-total" style="background: rgba(20, 20, 25, 0.65); border: 1px solid rgba(211, 47, 47, 0.2); border-radius: 8px; padding: 1.5rem; transition: all 0.3s ease;">
 
-            <div style="display: flex; align-items: center; gap: 1rem;">
+        <div style="display: flex; align-items: center; gap: 1rem;">
 
-                <div style="font-size: 2rem;">📦</div>
+            <div style="width: 50px; height: 50px; background: rgba(211, 47, 47, 0.15); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
 
-                <div>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d32f2f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 
-                    <span style="color: #a0a0a0; font-size: 0.85rem;">Total Devoluciones</span>
+                    <path d="M6 9l6-6 6 6M5 9h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2z"></path>
 
-                    <strong style="color: #d32f2f; font-size: 1.5rem; display: block;">0</strong>
+                </svg>
 
-                </div>
+            </div>
+
+            <div>
+
+                <span style="color: #a0a0a0; font-size: 0.85rem; display: block;">Total Devoluciones</span>
+
+                <strong class="stat-value" id="stat-total" style="color: #d32f2f; font-size: 1.8rem; display: block;">{{ $totalDevoluciones }}</strong>
 
             </div>
 
@@ -54,21 +60,29 @@
 
     </div>
 
-    <div class="col-md-3">
+    <!-- WIDGET 2: EN REVISIÓN / PENDIENTES -->
 
-        <div style="background: rgba(20, 20, 25, 0.65); border: 1px solid rgba(211, 47, 47, 0.2); border-radius: 8px; padding: 1.5rem;">
+    <div class="widget-stat" id="widget-pendientes" style="background: rgba(20, 20, 25, 0.65); border: 1px solid rgba(211, 47, 47, 0.2); border-radius: 8px; padding: 1.5rem; transition: all 0.3s ease;">
 
-            <div style="display: flex; align-items: center; gap: 1rem;">
+        <div style="display: flex; align-items: center; gap: 1rem;">
 
-                <div style="font-size: 2rem;">⏳</div>
+            <div style="width: 50px; height: 50px; background: rgba(255, 107, 107, 0.15); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
 
-                <div>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ff6b6b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 
-                    <span style="color: #a0a0a0; font-size: 0.85rem;">En Revisión</span>
+                    <circle cx="12" cy="12" r="10"></circle>
 
-                    <strong style="color: #ff6b6b; font-size: 1.5rem; display: block;">0</strong>
+                    <polyline points="12 6 12 12 16 14"></polyline>
 
-                </div>
+                </svg>
+
+            </div>
+
+            <div>
+
+                <span style="color: #a0a0a0; font-size: 0.85rem; display: block;">En Revisión</span>
+
+                <strong class="stat-value" id="stat-pendientes" style="color: #ff6b6b; font-size: 1.8rem; display: block;">{{ $pendientes }}</strong>
 
             </div>
 
@@ -76,21 +90,27 @@
 
     </div>
 
-    <div class="col-md-3">
+    <!-- WIDGET 3: COMPLETADAS -->
 
-        <div style="background: rgba(20, 20, 25, 0.65); border: 1px solid rgba(211, 47, 47, 0.2); border-radius: 8px; padding: 1.5rem;">
+    <div class="widget-stat" id="widget-completadas" style="background: rgba(20, 20, 25, 0.65); border: 1px solid rgba(40, 167, 69, 0.2); border-radius: 8px; padding: 1.5rem; transition: all 0.3s ease;">
 
-            <div style="display: flex; align-items: center; gap: 1rem;">
+        <div style="display: flex; align-items: center; gap: 1rem;">
 
-                <div style="font-size: 2rem;">✅</div>
+            <div style="width: 50px; height: 50px; background: rgba(40, 167, 69, 0.15); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
 
-                <div>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#28a745" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 
-                    <span style="color: #a0a0a0; font-size: 0.85rem;">Completadas</span>
+                    <polyline points="20 6 9 17 4 12"></polyline>
 
-                    <strong style="color: #28a745; font-size: 1.5rem; display: block;">0</strong>
+                </svg>
 
-                </div>
+            </div>
+
+            <div>
+
+                <span style="color: #a0a0a0; font-size: 0.85rem; display: block;">Completadas</span>
+
+                <strong class="stat-value" id="stat-completadas" style="color: #28a745; font-size: 1.8rem; display: block;">{{ $completadas }}</strong>
 
             </div>
 
@@ -98,21 +118,29 @@
 
     </div>
 
-    <div class="col-md-3">
+    <!-- WIDGET 4: VALOR TOTAL -->
 
-        <div style="background: rgba(20, 20, 25, 0.65); border: 1px solid rgba(211, 47, 47, 0.2); border-radius: 8px; padding: 1.5rem;">
+    <div class="widget-stat" id="widget-valor" style="background: rgba(20, 20, 25, 0.65); border: 1px solid rgba(211, 47, 47, 0.2); border-radius: 8px; padding: 1.5rem; transition: all 0.3s ease;">
 
-            <div style="display: flex; align-items: center; gap: 1rem;">
+        <div style="display: flex; align-items: center; gap: 1rem;">
 
-                <div style="font-size: 2rem;">💰</div>
+            <div style="width: 50px; height: 50px; background: rgba(211, 47, 47, 0.15); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
 
-                <div>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d32f2f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 
-                    <span style="color: #a0a0a0; font-size: 0.85rem;">Valor Total</span>
+                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
 
-                    <strong style="color: #d32f2f; font-size: 1.5rem; display: block;">€0.00</strong>
+                    <line x1="1" y1="10" x2="23" y2="10"></line>
 
-                </div>
+                </svg>
+
+            </div>
+
+            <div>
+
+                <span style="color: #a0a0a0; font-size: 0.85rem; display: block;">Valor Total</span>
+
+                <strong class="stat-value" id="stat-valor" style="color: #28a745; font-size: 1.8rem; display: block;">€{{ number_format($valorTotal, 2) }}</strong>
 
             </div>
 
@@ -168,51 +196,51 @@
 
                 <tbody id="tablaDevoluciones">
 
-    @forelse($devoluciones as $dev)
+                    @forelse($devoluciones as $dev)
 
-    <tr>
+                    <tr>
 
-        <td>{{ $dev['numero'] }}</td>      <!-- DEV-0001 -->
+                        <td>{{ $dev['numero'] }}</td>
 
-        <td>{{ $dev['cliente'] }}</td>
+                        <td>{{ $dev['cliente'] }}</td>
 
-        <td>{{ $dev['fecha'] }}</td>
+                        <td>{{ $dev['fecha'] }}</td>
 
-        <td>{{ $dev['producto'] }}</td>
+                        <td>{{ $dev['producto'] }}</td>
 
-        <td>€{{ number_format($dev['total'], 2) }}</td>
+                        <td>€{{ number_format($dev['total'], 2) }}</td>
 
-        <td>
+                        <td>
 
-            <span class="badge bg-{{ $dev['estado'] == 'completada' ? 'success' : 'danger' }}">
+                            <span class="badge bg-{{ $dev['estado'] == 'completada' ? 'success' : 'danger' }}">
 
-                {{ ucfirst($dev['estado']) }}
+                                {{ ucfirst($dev['estado']) }}
 
-            </span>
+                            </span>
 
-        </td>
+                        </td>
 
-        <td>
+                        <td>
 
-            <button class="btn btn-sm btn-info" onclick="verDevolucion({{ $dev['id'] }})">Ver</button>
+                            <button class="btn btn-sm btn-info" onclick="verDevolucion({{ $dev['id'] }})">Ver</button>
 
-            @if($dev['estado'] == 'pendiente')
+                            @if($dev['estado'] == 'pendiente')
 
-                <button class="btn btn-sm btn-success" onclick="cambiarEstado({{ $dev['id'] }}, 'completada')">Completar</button>
+                                <button class="btn btn-sm btn-success" onclick="cambiarEstado({{ $dev['id'] }}, 'completada')">Completar</button>
 
-            @endif
+                            @endif
 
-         </td>
+                        </td>
 
-    </tr>
+                    </tr>
 
-    @empty
+                    @empty
 
-        <tr><td colspan="7" style="text-align: center;">📭 Sin devoluciones registradas</td></tr>
+                    <tr><td colspan="7" style="text-align: center; color: #a0a0a0; padding: 2rem;">📭 Sin devoluciones registradas</td></tr>
 
-    @endforelse
+                    @endforelse
 
-</tbody>
+                </tbody>
 
             </table>
 
@@ -256,7 +284,7 @@
 
                         <input type="hidden" name="venta_id" id="ventaId">
 
-                        <div id="listaVentas" style="display: none; position: absolute; background: rgba(20, 20, 25, 0.95); border: 1px solid rgba(211, 47, 47, 0.3); border-radius: 6px; width: 100%; max-height: 200px; overflow-y: auto; z-index: 1000; margin-top: 0.25rem;"></div>
+                        <div id="listaVentas" style="display: none; position: absolute; background: rgba(20, 20, 25, 0.95); border: 1px solid rgba(211, 47, 47, 0.3); border-radius: 6px; max-width: 400px; max-height: 200px; overflow-y: auto; z-index: 1000; margin-top: 0.25rem;"></div>
 
                     </div>
 
@@ -344,11 +372,11 @@
 
                         <select name="estado" id="estado" class="form-select form-select-sm" required style="background: rgba(20, 20, 25, 0.8); border-color: rgba(211, 47, 47, 0.3); color: #f0f0f0; font-size: 0.9rem;">
 
-    <option value="pendiente" style="background: rgba(20, 20, 25); color: #f0f0f0;">Pendiente</option>
+                            <option value="pendiente" style="background: rgba(20, 20, 25); color: #f0f0f0;">Pendiente</option>
 
-    <option value="completada" selected style="background: rgba(20, 20, 25); color: #f0f0f0;">Completada</option>
+                            <option value="completada" selected style="background: rgba(20, 20, 25); color: #f0f0f0;">Completada</option>
 
-</select>
+                        </select>
 
                     </div>
 
@@ -562,477 +590,609 @@
 
 <!-- ============ SCRIPTS ============ -->
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
+
+// ============ FUNCIÓN PARA ANIMAR WIDGETS ============
+
+function animarWidget(elementId, valorNuevo) {
+
+    const el = document.getElementById(elementId);
+
+    if (!el) return;
+
+    el.style.transition = 'none';
+
+    el.style.transform = 'scale(1.2)';
+
+    el.style.color = '#28a745';
+
+    setTimeout(() => {
+
+        el.innerHTML = valorNuevo;
+
+        el.style.transition = 'all 0.5s ease';
+
+        el.style.transform = 'scale(1)';
+
+    }, 100);
+
+    setTimeout(() => {
+
+        const defaultColor = elementId === 'stat-valor' ? '#28a745' : 
+
+                            elementId === 'stat-pendientes' ? '#ff6b6b' : '#d32f2f';
+
+        el.style.color = defaultColor;
+
+    }, 500);
+
+}
 
 document.addEventListener('DOMContentLoaded', function() {
 
-        // Búsqueda de ventas
+    // ============ BÚSQUEDA DE VENTAS ============
 
-        const inputBusqueda = document.getElementById('buscadorVenta');
+    const inputBusqueda = document.getElementById('buscadorVenta');
 
-        const listaDiv = document.getElementById('listaVentas');
+    const listaDiv = document.getElementById('listaVentas');
 
-        inputBusqueda.addEventListener('input', function() {
+    inputBusqueda.addEventListener('input', function() {
 
-            const query = this.value;
+        const query = this.value;
 
-            if (query.length < 1) {
+        if (query.length < 1) {
 
-                listaDiv.style.display = 'none';
+            listaDiv.style.display = 'none';
 
-                return;
+            return;
 
-            }
+        }
 
-            fetch('/devoluciones/ventas-disponibles')
+        fetch('/devoluciones/ventas-disponibles')
 
-                .then(res => res.json())
+            .then(res => res.json())
 
-                .then(data => {
+            .then(data => {
 
-                    listaDiv.innerHTML = '';
+                listaDiv.innerHTML = '';
 
-                    const filtrados = data.ventas.filter(v => 
+                const filtrados = data.ventas.filter(v => 
 
-                        v.numero_factura.toLowerCase().includes(query.toLowerCase()) ||
+                    v.numero_factura.toLowerCase().includes(query.toLowerCase()) ||
 
-                        v.cliente.toLowerCase().includes(query.toLowerCase())
+                    v.cliente.toLowerCase().includes(query.toLowerCase())
 
-                    );
+                );
 
-                    if (filtrados.length > 0) {
+                if (filtrados.length > 0) {
 
-                        filtrados.forEach(venta => {
+                    filtrados.forEach(venta => {
 
-                            const item = document.createElement('div');
+                        const item = document.createElement('div');
 
-                            item.style.cssText = 'padding: 0.5rem 1rem; cursor: pointer; border-bottom: 1px solid rgba(211, 47, 47, 0.2); color: #f0f0f0;';
+                        item.style.cssText = 'padding: 0.5rem 1rem; cursor: pointer; border-bottom: 1px solid rgba(211, 47, 47, 0.2); color: #f0f0f0; transition: background 0.2s;';
 
-                            item.innerHTML = `<strong style="color: #d32f2f;">${venta.numero_factura}</strong> - ${venta.cliente} - <span style="color: #28a745;">€${parseFloat(venta.total).toFixed(2)}</span>`;
+                        item.innerHTML = `<strong style="color: #d32f2f;">${venta.numero_factura}</strong> - ${venta.cliente} - <span style="color: #28a745;">€${parseFloat(venta.total).toFixed(2)}</span>`;
 
-                            item.onmouseover = () => item.style.background = 'rgba(211, 47, 47, 0.2)';
+                        item.onmouseover = () => item.style.background = 'rgba(211, 47, 47, 0.2)';
 
-                            item.onmouseout = () => item.style.background = 'transparent';
+                        item.onmouseout = () => item.style.background = 'transparent';
 
-                            item.onclick = () => seleccionarVenta(venta);
+                        item.onclick = () => seleccionarVenta(venta);
 
-                            listaDiv.appendChild(item);
+                        listaDiv.appendChild(item);
 
-                        });
+                    });
 
-                        listaDiv.style.display = 'block';
-
-                    }
-
-                });
-
-        });
-
-        document.addEventListener('click', function(e) {
-
-            if (e.target !== inputBusqueda) {
-
-                listaDiv.style.display = 'none';
-
-            }
-
-        });
-
-        // GUARDAR FORMULARIO
-
-        document.getElementById('formDevolucion').addEventListener('submit', function(e) {
-
-            e.preventDefault();
-
-            // Validaciones
-
-            const ventaId = document.getElementById('ventaId').value;
-
-            if (!ventaId) {
-
-                alert('❌ Debes seleccionar una venta');
-
-                return;
-
-            }
-
-            const motivo = document.getElementById('motivo').value.trim();
-
-            if (!motivo) {
-
-                alert('❌ Debes completar el motivo de devolución');
-
-                return;
-
-            }
-
-            const totalDevolver = document.getElementById('totalInput').value;
-
-            if (parseFloat(totalDevolver) <= 0) {
-
-                alert('❌ El total a devolver debe ser mayor a €0.00');
-
-                return;
-
-            }
-
-            // Recolectar productos seleccionados
-
-            const productos = [];
-
-            const filas = document.querySelectorAll('#tablaProd tr');
-
-            filas.forEach(fila => {
-
-                const checkbox = fila.querySelector('.checkbox-producto');
-
-                const inputCantidad = fila.querySelector('.cantidad-devuelta');
-
-                if (checkbox && checkbox.checked) {
-
-                    const cantidadDevuelta = parseInt(inputCantidad.value) || 0;
-
-                    if (cantidadDevuelta > 0) {
-
-                        const precioBase = parseFloat(inputCantidad.dataset.precioBase);
-
-                        const subtotal = cantidadDevuelta * precioBase;
-
-                        const producto = {
-
-                            producto_id: parseInt(checkbox.dataset.id),
-
-                            cantidad: cantidadDevuelta,
-
-                            precio_unitario: precioBase,
-
-                            subtotal: subtotal
-
-                        };
-
-                        productos.push(producto);
-
-                        console.log('Producto agregado:', producto);
-
-                    }
+                    listaDiv.style.display = 'block';
 
                 }
 
             });
 
-            if (productos.length === 0) {
+    });
 
-                alert('❌ Debes seleccionar al menos un producto con cantidad > 0');
+    document.addEventListener('click', function(e) {
 
-                return;
+        if (e.target !== inputBusqueda) {
+
+            listaDiv.style.display = 'none';
+
+        }
+
+    });
+
+    // ============ GUARDAR FORMULARIO CON AJAX - SIN ERRORES ============
+
+    document.getElementById('formDevolucion').addEventListener('submit', function(e) {
+
+        e.preventDefault(); // ← STOP AQUÍ - Prevenir envío tradicional
+
+        // Validaciones
+
+        const ventaId = document.getElementById('ventaId').value;
+
+        if (!ventaId) {
+
+            alert('❌ Debes seleccionar una venta');
+
+            return;
+
+        }
+
+        const motivo = document.getElementById('motivo').value.trim();
+
+        if (!motivo) {
+
+            alert('❌ Debes completar el motivo de devolución');
+
+            return;
+
+        }
+
+        const totalDevolver = document.getElementById('totalInput').value;
+
+        if (parseFloat(totalDevolver) <= 0) {
+
+            alert('❌ El total a devolver debe ser mayor a €0.00');
+
+            return;
+
+        }
+
+        // Recolectar productos seleccionados
+
+        const productos = [];
+
+        const filas = document.querySelectorAll('#tablaProd tr');
+
+        filas.forEach(fila => {
+
+            const checkbox = fila.querySelector('.checkbox-producto');
+
+            const inputCantidad = fila.querySelector('.cantidad-devuelta');
+
+            if (checkbox && checkbox.checked) {
+
+                const cantidadDevuelta = parseInt(inputCantidad.value) || 0;
+
+                if (cantidadDevuelta > 0) {
+
+                    const precioBase = parseFloat(inputCantidad.dataset.precioBase);
+
+                    const subtotal = cantidadDevuelta * precioBase;
+
+                    const producto = {
+
+                        producto_id: parseInt(checkbox.dataset.id),
+
+                        cantidad: cantidadDevuelta,
+
+                        precio_unitario: precioBase,
+
+                        subtotal: subtotal
+
+                    };
+
+                    productos.push(producto);
+
+                }
 
             }
 
-            // Llenar campos ocultos
+        });
 
-            document.getElementById('productosJson').value = JSON.stringify(productos);
+        if (productos.length === 0) {
 
-            document.getElementById('totalInput').value = totalDevolver;
+            alert('❌ Debes seleccionar al menos un producto con cantidad > 0');
 
-            console.log('=== DATOS A ENVIAR ===');
+            return;
 
-            console.log('Venta ID:', ventaId);
+        }
 
-            console.log('Motivo:', motivo);
+        // Llenar campos ocultos
 
-            console.log('Estado:', document.getElementById('estado').value);
+        document.getElementById('productosJson').value = JSON.stringify(productos);
 
-            console.log('Total a devolver:', totalDevolver);
+        document.getElementById('totalInput').value = totalDevolver;
 
-            console.log('Productos:', productos);
+        // ✅ ENVIAR POR AJAX - NO RECARGA SIN PERMISO
 
-            // Enviar formulario
+        const formData = new FormData(this);
 
-            this.submit();
+        fetch(this.action, {
+
+            method: 'POST',
+
+            body: formData
+
+        })
+
+        .then(res => res.json())
+
+        .then(data => {
+
+            if (data.success) {
+
+                // ⭐ ANIMAR WIDGETS CON NUEVOS VALORES
+
+                const stats = data.estadisticas;
+
+                animarWidget('stat-total', stats.totalDevoluciones);
+
+                animarWidget('stat-pendientes', stats.pendientes);
+
+                animarWidget('stat-completadas', stats.completadas);
+
+                animarWidget('stat-valor', '€' + parseFloat(stats.valorTotal).toFixed(2));
+
+                // Mensaje de éxito
+
+                setTimeout(() => {
+
+                    alert('✅ Devolución guardada correctamente');
+
+                    // Cerrar modal
+
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('modalCrearDevolucion'));
+
+                    if (modal) modal.hide();
+
+                    // Resetear formulario
+
+                    document.getElementById('formDevolucion').reset();
+
+                    document.getElementById('ventaId').value = '';
+
+                    document.getElementById('clienteVenta').value = '';
+
+                    document.getElementById('totalVenta').value = '';
+
+                    document.getElementById('tablaProd').innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem; color: #a0a0a0;">Selecciona una venta</td></tr>';
+
+                    // Recargar tabla después de 1.5 segundos
+
+                    setTimeout(() => location.reload(), 500);
+
+                }, 500);
+
+            } else {
+
+                alert('❌ ' + (data.message || 'Error desconocido'));
+
+            }
+
+        })
+
+        .catch(err => {
+
+            console.error('Error:', err);
+
+            alert('❌ Error en la solicitud');
 
         });
 
     });
 
-    function seleccionarVenta(venta) {
+});
 
-        document.getElementById('ventaId').value = venta.id;
+function seleccionarVenta(venta) {
 
-        document.getElementById('buscadorVenta').value = venta.numero_factura + ' - ' + venta.cliente;
+    document.getElementById('ventaId').value = venta.id;
 
-        document.getElementById('clienteVenta').value = venta.cliente;
+    document.getElementById('buscadorVenta').value = venta.numero_factura + ' - ' + venta.cliente;
 
-        document.getElementById('totalVenta').value = '€' + parseFloat(venta.total).toFixed(2);
+    document.getElementById('clienteVenta').value = venta.cliente;
 
-        document.getElementById('listaVentas').style.display = 'none';
+    document.getElementById('totalVenta').value = '€' + parseFloat(venta.total).toFixed(2);
 
-        fetch(`/ventas/${venta.id}/json`)
+    document.getElementById('listaVentas').style.display = 'none';
 
-            .then(res => res.json())
+    fetch(`/ventas/${venta.id}/json`)
 
-            .then(ventaData => {
+        .then(res => res.json())
 
-                if (ventaData && ventaData.detalles) {
+        .then(ventaData => {
 
-                    llenarProductos(ventaData.detalles);
+            if (ventaData && ventaData.detalles) {
 
-                }
-
-            })
-
-            .catch(err => {
-
-                console.error('Error cargando venta:', err);
-
-                alert('Error al cargar los productos de la venta');
-
-            });
-
-    }
-
-    function llenarProductos(detalles) {
-    const tbody = document.getElementById('tablaProd');
-    tbody.innerHTML = '';
-
-    if (detalles && detalles.length > 0) {
-        detalles.forEach((detalle, idx) => {
-            const cantidad = parseInt(detalle.cantidad) || 0;
-            const precioUnitario = parseFloat(detalle.precio_unitario) || 0;
-            const precioBase = precioUnitario / 1.21;
-
-            const row = `
-                <tr>
-                    <td style="text-align: center;">
-                        <input type="checkbox" class="form-check-input checkbox-producto" 
-                            data-id="${detalle.producto_id}" 
-                            onchange="actualizarFila(this)" 
-                            style="cursor: pointer;">
-                    </td>
-                    <td style="color: #f0f0f0;">${detalle.producto?.nombre || 'Desconocido'}</td>
-                    <td style="text-align: center; color: #d32f2f;">${cantidad}</td>
-                    <td style="text-align: center;">
-                        <input type="number" class="form-control form-control-sm cantidad-devuelta" 
-                            value="0" min="0" max="${cantidad}" data-precio-base="${precioBase}" 
-                            onchange="actualizarFila(this)" 
-                            style="background: rgba(20, 20, 25, 0.8); border-color: rgba(211, 47, 47, 0.3); color: #f0f0f0; text-align: center; width: 60px;">
-                    </td>
-                    <td style="text-align: right; color: #28a745;">€${precioBase.toFixed(2)}</td>
-                    <td style="text-align: right; color: #d32f2f; font-weight: 600;">€0.00</td>
-                </tr>
-            `;
-
-            tbody.innerHTML += row;
-        });
-    }
-}
-
-    function actualizarFila(element) {
-
-        const fila = element.closest('tr');
-
-        const checkbox = fila.querySelector('.checkbox-producto');
-
-        const inputCantidad = fila.querySelector('.cantidad-devuelta');
-
-        // Si escriben en cantidad, marcar automáticamente el checkbox
-
-        if (element === inputCantidad && inputCantidad.value > 0) {
-
-            checkbox.checked = true;
-
-        }
-
-        const tbody = element.closest('tbody');
-
-        const rows = tbody.querySelectorAll('tr');
-
-        let totalBase = 0;
-
-        let totalConIva = 0;
-
-        rows.forEach((row, idx) => {
-
-            const checkboxFila = row.querySelector('.checkbox-producto');
-
-            const inputCantidadFila = row.querySelector('.cantidad-devuelta');
-
-            const subtotalCell = row.querySelector('td:last-child');
-
-            if (checkboxFila.checked && inputCantidadFila) {
-
-                const cantidadDevuelta = parseInt(inputCantidadFila.value) || 0;
-
-                const precioBase = parseFloat(inputCantidadFila.dataset.precioBase) || 0;
-
-                const subtotalBase = cantidadDevuelta * precioBase;
-
-                const subtotalConIva = subtotalBase * 1.21;
-
-                subtotalCell.textContent = '€' + subtotalBase.toFixed(2);
-
-                totalBase += subtotalBase;
-
-                totalConIva += subtotalConIva;
-
-            } else {
-
-                subtotalCell.textContent = '€0.00';
-
-                inputCantidadFila.value = 0;
+                llenarProductos(ventaData.detalles);
 
             }
 
+        })
+
+        .catch(err => {
+
+            console.error('Error cargando venta:', err);
+
+            alert('Error al cargar los productos de la venta');
+
         });
 
-        const iva = totalConIva - totalBase;
+}
 
-        document.getElementById('totalConIva').textContent = '€' + totalConIva.toFixed(2);
+function llenarProductos(detalles) {
 
-        document.getElementById('montoIva').textContent = '€' + iva.toFixed(2);
+    const tbody = document.getElementById('tablaProd');
 
-        document.getElementById('totalDevolver').textContent = '€' + totalBase.toFixed(2);
+    tbody.innerHTML = '';
 
-        document.getElementById('totalInput').value = totalBase.toFixed(2);
+    if (detalles && detalles.length > 0) {
 
-    }
+        detalles.forEach((detalle) => {
 
-    function verDevolucion(id) {
+            const cantidad = parseInt(detalle.cantidad) || 0;
 
-        fetch(`/devoluciones/${id}/json`)
+            const precioUnitario = parseFloat(detalle.precio_unitario) || 0;
 
-            .then(res => res.json())
+            const precioBase = precioUnitario / 1.21;
 
-            .then(data => {
+            const row = `
 
-                const modal = new bootstrap.Modal(document.getElementById('modalVerDevolucion'));
+                <tr>
 
-                document.getElementById('verCodigo').textContent = 'DEV-' + String(data.id).padStart(4, '0');
+                    <td style="text-align: center;">
 
-                document.getElementById('verCliente').textContent = data.venta?.cliente || '—';
+                        <input type="checkbox" class="form-check-input checkbox-producto" 
 
-                document.getElementById('verFecha').textContent = data.fecha ? new Date(data.fecha).toLocaleDateString('es-ES') : '—';
+                            data-id="${detalle.producto_id}" 
 
-                document.getElementById('verMonto').textContent = '€' + (parseFloat(data.total_devuelto) || 0).toFixed(2);
+                            onchange="actualizarFila(this)" 
 
-                document.getElementById('verUsuario').textContent = data.usuario?.name || '—';
+                            style="cursor: pointer;">
 
-                const estadoSpan = document.getElementById('verEstado');
+                    </td>
 
-                const estadoTexto = data.estado ? data.estado.charAt(0).toUpperCase() + data.estado.slice(1) : 'Pendiente';
+                    <td style="color: #f0f0f0;">${detalle.producto?.nombre || 'Desconocido'}</td>
 
-                estadoSpan.textContent = estadoTexto;
+                    <td style="text-align: center; color: #d32f2f;">${cantidad}</td>
 
-                estadoSpan.style.background = data.estado === 'completada' ? '#28a745' : '#d32f2f';
+                    <td style="text-align: center;">
 
-                estadoSpan.style.color = 'white';
+                        <input type="number" class="form-control form-control-sm cantidad-devuelta" 
 
-                const tbody = document.getElementById('verProductos');
+                            value="0" min="0" max="${cantidad}" data-precio-base="${precioBase}" 
 
-                tbody.innerHTML = '';
+                            onchange="actualizarFila(this)" 
 
-                let total = 0;
+                            style="background: rgba(20, 20, 25, 0.8); border-color: rgba(211, 47, 47, 0.3); color: #f0f0f0; text-align: center; width: 60px;">
 
-                if (data.detalles && data.detalles.length > 0) {
+                    </td>
 
-                    data.detalles.forEach(det => {
+                    <td style="text-align: right; color: #28a745;">€${precioBase.toFixed(2)}</td>
 
-                        const cantidad = parseInt(det.cantidad) || 0;
+                    <td style="text-align: right; color: #d32f2f; font-weight: 600;">€0.00</td>
 
-                        const precio = parseFloat(det.precio_unitario) || 0;
+                </tr>
 
-                        const subtotal = cantidad * precio;
+            `;
 
-                        total += subtotal;
+            tbody.innerHTML += row;
 
-                        const row = `
-
-                            <tr>
-
-                                <td style="color: #f0f0f0;">${det.producto?.nombre || '—'}</td>
-
-                                <td style="text-align: center; color: #d32f2f;">${cantidad}</td>
-
-                                <td style="text-align: right; color: #28a745;">€${precio.toFixed(2)}</td>
-
-                                <td style="text-align: right; color: #d32f2f;">${subtotal.toFixed(2)}</td>
-
-                            </tr>
-
-                        `;
-
-                        tbody.innerHTML += row;
-
-                    });
-
-                }
-
-                document.getElementById('verTotal').textContent = '€' + total.toFixed(2);
-
-                document.getElementById('verMotivo').textContent = data.motivo || '—';
-
-                modal.show();
-
-            })
-
-            .catch(err => {
-
-                console.error('Error:', err);
-
-                alert('Error al cargar la devolución');
-
-            });
+        });
 
     }
 
-    function cambiarEstado(id, estado) {
+}
 
-        if (confirm('¿Completar esta devolución?')) {
+function actualizarFila(element) {
 
-            fetch(`/devoluciones/${id}/estado`, {
+    const fila = element.closest('tr');
 
-                method: 'PATCH',
+    const checkbox = fila.querySelector('.checkbox-producto');
 
-                headers: {
+    const inputCantidad = fila.querySelector('.cantidad-devuelta');
 
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+    if (element === inputCantidad && inputCantidad.value > 0) {
 
-                    'Content-Type': 'application/json'
+        checkbox.checked = true;
 
-                },
+    }
 
-                body: JSON.stringify({ estado: estado })
+    const tbody = element.closest('tbody');
 
-            })
+    const rows = tbody.querySelectorAll('tr');
 
-            .then(res => res.json())
+    let totalBase = 0;
 
-            .then(data => {
+    let totalConIva = 0;
 
-                if (data.success) {
+    rows.forEach((row) => {
 
-                    alert('✅ ' + data.message);
+        const checkboxFila = row.querySelector('.checkbox-producto');
 
-                    window.location.reload();
+        const inputCantidadFila = row.querySelector('.cantidad-devuelta');
 
-                } else {
+        const subtotalCell = row.querySelector('td:last-child');
 
-                    alert('❌ Error: ' + (data.message || 'No especificado'));
+        if (checkboxFila && checkboxFila.checked && inputCantidadFila) {
 
-                }
+            const cantidadDevuelta = parseInt(inputCantidadFila.value) || 0;
 
-            })
+            const precioBase = parseFloat(inputCantidadFila.dataset.precioBase) || 0;
 
-            .catch(err => {
+            const subtotalBase = cantidadDevuelta * precioBase;
 
-                console.error('Error:', err);
+            const subtotalConIva = subtotalBase * 1.21;
 
-                alert('Error al cambiar estado');
+            subtotalCell.textContent = '€' + subtotalBase.toFixed(2);
 
-            });
+            totalBase += subtotalBase;
+
+            totalConIva += subtotalConIva;
+
+        } else {
+
+            subtotalCell.textContent = '€0.00';
+
+            if (inputCantidadFila) inputCantidadFila.value = 0;
 
         }
 
+    });
+
+    const iva = totalConIva - totalBase;
+
+    document.getElementById('totalConIva').textContent = '€' + totalConIva.toFixed(2);
+
+    document.getElementById('montoIva').textContent = '€' + iva.toFixed(2);
+
+    document.getElementById('totalDevolver').textContent = '€' + totalBase.toFixed(2);
+
+    document.getElementById('totalInput').value = totalBase.toFixed(2);
+
+}
+
+function verDevolucion(id) {
+
+    fetch(`/devoluciones/${id}/json`)
+
+        .then(res => res.json())
+
+        .then(data => {
+
+            const modal = new bootstrap.Modal(document.getElementById('modalVerDevolucion'));
+
+            document.getElementById('verCodigo').textContent = 'DEV-' + String(data.id).padStart(4, '0');
+
+            document.getElementById('verCliente').textContent = data.venta?.cliente || '—';
+
+            document.getElementById('verFecha').textContent = data.fecha ? new Date(data.fecha).toLocaleDateString('es-ES') : '—';
+
+            document.getElementById('verMonto').textContent = '€' + (parseFloat(data.total_devuelto) || 0).toFixed(2);
+
+            document.getElementById('verUsuario').textContent = data.usuario?.name || '—';
+
+            const estadoSpan = document.getElementById('verEstado');
+
+            const estadoTexto = data.estado ? data.estado.charAt(0).toUpperCase() + data.estado.slice(1) : 'Pendiente';
+
+            estadoSpan.textContent = estadoTexto;
+
+            estadoSpan.style.background = data.estado === 'completada' ? '#28a745' : '#d32f2f';
+
+            const tbody = document.getElementById('verProductos');
+
+            tbody.innerHTML = '';
+
+            let total = 0;
+
+            if (data.detalles && data.detalles.length > 0) {
+
+                data.detalles.forEach(det => {
+
+                    const cantidad = parseInt(det.cantidad) || 0;
+
+                    const precio = parseFloat(det.precio_unitario) || 0;
+
+                    const subtotal = cantidad * precio;
+
+                    total += subtotal;
+
+                    const row = `
+
+                        <tr>
+
+                            <td style="color: #f0f0f0;">${det.producto?.nombre || '—'}</td>
+
+                            <td style="text-align: center; color: #d32f2f;">${cantidad}</td>
+
+                            <td style="text-align: right; color: #28a745;">€${precio.toFixed(2)}</td>
+
+                            <td style="text-align: right; color: #d32f2f;">€${subtotal.toFixed(2)}</td>
+
+                        </tr>
+
+                    `;
+
+                    tbody.innerHTML += row;
+
+                });
+
+            }
+
+            document.getElementById('verTotal').textContent = '€' + total.toFixed(2);
+
+            document.getElementById('verMotivo').textContent = data.motivo || '—';
+
+            modal.show();
+
+        })
+
+        .catch(err => {
+
+            console.error('Error:', err);
+
+            alert('Error al cargar la devolución');
+
+        });
+
+}
+
+function cambiarEstado(id, estado) {
+
+    if (confirm('¿Completar esta devolución?')) {
+
+        fetch(`/devoluciones/${id}/estado`, {
+
+            method: 'PATCH',
+
+            headers: {
+
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+
+                'Content-Type': 'application/json'
+
+            },
+
+            body: JSON.stringify({ estado: estado })
+
+        })
+
+        .then(res => res.json())
+
+        .then(data => {
+
+            if (data.success) {
+
+                // ⭐ ANIMAR WIDGETS CON NUEVOS VALORES
+
+                const stats = data.estadisticas;
+
+                animarWidget('stat-total', stats.totalDevoluciones);
+
+                animarWidget('stat-pendientes', stats.pendientes);
+
+                animarWidget('stat-completadas', stats.completadas);
+
+                animarWidget('stat-valor', '€' + parseFloat(stats.valorTotal).toFixed(2));
+
+                alert('✅ ' + data.message);
+
+                setTimeout(() => location.reload(), 1000);
+
+            } else {
+
+                alert('❌ Error: ' + (data.message || 'No especificado'));
+
+            }
+
+        })
+
+        .catch(err => {
+
+            console.error('Error:', err);
+
+            alert('Error al cambiar estado');
+
+        });
+
     }
+
+}
 
 </script>
 

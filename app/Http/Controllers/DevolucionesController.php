@@ -55,6 +55,26 @@ class DevolucionesController extends Controller
         }
     }
 
+    private function obtenerEstadisticas()
+    {
+        $devoluciones = DevolucionVenta::with('usuario', 'venta', 'detalles.producto')
+            ->orderBy('fecha', 'desc')
+            ->get()
+            ->map(fn($d) => [
+                'id' => (int) $d->id,
+                'total' => (float) $d->total_devuelto,
+                'estado' => $d->estado,
+            ])
+            ->toArray();
+
+        return [
+            'totalDevoluciones' => count($devoluciones),
+            'pendientes' => count(array_filter($devoluciones, fn($d) => $d['estado'] === 'pendiente')),
+            'completadas' => count(array_filter($devoluciones, fn($d) => $d['estado'] === 'completada')),
+            'valorTotal' => array_sum(array_column($devoluciones, 'total')),
+        ];
+    }
+
     public function store(Request $request)
     {
         try {
@@ -75,7 +95,10 @@ class DevolucionesController extends Controller
             
             if (!is_array($productos) || empty($productos)) {
                 \Log::error('❌ Error al crear devolución: Debes agregar al menos una línea');
-                return back()->withInput()->with('error', 'Debes seleccionar al menos un producto a devolver');
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Debes seleccionar al menos un producto a devolver'
+                ], 400);
             }
 
             \Log::info('✅ Productos parseados:', $productos);
@@ -90,7 +113,10 @@ class DevolucionesController extends Controller
 
                 if (!$detalleOriginal) {
                     \Log::error('❌ Producto no encontrado en venta:', $productoDevolucion);
-                    return back()->withInput()->with('error', 'Producto no encontrado en la venta');
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Producto no encontrado en la venta'
+                    ], 400);
                 }
 
                 if ($productoDevolucion['cantidad'] > $detalleOriginal->cantidad) {
@@ -98,9 +124,10 @@ class DevolucionesController extends Controller
                         'solicitado' => $productoDevolucion['cantidad'],
                         'original' => $detalleOriginal->cantidad,
                     ]);
-                    return back()->withInput()->with('error', 
-                        "No puedes devolver más de {$detalleOriginal->cantidad} unidades"
-                    );
+                    return response()->json([
+                        'success' => false,
+                        'message' => "No puedes devolver más de {$detalleOriginal->cantidad} unidades"
+                    ], 400);
                 }
             }
 
@@ -148,15 +175,27 @@ class DevolucionesController extends Controller
 
             \Log::info('✅ Devolución guardada exitosamente', ['id' => $devolucion->id, 'estado' => $devolucion->estado]);
 
-            return redirect()->route('devoluciones.index')
-                           ->with('success', '✅ Devolución registrada correctamente');
+            // 6. Obtener estadísticas actualizadas
+            $estadisticas = $this->obtenerEstadisticas();
+
+            // ✅ DEVOLVER JSON con datos actualizados
+            return response()->json([
+                'success' => true,
+                'message' => '✅ Devolución registrada correctamente',
+                'devolucion_id' => $devolucion->id,
+                'estadisticas' => $estadisticas
+            ]);
 
         } catch (\Exception $e) {
             \Log::error('❌ Error al guardar devolución: ' . $e->getMessage(), [
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
             ]);
-            return back()->withInput()->with('error', 'Error: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
         }
     }
 
@@ -171,7 +210,6 @@ class DevolucionesController extends Controller
                 foreach ($devolucion->detalles as $detalle) {
                     $producto = $detalle->producto;
                     $producto->increment('stock_actual', $detalle->cantidad);
-
                     \Log::info("✅ Stock aumentado (cambio estado): Producto {$producto->id}, +{$detalle->cantidad}");
                 }
             }
@@ -179,9 +217,13 @@ class DevolucionesController extends Controller
             $devolucion->estado = $nuevoEstado;
             $devolucion->save();
 
+            // Obtener estadísticas actualizadas
+            $estadisticas = $this->obtenerEstadisticas();
+
             return response()->json([
                 'success' => true,
-                'message' => '✅ Devolución completada. Stock actualizado.'
+                'message' => '✅ Devolución completada. Stock actualizado.',
+                'estadisticas' => $estadisticas
             ]);
 
         } catch (\Exception $e) {
