@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RoninTech | Gestion de inventario, compras y ventas</title>
+    <meta name="description" content="Pagina comercial independiente para un sistema de inventario, ventas, compras, stock, proveedores, clientes y facturacion.">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="site-header" data-header>
+        <a class="brand" href="#inicio" aria-label="RoninTech">
+            <span class="brand-mark">RN</span>
+            <span>RoninTech</span>
+        </a>
+
+        <button class="nav-toggle" type="button" aria-label="Abrir menu" aria-expanded="false" data-nav-toggle>
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <nav class="site-nav" data-nav>
+            <a href="#modulos">Modulos</a>
+            <a href="#flujo">Flujo</a>
+            <a href="#control">Control</a>
+            <a href="#planes">Planes</a>
+            <a class="nav-cta" href="#demo">Solicitar demo</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero" id="inicio">
+            <div class="hero-content">
+                <p class="eyebrow">Software de gestion para empresas con stock real</p>
+                <h1>Inventario, compras y ventas bajo control en una sola pantalla.</h1>
+                <p class="hero-copy">
+                    Una web pensada para negocios que necesitan saber que se compra, que se vende,
+                    que queda en almacen y que facturas siguen pendientes.
+                </p>
+                <div class="hero-actions">
+                    <a class="button primary" href="#demo">Ver propuesta</a>
+                    <a class="button secondary" href="#modulos">Explorar modulos</a>
+                </div>
+                <div class="trust-row" aria-label="Indicadores principales">
+                    <span><strong>+8</strong> areas conectadas</span>
+                    <span><strong>24/7</strong> trazabilidad</span>
+                    <span><strong>PDF</strong> facturas listas</span>
+                </div>
+            </div>
+
+            <div class="product-visual" aria-label="Vista previa del panel de gestion">
+                <div class="dashboard-shell">
+                    <div class="dashboard-topbar">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                    <div class="dashboard-grid">
+                        <aside class="mock-sidebar">
+                            <span class="active"></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </aside>
+                        <div class="mock-main">
+                            <div class="mock-heading">
+                                <span></span>
+                                <strong>Stock operativo</strong>
+                            </div>
+                            <div class="mock-stats">
+                                <article>
+                                    <b>128</b>
+                                    <small>Productos</small>
+                                </article>
+                                <article>
+                                    <b>34</b>
+                                    <small>Pedidos</small>
+                                </article>
+                                <article>
+                                    <b>12</b>
+                                    <small>Alertas</small>
+                                </article>
+                            </div>
+                            <div class="mock-table">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="modulos">
+            <div class="section-heading">
+                <p class="eyebrow">Gestion completa</p>
+                <h2>Todo lo que mueve el negocio, conectado.</h2>
+                <p>Deja de perseguir datos entre hojas, mensajes y facturas sueltas. Cada modulo habla con el siguiente.</p>
+            </div>
+
+            <div class="module-grid">
+                <article class="module-card">
+                    <span class="module-icon">01</span>
+                    <h3>Ventas</h3>
+                    <p>Crea ventas, controla estados, genera facturas y consulta el historial de cada operacion.</p>
+                </article>
+                <article class="module-card">
+                    <span class="module-icon">02</span>
+                    <h3>Compras</h3>
+                    <p>Gestiona pedidos, albaranes, facturas de proveedor y pagos pendientes sin perder trazabilidad.</p>
+                </article>
+                <article class="module-card">
+                    <span class="module-icon">03</span>
+                    <h3>Stock</h3>
+                    <p>Consulta existencias, detecta faltantes y evita vender productos que no estan disponibles.</p>
+                </article>
+                <article class="module-card">
+                    <span class="module-icon">04</span>
+                    <h3>Clientes</h3>
+                    <p>Centraliza datos fiscales, contacto y busquedas rapidas para facturacion y seguimiento.</p>
+                </article>
+                <article class="module-card">
+                    <span class="module-icon">05</span>
+                    <h3>Proveedores</h3>
+                    <p>Organiza condiciones de pago, catalogo asociado y vencimientos de cada proveedor.</p>
+                </article>
+                <article class="module-card">
+                    <span class="module-icon">06</span>
+                    <h3>Devoluciones</h3>
+                    <p>Registra incidencias, cantidades devueltas y estados para mantener el inventario limpio.</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="workflow" id="flujo">
+            <div class="workflow-copy">
+                <p class="eyebrow">Flujo natural</p>
+                <h2>Del pedido al cobro, sin saltos raros.</h2>
+                <p>
+                    El sistema esta pensado para una operativa real: entra mercancia, se valida,
+                    se factura, se vende y se controla el stock resultante.
+                </p>
+            </div>
+            <div class="timeline">
+                <article>
+                    <span>1</span>
+                    <h3>Compra</h3>
+                    <p>Pedidos a proveedor con productos, cantidades y precios.</p>
+                </article>
+                <article>
+                    <span>2</span>
+                    <h3>Recepcion</h3>
+                    <p>Albaranes para confirmar lo recibido y lo pendiente.</p>
+                </article>
+                <article>
+                    <span>3</span>
+                    <h3>Factura</h3>
+                    <p>Documentos listos para descargar y pagos controlados.</p>
+                </article>
+                <article>
+                    <span>4</span>
+                    <h3>Venta</h3>
+                    <p>Salida de productos, cliente asociado y total calculado.</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="control-band" id="control">
+            <div>
+                <p class="eyebrow">Control operativo</p>
+                <h2>Menos incertidumbre. Mas decisiones con datos.</h2>
+            </div>
+            <div class="control-grid">
+                <article>
+                    <b>Alertas</b>
+                    <p>Detecta productos criticos antes de quedarte sin unidades.</p>
+                </article>
+                <article>
+                    <b>Roles</b>
+                    <p>Acceso separado para administracion y usuarios operativos.</p>
+                </article>
+                <article>
+                    <b>PDF</b>
+                    <p>Facturas y documentos listos para entregar o archivar.</p>
+                </article>
+                <article>
+                    <b>Historial</b>
+                    <p>Cada venta, compra y devolucion queda registrada.</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="section split-section">
+            <div>
+                <p class="eyebrow">Para quien es</p>
+                <h2>Una herramienta hecha para trabajar, no para decorar.</h2>
+                <p>
+                    Ideal para tiendas, distribuidores, almacenes pequenos y equipos que necesitan
+                    una gestion clara sin montar un ERP gigante.
+                </p>
+            </div>
+            <div class="audience-list">
+                <span>Tiendas con catalogo amplio</span>
+                <span>Empresas con compras recurrentes</span>
+                <span>Equipos que emiten facturas</span>
+                <span>Negocios con devoluciones y control de stock</span>
+            </div>
+        </section>
+
+        <section class="section" id="planes">
+            <div class="section-heading">
+                <p class="eyebrow">Opciones</p>
+                <h2>Elige el alcance de la implantacion.</h2>
+                <p>Planes orientativos para presentar la web como producto o servicio.</p>
+            </div>
+
+            <div class="pricing-grid">
+                <article class="price-card">
+                    <h3>Base</h3>
+                    <p class="price">Desde 49 EUR/mes</p>
+                    <ul>
+                        <li>Productos y stock</li>
+                        <li>Ventas basicas</li>
+                        <li>Clientes y proveedores</li>
+                    </ul>
+                </article>
+                <article class="price-card featured">
+                    <h3>Gestion completa</h3>
+                    <p class="price">Desde 89 EUR/mes</p>
+                    <ul>
+                        <li>Compras, albaranes y facturas</li>
+                        <li>Pagos y vencimientos</li>
+                        <li>PDF y trazabilidad completa</li>
+                    </ul>
+                </article>
+                <article class="price-card">
+                    <h3>A medida</h3>
+                    <p class="price">Proyecto cerrado</p>
+                    <ul>
+                        <li>Personalizacion visual</li>
+                        <li>Datos iniciales</li>
+                        <li>Formacion del equipo</li>
+                    </ul>
+                </article>
+            </div>
+        </section>
+
+        <section class="demo-section" id="demo">
+            <div>
+                <p class="eyebrow">Demo</p>
+                <h2>Presenta tu sistema con una web seria y directa.</h2>
+                <p>
+                    Esta pagina independiente sirve como escaparate del proyecto:
+                    explica que hace, para quien es y por que aporta valor.
+                </p>
+            </div>
+            <form id="demoForm" class="demo-form">
+    <label>
+        Nombre
+        <input type="text" name="nombre" placeholder="Tu nombre" required>
+    </label>
+    <label>
+        Email
+        <input type="email" name="email" placeholder="correo@empresa.com" required>
+    </label>
+    <label>
+        ¿Qué necesitas?
+        <textarea name="mensaje" placeholder="Cuéntame qué quieres gestionar"></textarea>
+    </label>
+    <button class="button primary" type="submit">Enviar solicitud</button>
+</form>
+<div id="formStatus"></div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <p>RoninTech. Web independiente para presentar un sistema de inventario, compras y ventas.</p>
+        <a href="#inicio">Volver arriba</a>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
