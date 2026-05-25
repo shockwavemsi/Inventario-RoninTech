@@ -342,12 +342,20 @@ initInfiniteScroll(tabId) {
                         <div style="font-size: 2rem; font-weight: bold; color: #e63946;">${(item.total || 0).toFixed(2)}€</div>
                         <div style="color: #a0a0a0; font-size: 0.75rem; margin-top: 0.25rem;">Total</div>
                         ${tabId === 'pedidos' ? `
-                            <button type="button"
-                                class="btn btn-sm btn-outline-danger clone-pedido-btn"
-                                data-pedido-id="${item.id}"
-                                style="margin-top: 0.75rem; border-color: #e63946; color: #f0f0f0; background: rgba(230, 57, 70, 0.12);">
-                                <i class="bi bi-files"></i> Clonar
-                            </button>
+                             <div style="display: flex; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap;">
+        <button type="button"
+            class="btn btn-sm btn-outline-danger clone-pedido-btn"
+            data-pedido-id="${item.id}"
+            style="border-color: #e63946; color: #f0f0f0; background: rgba(230, 57, 70, 0.12);">
+            <i class="bi bi-files"></i> Clonar
+        </button>
+        <button type="button"
+            class="btn btn-sm btn-outline-success"
+            onclick="window.descargarPedidoPdf(${item.id})"
+            style="border-color: #90ee90; color: #90ee90; background: rgba(144, 238, 144, 0.12);">
+            <i class="bi bi-download"></i> PDF
+        </button>
+    </div>
                         ` : ''}
                     </div>
                 </div>

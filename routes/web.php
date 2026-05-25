@@ -83,6 +83,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/pedidos/{pedidoCompra}/json', [PedidoCompraController::class, 'showJson']);
         Route::get('/pedidos/{pedidoCompra}/edit', [PedidoCompraController::class, 'edit'])->name('pedidos-compra.edit');
         Route::put('/pedidos/{pedidoCompra}', [PedidoCompraController::class, 'update'])->name('pedidos-compra.update');
+         Route::get('/pedidos/{id}/pdf', [PedidoCompraController::class, 'generarPDF'])->name('compras.pedidos.pdf');
         Route::delete('/pedidos/{pedidoCompra}', [PedidoCompraController::class, 'destroy']);
         Route::get('/albaranes', [AlbaranCompraController::class, 'index'])->name('albaranes-compra.index');
         Route::post('/albaranes', [AlbaranCompraController::class, 'store'])->name('albaranes-compra.store');
@@ -101,6 +102,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/api/proveedor/{proveedorId}/dias-vencimiento', [FacturaCompraController::class, 'obtenerDiasVencimiento']);
         Route::get('/api/buscar-albaranes', [FacturaCompraController::class, 'buscarAlbaranes']);
         Route::get('/api/proveedor/{proveedorId}/formas-pago', [FacturaCompraController::class, 'obtenerFormasPago']);
+        
     });
 
     // ========== DEVOLUCIONES DE VENTA ==========

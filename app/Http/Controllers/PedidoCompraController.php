@@ -10,9 +10,18 @@ use App\Models\Producto;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use App\Services\CarboneService;
 
 class PedidoCompraController extends Controller
 {
+
+protected $carbone;
+
+    public function __construct(CarboneService $carbone)
+    {
+        $this->carbone = $carbone;
+    }
+
     public function index()
 {
     // ✅ CARGAR PEDIDOS - MOSTRAR TODOS CON ALBARANES
@@ -328,4 +337,83 @@ class PedidoCompraController extends Controller
             return response()->json(['success' => false, 'message' => '❌ Error: ' . $e->getMessage()], 500);
         }
     }
+
+    public function generarPDF($id)
+{
+    try {
+        $pedido = PedidoCompra::with([
+            'proveedor',
+            'lineas.producto',
+            'usuario'
+        ])->findOrFail($id);
+
+        $config = DB::table('configuracion')->first();
+
+        $datos = [
+            // Datos empresa
+            'nombre_empresa' => $config->nombre_empresa ?? 'Tu Empresa',
+            'cif' => $config->ruc ?? 'A12345678',
+            'dir_empresa' => $config->direccion ?? 'Dirección',
+            'telefono_empresa' => $config->telefono ?? '+34 XXX XXX XXX',
+            'email_empresa' => $config->email ?? 'info@empresa.com',
+            'web_empresa' => 'www.ronintech.es',
+
+            // Datos pedido
+            'numero_pedido' => $pedido->numero_pedido,
+            'fecha_pedido' => date('d/m/Y', strtotime($pedido->fecha_pedido)),
+            'fecha_estimada' => $pedido->fecha_entrega_esperada ? date('d/m/Y', strtotime($pedido->fecha_entrega_esperada)) : '—',
+
+            // Datos proveedor
+            'proveedor_nombre' => $pedido->proveedor->nombre ?? 'SIN PROVEEDOR',
+            'proveedor_cif' => $pedido->proveedor->ruc ?? '—',
+            'proveedor_contacto' => $pedido->proveedor->contacto_nombre ?? '—',
+            'proveedor_telefono' => $pedido->proveedor->telefono ?? '—',
+            'proveedor_correo' => $pedido->proveedor->email ?? '—',
+
+            // Productos (LOOP)
+            'productos' => $pedido->lineas->map(function($linea) {
+                return [
+                    'name' => $linea->producto->nombre ?? 'Desconocido',
+                    'cantidad' => (int) $linea->cantidad,
+                    'precio_unitario' => number_format((float) $linea->precio_unitario, 2, '.', ''),
+                    'total' => number_format((float) $linea->total, 2, '.', '')
+                ];
+            })->toArray(),
+
+            // Totales - DESDE LA BD ✅
+            'subTotal' => number_format((float) $pedido->subtotal, 2, '.', ''),
+            'desc' => (float) $pedido->descuento_porcentaje,
+            'cantidad_desc' => number_format((float) $pedido->descuento_cantidad, 2, '.', ''),
+            'total_pagar' => number_format((float) $pedido->total, 2, '.', ''),
+
+            // Condiciones de pago
+            'pago' => $pedido->proveedor->formasPago->map(function($fp) {
+                return [
+                    'nombre' => $fp->formaPago->nombre ?? 'Método desconocido',
+                    'banco' => $fp->banco->nombre ?? '—',
+                    'referencia' => $fp->referencia ?? '—'
+                ];
+            })->toArray(),
+
+            'observaciones' => $pedido->observaciones ?? 'Sin observaciones',
+            'usuario' => auth()->user()->name ?? $pedido->usuario->name ?? 'Usuario'
+        ];
+
+        $nombreArchivo = "Pedido_" . $pedido->numero_pedido . "_" . now()->timestamp;
+        $pdfPath = $this->carbone->render('pedido', $datos, $nombreArchivo);
+
+        return response()->download(
+            $pdfPath,
+            "Pedido_{$pedido->numero_pedido}.pdf",
+            ['Content-Type' => 'application/pdf']
+        );
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => 'Error al generar PDF',
+            'mensaje' => $e->getMessage(),
+            'status' => 500
+        ], 500);
+    }
+}
 }

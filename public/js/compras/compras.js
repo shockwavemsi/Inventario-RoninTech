@@ -94,6 +94,10 @@ window.abrirModalPedido = function(id) {
     window.comprasApp.abrirDetalles(id, 'pedido');
 };
 
+window.descargarPedidoPdf = function(id) {
+    window.open(`/compras/pedidos/${id}/pdf`, '_blank');
+};
+
 window.clonarPedidoCompra = async function(id) {
     if (!id) return;
 

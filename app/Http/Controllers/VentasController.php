@@ -313,18 +313,14 @@ foreach ($lineas as $linea) {
 public function generarPDF(Request $request)
 {
     try {
-        // 📋 Obtener configuración de empresa
         $config = DB::table('configuracion')->first();
-
-        // 📋 Obtener venta con detalles
         $venta = Venta::with('detalles.producto', 'usuario')
             ->findOrFail($request->venta_id);
 
-        // 📋 Preparar datos para Carbone
         $datos = [
-            // Datos de la empresa (desde Configuración)
+            // Datos de la empresa
             'nombre_empresa' => $config->nombre_empresa ?? 'Tu Empresa',
-            'cif' => $config->ruc ?? 'A12345678',
+            'cif' => $config->ruc ?? 'A12345678',  // ← Nota: en BD es RUC
             'dir_empresa' => $config->direccion ?? 'Dirección',
             'telefono_empresa' => $config->telefono ?? '+34 XXX XXX XXX',
             'email_empresa' => $config->email ?? 'info@empresa.com',
@@ -360,9 +356,11 @@ public function generarPDF(Request $request)
             'IVA' => (float) $config->impuesto_porcentaje ?? 21,
             'cantidad_IVA' => (float) $venta->impuesto,
             'total_pagar' => (float) $venta->total,
+
+            'días_devoluciones' => $config->dias_devolucion ?? '14 días',
+            'proveedor_empresa' => 'RONINTECH'
         ];
 
-        // 🔧 Renderizar con Carbone
         $carbone = new \App\Services\CarboneService();
         $pdf = $carbone->render('factura_venta', $datos, 'venta_' . time());
 
