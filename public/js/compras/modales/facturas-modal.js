@@ -104,9 +104,6 @@ class FacturasModal {
                     <td style="padding: 0.75rem; color: #a0a0a0; text-align: center; font-size: 0.875rem;">${idx + 1}</td>
                     <td style="padding: 0.75rem; color: #f0f0f0; font-weight: 500;">${l.producto_nombre || '—'}</td>
                     <td style="padding: 0.75rem; color: #f0f0f0; text-align: center; font-weight: 500;">${l.cantidad}</td>
-                    <td style="padding: 0.75rem; color: #f0f0f0; text-align: right;">${(parseFloat(l.precio_base) || 0).toFixed(2)}€</td>
-                    <td style="padding: 0.75rem; color: #f0f0f0; text-align: center;">${(parseFloat(l.iva) || 0).toFixed(1)}%</td>
-                    <td style="padding: 0.75rem; color: #90ee90; font-weight: 600; text-align: right;">${(parseFloat(l.precio_final) || 0).toFixed(2)}€</td>
                 </tr>
             `).join('');
         } else {
@@ -115,35 +112,59 @@ class FacturasModal {
 
         let filas_pagos = '';
 
-        if (item.pagos && item.pagos.length > 0) {
-            filas_pagos = item.pagos.map((p) => {
-                const colorEstado = p.estado === 'pagado' ? '#90ee90' : 
-                                   p.estado === 'en_transito' ? '#fed7aa' : '#a0a0a0';
+if (item.pagos && item.pagos.length > 0) {
 
-                const bgEstado = p.estado === 'pagado' ? 'rgba(34, 197, 94, 0.1)' :
-                                p.estado === 'en_transito' ? 'rgba(249, 115, 22, 0.1)' : 'rgba(160, 160, 160, 0.1)';
+    filas_pagos = item.pagos.map((p) => {
 
-                const iconoEstado = p.estado === 'pagado' ? this.getSVG('check') : 
-                                   p.estado === 'en_transito' ? this.getSVG('clock') : this.getSVG('warning');
+        const colorEstado = p.estado === 'pagado' ? '#90ee90' : 
 
-                return `
-                    <tr style="border-bottom: 1px solid rgba(230, 57, 70, 0.1);">
-                        <td style="padding: 0.75rem; color: #f0f0f0; font-weight: 500;">${p.referencia || '—'}</td>
-                        <td style="padding: 0.75rem; color: #90ee90; font-weight: 600; text-align: right;">${(parseFloat(p.monto) || 0).toFixed(2)}€</td>
-                        <td style="padding: 0.75rem; color: #f0f0f0; text-align: center;">${p.fecha || '—'}</td>
-                        <td style="padding: 0.75rem; color: #a0a0a0; text-align: center; font-family: monospace; font-size: 0.875rem;">${p.referencia || '—'}</td>
-                        <td style="padding: 0.75rem; text-align: center;">
-                            <span style="display: inline-flex; align-items: center; gap: 0.4rem; color: ${colorEstado}; background: ${bgEstado}; padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">
-                                ${iconoEstado}
-                                ${(p.estado || 'pendiente').toUpperCase()}
-                            </span>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-        } else {
-            filas_pagos = '<tr><td colspan="5" style="text-align: center; padding: 1rem; color: #a0a0a0;">Sin pagos registrados</td></tr>';
-        }
+                           p.estado === 'en_transito' ? '#fed7aa' : '#a0a0a0';
+
+        const bgEstado = p.estado === 'pagado' ? 'rgba(34, 197, 94, 0.1)' :
+
+                        p.estado === 'en_transito' ? 'rgba(249, 115, 22, 0.1)' : 'rgba(160, 160, 160, 0.1)';
+
+        const iconoEstado = p.estado === 'pagado' ? this.getSVG('check') : 
+
+                           p.estado === 'en_transito' ? this.getSVG('clock') : this.getSVG('warning');
+
+        return `
+
+            <tr style="border-bottom: 1px solid rgba(230, 57, 70, 0.1);">
+
+                <td style="padding: 0.75rem; color: #f0f0f0; font-weight: 500;">${p.metodo_pago || '—'}</td>
+
+                <td style="padding: 0.75rem; color: #f0f0f0; font-weight: 500;">${p.banco || '—'}</td>
+
+                <td style="padding: 0.75rem; color: #90ee90; font-weight: 600; text-align: right;">${(parseFloat(p.monto) || 0).toFixed(2)}€</td>
+
+                <td style="padding: 0.75rem; color: #f0f0f0; text-align: center;">${p.fecha || '—'}</td>
+
+                <td style="padding: 0.75rem; color: #a0a0a0; text-align: center; font-family: monospace; font-size: 0.875rem;">${p.referencia || '—'}</td>
+
+                <td style="padding: 0.75rem; text-align: center;">
+
+                    <span style="display: inline-flex; align-items: center; gap: 0.4rem; color: ${colorEstado}; background: ${bgEstado}; padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">
+
+                        ${iconoEstado}
+
+                        ${(p.estado || 'pendiente').toUpperCase()}
+
+                    </span>
+
+                </td>
+
+            </tr>
+
+        `;
+
+    }).join('');
+
+} else {
+
+    filas_pagos = '<tr><td colspan="6" style="text-align: center; padding: 1rem; color: #a0a0a0;">Sin pagos registrados</td></tr>';
+
+}
 
         // ✅ DETERMINAR COLOR DEL BADGE SEGÚN ESTADO
         let colorEstadoBadge = 'bg-warning';
@@ -205,52 +226,50 @@ class FacturasModal {
             </div>
 
             <!-- LÍNEAS FACTURADAS -->
-            <div style="margin-bottom: 1.5rem;">
-                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
-                    ${this.getSVG('package')}
-                    <h6 style="margin: 0; color: #e63946; font-weight: 700; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Líneas Facturadas</h6>
-                </div>
-                <div style="overflow-x: auto; border-radius: 8px; border: 1px solid rgba(230, 57, 70, 0.2);">
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <thead>
-                            <tr style="background: rgba(230, 57, 70, 0.15);">
-                                <th style="padding: 0.75rem; color: #e63946; text-align: center; font-weight: 700; font-size: 0.875rem;">#</th>
-                                <th style="padding: 0.75rem; color: #e63946; text-align: left; font-weight: 700; font-size: 0.875rem;">PRODUCTO</th>
-                                <th style="padding: 0.75rem; color: #e63946; text-align: center; font-weight: 700; font-size: 0.875rem;">CANTIDAD</th>
-                                <th style="padding: 0.75rem; color: #e63946; text-align: right; font-weight: 700; font-size: 0.875rem;">PRECIO BASE</th>
-                                <th style="padding: 0.75rem; color: #e63946; text-align: center; font-weight: 700; font-size: 0.875rem;">IVA %</th>
-                                <th style="padding: 0.75rem; color: #e63946; text-align: right; font-weight: 700; font-size: 0.875rem;">PRECIO FINAL</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${filas_lineas}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+<div style="margin-bottom: 1.5rem;">
+    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+        ${this.getSVG('package')}
+        <h6 style="margin: 0; color: #e63946; font-weight: 700; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Líneas Facturadas</h6>
+    </div>
+    <div style="overflow-x: auto; border-radius: 8px; border: 1px solid rgba(230, 57, 70, 0.2);">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: rgba(230, 57, 70, 0.15);">
+                    <th style="padding: 0.75rem; color: #e63946; text-align: center; font-weight: 700; font-size: 0.875rem;">#</th>
+                    <th style="padding: 0.75rem; color: #e63946; text-align: left; font-weight: 700; font-size: 0.875rem;">PRODUCTO</th>
+                    <th style="padding: 0.75rem; color: #e63946; text-align: center; font-weight: 700; font-size: 0.875rem;">CANTIDAD RECIBIDA</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${filas_lineas}
+            </tbody>
+        </table>
+    </div>
+</div>
 
             <!-- FORMAS DE PAGO -->
-            <div style="margin-bottom: 1.5rem;">
-                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
-                    ${this.getSVG('creditCard')}
-                    <h6 style="margin: 0; color: #e63946; font-weight: 700; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Formas de Pago</h6>
-                </div>
-                <div style="overflow-x: auto; border-radius: 8px; border: 1px solid rgba(230, 57, 70, 0.2);">
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <thead>
-                            <tr style="background: rgba(230, 57, 70, 0.15);">
-                                <th style="padding: 0.75rem; color: #e63946; text-align: left; font-weight: 700; font-size: 0.875rem;">MÉTODO</th>
-                                <th style="padding: 0.75rem; color: #e63946; text-align: right; font-weight: 700; font-size: 0.875rem;">MONTO</th>
-                                <th style="padding: 0.75rem; color: #e63946; text-align: center; font-weight: 700; font-size: 0.875rem;">FECHA</th>
-                                <th style="padding: 0.75rem; color: #e63946; text-align: center; font-weight: 700; font-size: 0.875rem;">REFERENCIA</th>
-                                <th style="padding: 0.75rem; color: #e63946; text-align: center; font-weight: 700; font-size: 0.875rem;">ESTADO</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${filas_pagos}
-                        </tbody>
-                    </table>
-                </div>
+<div style="margin-bottom: 1.5rem;">
+    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+        ${this.getSVG('creditCard')}
+        <h6 style="margin: 0; color: #e63946; font-weight: 700; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Formas de Pago</h6>
+    </div>
+    <div style="overflow-x: auto; border-radius: 8px; border: 1px solid rgba(230, 57, 70, 0.2);">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: rgba(230, 57, 70, 0.15);">
+                    <th style="padding: 0.75rem; color: #e63946; text-align: left; font-weight: 700; font-size: 0.875rem;">MÉTODO</th>
+                    <th style="padding: 0.75rem; color: #e63946; text-align: left; font-weight: 700; font-size: 0.875rem;">BANCO</th>
+                    <th style="padding: 0.75rem; color: #e63946; text-align: right; font-weight: 700; font-size: 0.875rem;">MONTO</th>
+                    <th style="padding: 0.75rem; color: #e63946; text-align: center; font-weight: 700; font-size: 0.875rem;">FECHA</th>
+                    <th style="padding: 0.75rem; color: #e63946; text-align: center; font-weight: 700; font-size: 0.875rem;">REFERENCIA</th>
+                    <th style="padding: 0.75rem; color: #e63946; text-align: center; font-weight: 700; font-size: 0.875rem;">ESTADO</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${filas_pagos}
+            </tbody>
+        </table>
+    </div>
 
                 ${item.pagos && item.pagos.length > 0 ? `
                     <div style="margin-top: 1rem; padding: 1rem; background: rgba(230, 57, 70, 0.05); border-radius: 6px; border-left: 3px solid #e63946;">

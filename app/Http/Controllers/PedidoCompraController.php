@@ -25,8 +25,9 @@ protected $carbone;
     public function index()
 {
     // ✅ CARGAR PEDIDOS - MOSTRAR TODOS CON ALBARANES
-    $pedidosRaw = PedidoCompra::with('proveedor', 'lineas', 'lineas.producto', 'albaranes')
-        ->get();
+    $pedidosRaw = PedidoCompra::where('estado', '!=', 'cancelado')
+    ->with('proveedor', 'lineas', 'lineas.producto', 'albaranes')
+    ->get();
 
     $pedidos = $pedidosRaw->map(fn($p) => [
         'id' => (int) $p->id,
@@ -57,7 +58,7 @@ protected $carbone;
     $facturas = \DB::table('facturas_compra')->orderBy('fecha_factura', 'desc')->get();
 
     // ✅ OTROS DATOS
-    $proveedores = Proveedor::all();
+    $proveedores = Proveedor::where('activo', true)->get();
     $productos = Producto::all();
 
     $ultimoPedidoId = PedidoCompra::latest('id')->first()?->id ?? 0;
@@ -307,7 +308,7 @@ protected $carbone;
 
     public function edit(PedidoCompra $pedidoCompra)
     {
-        $proveedores = Proveedor::all();
+        $proveedores = Proveedor::where('activo', true)->get();
         return view('admin.compras.pedidos.edit', compact('pedidoCompra', 'proveedores'));
     }
 
@@ -414,6 +415,42 @@ protected $carbone;
             'mensaje' => $e->getMessage(),
             'status' => 500
         ], 500);
+    }
+}
+
+/**
+ * ✅ NUEVO - Obtener productos pendientes de un pedido
+ */
+public function productosFaltantes($pedidoId)
+{
+    try {
+        $pedido = PedidoCompra::with('lineas.producto', 'albaranes.lineas')
+            ->findOrFail($pedidoId);
+
+        $productosFaltantes = $pedido->lineas->map(function($linea) use ($pedido) {
+            // Calcular cantidad recibida en todos los albaranes
+            $cantidadRecibida = $pedido->albaranes->sum(function($albaran) use ($linea) {
+                return $albaran->lineas
+                    ->where('producto_id', $linea->producto_id)
+                    ->sum('cantidad_recibida');
+            });
+
+            $cantidadFaltante = (int)$linea->cantidad - $cantidadRecibida;
+
+            return [
+                'producto_id' => (int) $linea->producto_id,
+                'producto_nombre' => $linea->producto?->nombre ?? 'Producto desconocido',
+                'cantidad_pedida' => (int) $linea->cantidad,
+                'cantidad_recibida' => $cantidadRecibida,
+                'cantidad_faltante' => $cantidadFaltante,
+            ];
+        })->filter(fn($p) => $p['cantidad_faltante'] > 0)  // ✅ Solo faltantes
+         ->values();
+
+        return response()->json($productosFaltantes);
+
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
     }
 }
 }

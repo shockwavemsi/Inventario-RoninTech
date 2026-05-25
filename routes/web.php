@@ -82,6 +82,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/pedidos/{pedidoCompra}/clonar', [PedidoCompraController::class, 'clonar'])->name('pedidos-compra.clonar');
         Route::get('/pedidos/{pedidoCompra}/json', [PedidoCompraController::class, 'showJson']);
         Route::get('/pedidos/{pedidoCompra}/edit', [PedidoCompraController::class, 'edit'])->name('pedidos-compra.edit');
+        // Añade esta línea:
+        Route::get('/pedidos/{pedidoId}/productos-faltantes', [PedidoCompraController::class, 'productosFaltantes'])->name('pedidos.productos-faltantes');
         Route::put('/pedidos/{pedidoCompra}', [PedidoCompraController::class, 'update'])->name('pedidos-compra.update');
          Route::get('/pedidos/{id}/pdf', [PedidoCompraController::class, 'generarPDF'])->name('compras.pedidos.pdf');
         Route::delete('/pedidos/{pedidoCompra}', [PedidoCompraController::class, 'destroy']);

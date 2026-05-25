@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ $config->nombre_empresa }} - Configuración</title>
-    <link rel="stylesheet" href="{{ secure_asset('css/menu.css') }}">
-    <link rel="stylesheet" href="{{ secure_asset('css/index.css') }}">
+    <link rel="stylesheet" href="{{secure_asset('css/menu.css') }}">
+    <link rel="stylesheet" href="{{secure_asset('css/index.css') }}">
     <!-- Bootstrap -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"> 
-    <script src="{{ secure_asset('js/menu.js') }}"></script>
-    <link rel="stylesheet" href="{{ secure_asset('css/compras.css') }}">
+    <script src="{{secure_asset('js/menu.js') }}"></script>
+    <link rel="stylesheet" href="{{secure_asset('css/compras.css') }}">
     
 </head>
 
@@ -49,7 +49,7 @@
             </div>
 
             <div class="mb-3">
-                <label>RUC</label>
+                <label>CIF</label>
                 <input type="text" name="ruc" class="form-control" value="{{ $config->ruc }}">
             </div>
 
@@ -66,26 +66,6 @@
             <div class="mb-3">
                 <label>Dirección</label>
                 <textarea name="direccion" class="form-control">{{ $config->direccion }}</textarea>
-            </div>
-
-            <div class="mb-3">
-                <label>Logo (URL o ruta)</label>
-                <input type="text" name="logo" class="form-control" value="{{ $config->logo }}">
-            </div>
-
-            <div class="mb-3">
-                <label>Impuesto (%)</label>
-                <input type="number" step="0.01" name="impuesto_porcentaje" class="form-control" value="{{ $config->impuesto_porcentaje }}">
-            </div>
-
-            <div class="mb-3">
-                <label>Moneda</label>
-                <input type="text" name="moneda" class="form-control" value="{{ $config->moneda }}">
-            </div>
-
-            <div class="mb-3">
-                <label>Formato de Factura</label>
-                <input type="text" name="formato_factura" class="form-control" value="{{ $config->formato_factura }}">
             </div>
 
             <button type="submit" class="btn btn-primary">Actualizar</button>

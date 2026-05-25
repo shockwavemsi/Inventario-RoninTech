@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Login Inventario</title>
-    <link rel="stylesheet" href="{{ secure_asset('css/login.css') }}">
+    <link rel="stylesheet" href="{{secure_asset('css/login.css') }}">
 </head>
 
 <body>

@@ -15,8 +15,7 @@ class ProveedorController extends Controller
     public function index()
     {
         $config = Configuracion::first();
-        $proveedores = Proveedor::where('activo', true)
-            ->with('formasPago.formaPago', 'formasPago.banco', 'diasVencimiento')
+        $proveedores = Proveedor::with('formasPago.formaPago', 'formasPago.banco', 'diasVencimiento')
             ->get();
         $formasPago = FormaPago::where('activo', true)->get();
         $bancos = Banco::all();

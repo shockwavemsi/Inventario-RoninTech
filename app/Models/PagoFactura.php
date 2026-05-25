@@ -13,7 +13,7 @@ class PagoFactura extends Model
 
     protected $fillable = [
         'factura_compra_id',
-        'metodo_pago_id',
+        'forma_pago_proveedor_id',  // ✅ Agregado
         'monto',
         'fecha_pago',
         'referencia',
@@ -21,6 +21,8 @@ class PagoFactura extends Model
         'estado',
         'usuario_id',
         'notas',
+        'forma_pago_nombre',         // ✅ AGREGADO
+        'banco_nombre',              // ✅ AGREGADO
     ];
 
     protected $casts = [

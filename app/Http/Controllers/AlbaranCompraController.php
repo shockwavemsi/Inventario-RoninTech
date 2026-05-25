@@ -21,8 +21,8 @@ class AlbaranCompraController extends Controller
      */
 public function index()
 {
-    // ✅ CARGAR PEDIDOS DISPONIBLES
-    $pedidosRaw = PedidoCompra::with('proveedor', 'lineas.producto', 'albaranes')
+    // ✅ CARGAR PEDIDOS DISPONIBLES - Con relaciones de albaranes
+    $pedidosRaw = PedidoCompra::with('proveedor', 'lineas.producto', 'albaranes.lineas')
         ->where('estado', '!=', 'completo')
         ->get();
 
@@ -30,11 +30,27 @@ public function index()
         'id' => (int) $p->id,
         'numero_pedido' => $p->numero_pedido,
         'proveedor_id' => (int) $p->proveedor_id,
-        'lineas' => $p->lineas->map(fn($l) => [
-            'producto_id' => (int) $l->producto_id,
-            'producto_nombre' => $l->producto?->nombre ?? '—',
-            'cantidad' => (int) $l->cantidad,
-        ])->toArray(),
+        'lineas' => $p->lineas->map(function($l) use ($p) {
+            // ✅ Calcular cantidad recibida en TODOS los albaranes
+            $cantidadRecibida = $p->albaranes->sum(function($albaran) use ($l) {
+                return $albaran->lineas
+                    ->where('producto_id', $l->producto_id)
+                    ->sum('cantidad_recibida');
+            });
+
+            $cantidadPendiente = (int)$l->cantidad - $cantidadRecibida;
+
+            return [
+                'producto_id' => (int) $l->producto_id,
+                'producto_nombre' => $l->producto?->nombre ?? '—',
+                'cantidad_pedida' => (int) $l->cantidad,
+                'cantidad_recibida' => $cantidadRecibida,
+                'cantidad_pendiente' => $cantidadPendiente,
+                'mostrar' => $cantidadPendiente > 0  // ✅ Solo mostrar si hay pendiente
+            ];
+        })->filter(fn($l) => $l['mostrar'])  // ✅ Filtrar solo productos pendientes
+         ->values()  // ✅ Reiniciar índices
+         ->toArray(),
     ])->toArray();
 
     // ✅ CARGAR ALBARANES
@@ -52,10 +68,13 @@ public function index()
 
     // ✅ OTROS DATOS (CRÍTICO)
     $proveedores = Proveedor::all();
+
     $productos = Producto::all();
 
     $ultimoPedidoId = PedidoCompra::latest('id')->first()?->id ?? 0;
+
     $ultimoAlbaranId = AlbaranCompra::latest('id')->first()?->id ?? 0;
+
     $ultimoFacturaId = \DB::table('facturas_compra')->latest('id')->first()?->id ?? 0;
 
     return view('admin.compras.index', compact(
@@ -272,17 +291,15 @@ public function index()
     try {
         $albaranCompra->load(['pedidoCompra', 'lineas.producto', 'proveedor']);
 
-        $detalles = $albaranCompra->lineas
-            ->filter(fn($linea) => $linea->cantidad_recibida > 0)
-            ->map(fn($linea) => [
-                'id' => $linea->id,
-                'producto_id' => $linea->producto_id,
-                'producto_nombre' => $linea->producto?->nombre ?? 'Producto desconocido',
-                'cantidad_pedida' => (int) $linea->cantidad_pedida,
-                'cantidad_recibida' => (int) $linea->cantidad_recibida,
-                'cantidad_faltante' => (int) $linea->cantidad_faltante,
-                'estado' => $linea->estado ?? 'recibido'
-            ]);
+        $detalles = $albaranCompra->lineas->map(fn($linea) => [
+            'id' => $linea->id,
+            'producto_id' => $linea->producto_id,
+            'producto_nombre' => $linea->producto?->nombre ?? 'Producto desconocido',
+            'cantidad_pedida' => (int) $linea->cantidad_pedida,
+            'cantidad_recibida' => (int) $linea->cantidad_recibida,
+            'cantidad_faltante' => (int) $linea->cantidad_faltante,
+            'estado' => $linea->estado ?? 'recibido'  // recibido, parcial, falta
+        ])->values();
 
         return response()->json([
             'id' => $albaranCompra->id,
@@ -299,7 +316,7 @@ public function index()
             'estado' => $albaranCompra->estado ?? 'recibido',
             'total' => (float) ($albaranCompra->total ?? 0),
             'observaciones' => $albaranCompra->observaciones ?? null,
-            'detalles' => $detalles->values()
+            'detalles' => $detalles  // ✅ TODOS los productos (recibidos + faltantes)
         ]);
 
     } catch (\Exception $e) {

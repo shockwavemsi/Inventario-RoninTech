@@ -116,15 +116,7 @@
 
                                         <button type="button" class="btn btn-sm btn-info" onclick="generarPDFVenta({{ $venta['id'] }})" style="padding: 0.25rem 0.5rem;">📥</button>
 
-                                        <form action="{{ route('ventas.destroy', $venta['id']) }}" method="POST" style="display: inline;">
-
-                                            @csrf
-
-                                            @method('DELETE')
-
-                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar venta?')" style="padding: 0.25rem 0.5rem;">🗑️</button>
-
-                                        </form>
+                                        
 
                                     </td>
 
@@ -304,11 +296,11 @@
 
                             <select name="estado" id="estado" class="form-select form-select-sm" style="background: rgba(20, 20, 25, 0.8); border-color: rgba(230, 57, 70, 0.3); color: #f0f0f0; font-size: 0.9rem;">
 
-                                <option value="pendiente">Pendiente</option>
+                                
 
                                 <option value="completada" selected>Completada</option>
 
-                                <option value="cancelada">Cancelada</option>
+                                
 
                             </select>
 

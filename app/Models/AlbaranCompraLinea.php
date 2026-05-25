@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class AlbaranCompraLinea extends Model
 {
     protected $table = 'albaranes_compra_linea';
+    public $timestamps = false;
 
     protected $fillable = [
         'albaran_compra_id',
@@ -14,7 +15,7 @@ class AlbaranCompraLinea extends Model
         'cantidad_pedida',
         'cantidad_recibida',
         'cantidad_faltante',
-        'estado'
+        'estado',
     ];
 
     public function albaranCompra()
