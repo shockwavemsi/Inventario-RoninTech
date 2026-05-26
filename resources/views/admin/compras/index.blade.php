@@ -716,7 +716,7 @@
 
 @push('scripts')
 
-    <script src="{{ secure_asset('js/compras/modales/crear-factura-modal.js') }}"></script>
+    <script src="{{ asset('js/compras/modales/crear-factura-modal.js') }}"></script>
 
 @endpush
 
