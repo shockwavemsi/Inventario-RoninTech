@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Dashboard</title>
-    <link rel="stylesheet" href="{{secure_asset('css/menu.css') }}">
+    <link rel="stylesheet" href="{{ secure_asset('css/menu.css') }}">
 </head>
 <body>
 <h1>Bienvenido {{ Auth::user()->nombre }}</h1>
@@ -15,6 +15,6 @@
     <button type="submit">Cerrar sesión</button>
 </form>
 
-<script src="{{secure_asset('js/menu.js') }}"></script>
+<script src="{{ secure_asset('js/menu.js') }}"></script>
 </body>
 </html>

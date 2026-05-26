@@ -15,10 +15,14 @@ class ProveedorController extends Controller
     public function index()
     {
         $config = Configuracion::first();
+
+        // ✅ MOSTRAR TODOS (sin filtro)
         $proveedores = Proveedor::with('formasPago.formaPago', 'formasPago.banco', 'diasVencimiento')
             ->get();
+
         $formasPago = FormaPago::where('activo', true)->get();
         $bancos = Banco::all();
+
         return view('admin.proveedores', compact('config', 'proveedores', 'formasPago', 'bancos'));
     }
 
@@ -32,7 +36,6 @@ class ProveedorController extends Controller
 
     public function store(Request $request)
     {
-        // ✅ VALIDAR DATOS GENERALES
         $request->validate([
             'nombre' => 'required|string|max:200',
             'email' => 'nullable|email',
@@ -43,7 +46,6 @@ class ProveedorController extends Controller
             'ruc' => 'nullable|string|max:20',
             'activo' => 'nullable|boolean',
             'dias_vencimiento' => 'required|integer|min:1|max:365',
-            // ✅ VALIDAR ARRAYS DE FORMAS DE PAGO
             'forma_pago_id' => 'required|array|min:1',
             'forma_pago_id.*' => 'required|exists:formas_pago,id',
             'banco_id' => 'nullable|array',
@@ -55,7 +57,6 @@ class ProveedorController extends Controller
         ]);
 
         try {
-            // ✅ CREAR PROVEEDOR
             $proveedor = Proveedor::create([
                 'nombre' => $request->nombre,
                 'ruc' => $request->ruc,
@@ -67,13 +68,11 @@ class ProveedorController extends Controller
                 'activo' => $request->activo ?? true,
             ]);
 
-            // ✅ CREAR DÍAS DE VENCIMIENTO
             DiasVencimientoProveedor::create([
                 'proveedor_id' => $proveedor->id,
                 'dias_vencimiento' => $request->dias_vencimiento,
             ]);
 
-            // ✅ CREAR MÚLTIPLES FORMAS DE PAGO (LOOP)
             $formasPagoIds = $request->input('forma_pago_id', []);
             $bancosIds = $request->input('banco_id', []);
             $referencias = $request->input('referencia', []);
@@ -90,7 +89,6 @@ class ProveedorController extends Controller
             }
 
             return redirect()->route('proveedores.index')->with('success', '✅ Proveedor creado con éxito');
-
         } catch (\Exception $e) {
             return redirect()->back()->withErrors(['error' => 'Error al crear proveedor: ' . $e->getMessage()]);
         }
@@ -110,7 +108,6 @@ class ProveedorController extends Controller
 
     public function update(Request $request, $id)
     {
-        // ✅ VALIDAR DATOS GENERALES
         $request->validate([
             'nombre' => 'required|string|max:200',
             'email' => 'nullable|email',
@@ -120,7 +117,6 @@ class ProveedorController extends Controller
             'telefono' => 'nullable|string|max:20',
             'ruc' => 'nullable|string|max:20',
             'dias_vencimiento' => 'nullable|integer|min:1|max:365',
-            // ✅ VALIDAR ARRAYS DE FORMAS DE PAGO (OPCIONAL EN EDICIÓN)
             'forma_pago_id' => 'nullable|array|min:1',
             'forma_pago_id.*' => 'nullable|exists:formas_pago,id',
             'banco_id' => 'nullable|array',
@@ -134,7 +130,6 @@ class ProveedorController extends Controller
         try {
             $proveedor = Proveedor::findOrFail($id);
 
-            // ✅ ACTUALIZAR DATOS GENERALES
             $proveedor->update([
                 'nombre' => $request->nombre,
                 'ruc' => $request->ruc,
@@ -146,7 +141,6 @@ class ProveedorController extends Controller
                 'activo' => $request->activo ?? true,
             ]);
 
-            // ✅ ACTUALIZAR DÍAS DE VENCIMIENTO
             if ($request->has('dias_vencimiento')) {
                 DiasVencimientoProveedor::updateOrCreate(
                     ['proveedor_id' => $id],
@@ -154,19 +148,16 @@ class ProveedorController extends Controller
                 );
             }
 
-            // ✅ ACTUALIZAR FORMAS DE PAGO (SI SE ENVÍAN)
             if ($request->has('forma_pago_id') && is_array($request->forma_pago_id)) {
-                // 1. Eliminar todas las formas de pago existentes
                 FormasPagoProveedor::where('proveedor_id', $id)->delete();
 
-                // 2. Crear nuevas formas de pago
                 $formasPagoIds = $request->input('forma_pago_id', []);
                 $bancosIds = $request->input('banco_id', []);
                 $referencias = $request->input('referencia', []);
                 $nombresBancos = $request->input('nombre_banco', []);
 
                 foreach ($formasPagoIds as $index => $formaPagoId) {
-                    if ($formaPagoId) { // Solo si hay forma de pago seleccionada
+                    if ($formaPagoId) {
                         FormasPagoProveedor::create([
                             'proveedor_id' => $id,
                             'forma_pago_id' => $formaPagoId,
@@ -180,9 +171,8 @@ class ProveedorController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => ' Proveedor actualizado correctamente'
+                'message' => '✅ Proveedor actualizado correctamente'
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -195,11 +185,19 @@ class ProveedorController extends Controller
     {
         try {
             $proveedor = Proveedor::findOrFail($id);
-            // ✅ SOFT DELETE: Marcar como inactivo en lugar de eliminar
+
+            // ✅ MARCAR COMO INACTIVO (No elimina de la BD)
             $proveedor->update(['activo' => false]);
-            return response()->json(['success' => true]);
+
+            return response()->json([
+                'success' => true,
+                'message' => '✅ Proveedor eliminado correctamente'
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 400);
+            return response()->json([
+                'success' => false,
+                'message' => '❌ Error: ' . $e->getMessage()
+            ], 500);
         }
     }
 

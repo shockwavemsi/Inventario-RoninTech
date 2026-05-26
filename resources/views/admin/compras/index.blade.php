@@ -338,9 +338,15 @@
 
                                 <tr>
 
+                                    <th style="color: #e63946; width: 8%; font-size: 0.8rem;">#</th>
+
                                     <th style="color: #e63946; width: 30%; font-size: 0.8rem;">Producto</th>
 
+                                    <th style="color: #e63946; width: 12%; font-size: 0.8rem;">Cant. Pedida</th>
+
                                     <th style="color: #e63946; width: 15%; font-size: 0.8rem;">Cant. Recibida *</th>
+
+                                    <th style="color: #e63946; width: 15%; font-size: 0.8rem;">Cant. Faltante</th>
 
                                     <th style="color: #e63946; width: 15%; font-size: 0.8rem;">Estado</th>
 
@@ -530,45 +536,45 @@
 
                     <div style="margin-bottom: 2rem;">
 
-    <h6 style="color: #e63946; font-weight: 700; font-size: 0.95rem; margin-bottom: 1rem; text-transform: uppercase;">📋 Líneas a Facturar</h6>
+                        <h6 style="color: #e63946; font-weight: 700; font-size: 0.95rem; margin-bottom: 1rem; text-transform: uppercase;">📋 Líneas a Facturar</h6>
 
-    <div style="overflow-x: auto; border-radius: 8px; border: 1px solid rgba(230, 57, 70, 0.2);">
+                        <div style="overflow-x: auto; border-radius: 8px; border: 1px solid rgba(230, 57, 70, 0.2);">
 
-        <table style="width: 100%; border-collapse: collapse;">
+                            <table style="width: 100%; border-collapse: collapse;">
 
-            <thead>
+                                <thead>
 
-                <tr style="background: rgba(230, 57, 70, 0.15);">
+                                    <tr style="background: rgba(230, 57, 70, 0.15);">
 
-                    <th style="padding: 0.75rem; color: #e63946; text-align: center; font-weight: 700; font-size: 0.875rem;">#</th>
+                                        <th style="padding: 0.75rem; color: #e63946; text-align: center; font-weight: 700; font-size: 0.875rem;">#</th>
 
-                    <th style="padding: 0.75rem; color: #e63946; text-align: left; font-weight: 700; font-size: 0.875rem;">PRODUCTO</th>
+                                        <th style="padding: 0.75rem; color: #e63946; text-align: left; font-weight: 700; font-size: 0.875rem;">PRODUCTO</th>
 
-                    <th style="padding: 0.75rem; color: #e63946; text-align: center; font-weight: 700; font-size: 0.875rem;">CANT. RECIBIDA</th>
+                                        <th style="padding: 0.75rem; color: #e63946; text-align: center; font-weight: 700; font-size: 0.875rem;">CANT. RECIBIDA</th>
 
-                </tr>
+                                    </tr>
 
-            </thead>
+                                </thead>
 
-            <tbody id="productosFacturaList">
+                                <tbody id="productosFacturaList">
 
-                <tr>
+                                    <tr>
 
-                    <td colspan="3" style="text-align: center; padding: 1.5rem; color: #a0a0a0;">
+                                        <td colspan="3" style="text-align: center; padding: 1.5rem; color: #a0a0a0;">
 
-                        Selecciona un albarán para cargar productos
+                                            Selecciona un albarán para cargar productos
 
-                    </td>
+                                        </td>
 
-                </tr>
+                                    </tr>
 
-            </tbody>
+                                </tbody>
 
-        </table>
+                            </table>
 
-    </div>
+                        </div>
 
-</div>
+                    </div>
 
                     <hr style="border-color: rgba(230, 57, 70, 0.3); margin: 2rem 0;">
 
@@ -710,7 +716,7 @@
 
 @push('scripts')
 
-    <script src="{{secure_asset('js/compras/modales/crear-factura-modal.js') }}"></script>
+    <script src="{{ secure_asset('js/compras/modales/crear-factura-modal.js') }}"></script>
 
 @endpush
 
