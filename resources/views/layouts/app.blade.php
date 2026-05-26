@@ -12,8 +12,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 
     <!-- CSS Cyberpunk Theme -->
-    <link rel="stylesheet" href="{{ secure_asset('css/menu.css') }}">
-    <link rel="stylesheet" href="{{ secure_asset('css/compras.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/menu.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/compras.css') }}">
 
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -55,20 +55,20 @@
     $roleName = $user->role->name ?? 'user';
     $menuScript = $roleName === 'admin' ? 'js/menu.js' : 'js/userMenu.js';
 @endphp
-<script src="{{ secure_asset($menuScript) }}"></script>
+<script src="{{ asset($menuScript) }}"></script>
 
     <!-- ✅ CARGAR COMPRAS SOLO EN /compras -->
     @if(str_contains(request()->path(), 'compras'))
         <!-- ✅ MODAL MANAGER (SIN MÓDULOS - DEBE IR PRIMERO) -->
-        <script src="{{ secure_asset('js/compras/modales/modal-manager.js') }}"></script>
+        <script src="{{ asset('js/compras/modales/modal-manager.js') }}"></script>
 
         <!-- ✅ COMPRAS (MÓDULO) -->
-        <script type="module" src="{{ secure_asset('js/compras/compras.js') }}"></script>
+        <script type="module" src="{{ asset('js/compras/compras.js') }}"></script>
     @endif
 
     <!-- ✅ CARGAR VENTAS SOLO EN /ventas -->
     @if(str_contains(request()->path(), 'ventas'))
-        <script type="module" src="{{ secure_asset('js/ventas/venta.js') }}"></script>
+        <script type="module" src="{{ asset('js/ventas/venta.js') }}"></script>
     @endif
 
     @yield('extra-js')
