@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Registro de Ciclistas</title>
-    <link rel="stylesheet" href="{{ asset('css/register.css') }}">
+    <link rel="stylesheet" href="{{ secure_asset('css/register.css') }}">
 </head>
 <body>
 
